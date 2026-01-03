@@ -2,32 +2,27 @@
 
 @layer components {
     /* Rainbow Mode Animation */
-    @keyframes rainbow-backdrop {
-        0% { backdrop-filter: hue-rotate(0deg); }
-        100% { backdrop-filter: hue-rotate(360deg); }
+    @keyframes rainbow-rotate {
+        0% { filter: hue-rotate(0deg); }
+        100% { filter: hue-rotate(360deg); }
+    }
+    @keyframes rainbow-rotate-reverse {
+        0% { filter: hue-rotate(0deg); }
+        100% { filter: hue-rotate(-360deg); }
     }
 
     html.is-rainbow-mode .card-base {
-        position: relative;
-    }
-
-    html.is-rainbow-mode .card-base::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        z-index: 1;
-        pointer-events: none;
-        border-radius: inherit;
-        animation: rainbow-backdrop linear infinite;
+        animation: rainbow-rotate linear infinite;
         animation-duration: var(--rainbow-duration, 5s);
     }
 
-    /* Protect images and other sensitive media from color rotation */
+    /* Reverse filter for images to keep original colors */
     html.is-rainbow-mode .card-base img,
     html.is-rainbow-mode .card-base video,
-    html.is-rainbow-mode .card-base iframe {
-        position: relative;
-        z-index: 2;
+    html.is-rainbow-mode .card-base iframe,
+    html.is-rainbow-mode .card-base .no-hue-rotate {
+        animation: rainbow-rotate-reverse linear infinite;
+        animation-duration: var(--rainbow-duration, 5s);
     }
 
     .card-base {
