@@ -13,6 +13,11 @@ Umami，用于在网站插入一个JS来进行访客统计以及展示访客信�
 ::url{href="https://umami.acofork.com/share/CdkXbGgZr6ECKOyK"}
 静态随机图，用于置顶文章Cover和整个网站的背景图
 ::url{href="https://pic.acofork.com"}
+
+---
+其他： https://acofork.com , https://www.acofork.com
+这些都是要 **301** 重定向到 https://blog.acofork.com 的域名，我们也需要为其配置分流
+
 # 各CDN SSL申请方案
 
 ### EdgeOne
@@ -25,6 +30,9 @@ Umami，用于在网站插入一个JS来进行访客统计以及展示访客信�
 ### Cloudflare
 使用HTTP验证，由于ACME验证节点在国外，所以它只会看到CNAME到Cloudflare的记录，从而签发SSL
 ![](../assets/images/fenliu-3.png)
+针对重定向的域名，由于默认所有请求都会被重定向到新域，ACME自然无法验证，所以我们需要写一条排除规则，让ACME验证路径直接返回200 OK，其余的路径再重定向
+![](../assets/images/fenliu-17.png)
+
 # 源站类型
 
 ### 静态型
