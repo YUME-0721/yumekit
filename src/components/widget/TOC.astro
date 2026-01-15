@@ -133,7 +133,7 @@ class TableOfContents extends HTMLElement {
 
         if (this.anchorNavTarget || !this.tocEl) return;
         const activeHeading =
-            document.querySelectorAll<HTMLDivElement>(`#toc .${this.visibleClass}`);
+            document.querySelectorAll<HTMLDivElement>(`#toc-sidebar .${this.visibleClass}, #toc .${this.visibleClass}`);
         if (!activeHeading.length) return;
 
         const topmost = activeHeading[0];
@@ -216,9 +216,8 @@ class TableOfContents extends HTMLElement {
     };
 
     init() {
-        this.tocEl = document.getElementById(
-            "toc-inner-wrapper"
-        );
+        // 优先使用侧边栏的 TOC 容器，否则使用原来的
+        this.tocEl = document.getElementById("toc-sidebar") || document.getElementById("toc-inner-wrapper");
 
         if (!this.tocEl) return;
 
@@ -229,7 +228,7 @@ class TableOfContents extends HTMLElement {
         this.activeIndicator = document.getElementById("active-indicator");
 
         this.tocEntries = Array.from(
-            document.querySelectorAll<HTMLAnchorElement>("#toc a[href^='#']")
+            document.querySelectorAll<HTMLAnchorElement>("#toc-sidebar a[href^='#'], #toc a[href^='#']")
         );
 
         if (this.tocEntries.length === 0) return;

@@ -1,0 +1,20 @@
+---
+interface Props {
+	url?: string;
+	badge?: string;
+	label?: string;
+	reload?: boolean;
+}
+const { url, badge, label, reload }: Props = Astro.props;
+---
+<a href={url} aria-label={label} data-no-swup={reload ? "" : undefined} class="group btn-regular h-10 rounded-lg px-4 flex items-center justify-between w-full">
+    <span class="transition group-hover:text-[var(--primary)]">
+        <slot></slot>
+    </span>
+    {badge && (
+        <span class="text-xs text-50 bg-[var(--btn-regular-bg)] group-hover:bg-[var(--btn-regular-bg-hover)] 
+                     px-2 py-0.5 rounded-full transition">
+            {badge}
+        </span>
+    )}
+</a>

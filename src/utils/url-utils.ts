@@ -24,3 +24,17 @@ export function getDir(path: string): string {
 export function url(path: string) {
 	return joinUrl("", import.meta.env.BASE_URL, path);
 }
+
+// 生成标签筛选 URL
+export function getTagUrl(tag: string): string {
+	if (!tag) return url("/archive/");
+	return url(`/archive/?tag=${encodeURIComponent(tag.trim())}`);
+}
+
+// 生成分类筛选 URL
+export function getCategoryUrl(category: string | null): string {
+	if (!category || category.trim() === "" || category.trim() === "未分类") {
+		return url("/archive/?uncategorized=true");
+	}
+	return url(`/archive/?category=${encodeURIComponent(category.trim())}`);
+}

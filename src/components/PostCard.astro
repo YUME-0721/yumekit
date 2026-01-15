@@ -120,6 +120,9 @@ const { remarkPluginFrontmatter } = await entry.render();
     async function loadCardStats() {
         const elements = document.querySelectorAll('.post-pageviews');
         
+        // 检查 API 函数是否可用
+        if (typeof window.getUmamiPageStats !== 'function') return;
+        
         elements.forEach(async (el) => {
             // 如果元素已经处理过，且已有内容（非0），则不再处理
             if (el.classList.contains('processed') && el.textContent !== '0') return;
@@ -127,21 +130,20 @@ const { remarkPluginFrontmatter } = await entry.render();
             el.classList.add('processed');
             const url = el.dataset.url;
             const baseUrl = el.dataset.umamiBaseUrl;
-            const shareId = el.dataset.umamiShareId;
-            const timezone = el.dataset.umamiTimezone;
+            const apiKey = el.dataset.umamiApiKey;
+            const websiteId = el.dataset.umamiWebsiteId;
             
-            if (!baseUrl || !shareId) return;
+            if (!baseUrl || !apiKey || !websiteId) return;
             
             try {
-                // Check if fetchUmamiStats exists
-                if (typeof window.fetchUmamiStats !== 'function') return;
-
-                const statsData = await window.fetchUmamiStats(baseUrl, shareId, {
-                    url: url,
-                    timezone: timezone
-                });
+                const statsData = await window.getUmamiPageStats(
+                    baseUrl,
+                    apiKey,
+                    websiteId,
+                    url
+                );
                 
-                const pageviews = (statsData.pageviews && statsData.pageviews.value) || statsData.pageviews || 0;
+                const pageviews = statsData.pageviews || 0;
                 
                 // 如果数据来自缓存，直接显示结果，跳过动画
                 if (statsData._fromCache) {

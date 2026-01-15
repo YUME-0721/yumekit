@@ -86,11 +86,20 @@ const config = profileConfig;
 
     // 获取全站访问量统计
     async function loadSiteStats() {
-        if (!umamiConfig.enable) return;
+        if (!umamiConfig.enabled) return;
+        
+        // 检查 API 函数是否可用
+        if (typeof window.getUmamiPageStats !== 'function') {
+            console.warn('Umami API 函数未加载');
+            return;
+        }
+        
         try {
-            const statsData = await fetchUmamiStats(umamiConfig.baseUrl, umamiConfig.shareId, {
-                timezone: umamiConfig.timezone
-            });
+            const statsData = await window.getUmamiPageStats(
+                umamiConfig.baseUrl,
+                umamiConfig.apiKey,
+                umamiConfig.websiteId
+            );
             
             const pageviews = statsData.pageviews || 0;
             const visitors = statsData.visitors || 0;

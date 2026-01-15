@@ -2,6 +2,10 @@
 import type { MarkdownHeading } from "astro";
 
 import Profile from "./Profile.astro";
+import Categories from "./Categories.astro";
+import Tags from "./Tags.astro";
+import TOC from "./TOC.astro";
+import { siteConfig } from "../../config";
 
 interface Props {
 	class?: string;
@@ -9,27 +13,24 @@ interface Props {
 }
 
 const className = Astro.props.class;
+const { headings = [] } = Astro.props;
+const tocEnabled = siteConfig.toc.enable;
 ---
 <div id="sidebar" class:list={[className, "w-full"]}>
     <div class="flex flex-col w-full gap-4 mb-4">
         <Profile></Profile>
+        <Categories class="onload-animation"></Categories>
+        <Tags class="onload-animation"></Tags>
     </div>
-    <div id="sidebar-sticky" class="transition-all duration-700 flex flex-col w-full gap-4 top-4 sticky top-4">
-        <!-- 赞助标 -->
-        <div class="overflow-hidden flex justify-center">
-            <a href="https://secbit.ai/" target="_blank" rel="noopener noreferrer">
-                <img src="/aff/secbit-banner-1.gif" alt="Secbit" class="w-full max-w-[280px] rounded-lg hover:opacity-90 transition-opacity" />
-            </a>
-        </div>
-        <div class="overflow-hidden flex justify-center">
-            <iframe
-                src="https://support.nodeget.com/page/promotion?id=316"
-                style="border:none; border-radius:8px; height:270px; width:100%; max-width:280px;
-                transform: scale(1.0); transform-origin: center top;"
-            ></iframe>
+    <div id="sidebar-sticky" class="transition-all duration-700 flex flex-col w-full gap-4 sticky top-4">
+        <!-- 目录容器（Swup 会替换此元素内容） -->
+        <div id="toc-sidebar" class:list={["card-base p-4 max-h-[calc(100vh-8rem)] overflow-y-auto", {"hidden": !tocEnabled || headings.length === 0, "hidden lg:block": tocEnabled && headings.length > 0}]}>
+            {tocEnabled && headings.length > 0 && (
+                <>
+                    <div class="text-sm font-medium text-black/60 dark:text-white/60 mb-2">目录</div>
+                    <TOC headings={headings}></TOC>
+                </>
+            )}
         </div>
     </div>
 </div>
-
-
-

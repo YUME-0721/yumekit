@@ -90,10 +90,11 @@ export type ImageFallbackConfig = {
 };
 
 export type UmamiConfig = {
-	enable: boolean;
+	enabled: boolean;
+	apiKey: string;
 	baseUrl: string;
-	shareId: string;
-	timezone: string;
+	websiteId: string;
+	scripts: string;
 };
 
 export type LIGHT_DARK_MODE =
@@ -107,6 +108,7 @@ export type BlogPostData = {
 	published: Date;
 	description: string;
 	tags: string[];
+	category?: string;
 	draft?: boolean;
 	image?: string;
 	prevTitle?: string;

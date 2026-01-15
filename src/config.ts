@@ -11,60 +11,59 @@ import type {
 import { LinkPreset } from "./types/config";
 
 export const siteConfig: SiteConfig = {
-	title: "AcoFork Blog",
+	title: "YUME Blog",
 	subtitle: "技术分享与实践",
 	description:
-		"分享网络技术、服务器部署、内网穿透、静态网站搭建、CDN优化、容器化部署等技术教程与实践经验的个人技术博客，专注于云原生、无服务器架构和前后端开发，作者为afoim/二叉树树",
+		"分享网络技术、服务器部署、内网穿透、静态网站搭建、CDN优化、容器化部署等技术教程与实践经验的个人技术博客，专注于云原生、无服务器架构和前后端开发，作者为YUME",
 
 	keywords: [],
 	lang: "zh_CN", // 'en', 'zh_CN', 'zh_TW', 'ja', 'ko', 'es', 'th'
 	themeColor: {
-		hue: 361, // Default hue for the theme color, from 0 to 360. e.g. red: 0, teal: 200, cyan: 250, pink: 345
-		fixed: false, // Hide the theme color picker for visitors
-		forceDarkMode: false, // Force dark mode and hide theme switcher
+		hue: 345, // 主题颜色的默认色调，范围在 0 到 360 度之间。例如：红色：0 度，青绿色：200 度，青色：250 度，粉色：345 度。
+		fixed: false, // 隐藏访客端的主题颜色选择器
+		forceDarkMode: false, // 强制启用暗黑模式并隐藏主题切换器
 	},
 	banner: {
 		enable: false,
-		src: "/xinghui.avif", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
+		src: "/xinghui.avif", // 相对于“/src”目录。如果位于“/public”目录的起始位置，则相对于“/public”目录。
 
-		position: "center", // Equivalent to object-position, only supports 'top', 'center', 'bottom'. 'center' by default
+		position: "center", // 与对象位置设置相同，仅支持“顶部”、“居中”、“底部”选项。默认情况下为“居中”。
 		credit: {
-			enable: true, // Display the credit text of the banner image
-			text: "Pixiv @chokei", // Credit text to be displayed
+			enable: true, // 显示横幅图片的信用说明文字
+			text: "Pixiv @chokei", // 需显示的版权声明
 
-			url: "https://www.pixiv.net/artworks/122782209", // (Optional) URL link to the original artwork or artist's page
+			url: "https://www.pixiv.net/artworks/122782209", // （可选）指向原始作品或艺术家页面的网址链接
 		},
 	},
 	background: {
-		enable: true, // Enable background image
-		src: "", // Background image URL (supports HTTPS)
-		position: "center", // Background position: 'top', 'center', 'bottom'
-		size: "cover", // Background size: 'cover', 'contain', 'auto'
-		repeat: "no-repeat", // Background repeat: 'no-repeat', 'repeat', 'repeat-x', 'repeat-y'
-		attachment: "fixed", // Background attachment: 'fixed', 'scroll', 'local'
-		opacity: 1, // Background opacity (0-1)
+		enable: true, // 启用背景图片
+		src: "", // 背景图片 URL（支持 HTTPS）
+		position: "center", // 背景位置：'top'（顶部）、'center'（居中）、'bottom'（底部）
+		size: "cover", // 背景尺寸：'cover'（覆盖）、'contain'（包含）、'auto'（自动）
+		repeat: "no-repeat", // 背景重复：'no-repeat'（不重复）、'repeat'（重复）、'repeat-x'（水平重复）、'repeat-y'（垂直重复）
+		attachment: "fixed", // 背景附件：'fixed'（固定）、'scroll'（滚动）、'local'（本地）
+		opacity: 1, // 背景不透明度（0-1）
 	},
 	toc: {
-		enable: true, // Display the table of contents on the right side of the post
-		depth: 2, // Maximum heading depth to show in the table, from 1 to 3
+		enable: true, // 在文章右侧显示目录
+		depth: 2, // 显示目录的最大标题深度，从 1 到 3
 	},
 	favicon: [
-		// Leave this array empty to use the default favicon
+		// 将此数组留空，即可使用默认的网站图标。
 		{
-			src: "https://q2.qlogo.cn/headimg_dl?dst_uin=2726730791&spec=0", // Path of the favicon, relative to the /public directory
-			//   theme: 'light',              // (Optional) Either 'light' or 'dark', set only if you have different favicons for light and dark mode
-			//   sizes: '32x32',              // (Optional) Size of the favicon, set only if you have favicons of different sizes
+			src: "/favicon/favicon.ico", // 网站图标的路径，相对于“/public”目录
+			//   theme: 'light',              // （可选）“light”或“dark”，仅在有不同亮暗模式的网站图标时设置
+			//   sizes: '32x32',              // （可选）网站图标的大小，仅在有不同尺寸的网站图标时设置
 		},
 	],
 	officialSites: [
-		{ url: "https://blog.acofork.com", alias: "CN" },
-		{ url: "https://2x.nz", alias: "Global" },
+		{ url: "https://blog.YUMEkai.top", alias: "CN" },
+		{ url: "https://blog072199.xyz", alias: "Global" },
 	],
 	server: [
 		{ url: "", text: "博客本体节点" },
-		{ url: "https://umami.acofork.com", text: "Umami节点" },
-		{ url: "https://pic.acofork.com", text: "随机图节点" },
-		{ url: "https://status.acofork.com", text: "状态检测节点"}
+		{ url: "https://pic.YUMEkai.top", text: "随机图节点" },
+		// { url: "https://status.acofork.com", text: "状态检测节点" }
 	],
 };
 
@@ -74,41 +73,36 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.Archive,
 		{
 			name: "友链",
-			url: "/friends/", // Internal links should not include the base path, as it is automatically added
-			external: false, // Show an external link icon and will open in a new tab
-		},
-		{
-			name: "赞助",
-			url: "/sponsors/", // Internal links should not include the base path, as it is automatically added
-			external: false, // Show an external link icon and will open in a new tab
+			url: "/friends/", // 内部链接不应包含基础路径，因为它会自动添加
+			external: false, // 显示外部链接图标并在新标签页中打开
 		},
 		{
 			name: "统计",
-			url: "https://umami.acofork.com/share/CdkXbGgZr6ECKOyK", // Internal links should not include the base path, as it is automatically added
-			external: true, // Show an external link icon and will open in a new tab
+			url: "https://cloud.umami.is/share/Euu7elNJGcNr6rUR", // 内部链接不应包含基础路径，因为它会自动添加
+			external: true, // 显示外部链接图标并在新标签页中打开
 		},
-		{
-			name: "监控",
-			url: "https://status.acofork.com", // Internal links should not include the base path, as it is automatically added
-			external: true, // Show an external link icon and will open in a new tab
-		},
+		// {
+		// 	name: "监控",
+		// 	url: "https://status.acofork.com", // 内部链接不应包含基础路径，因为它会自动添加
+		// 	external: true, // 显示外部链接图标并在新标签页中打开
+		// },
 	],
 };
 
 export const profileConfig: ProfileConfig = {
-	avatar: "https://q2.qlogo.cn/headimg_dl?dst_uin=2726730791&spec=0", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
-	name: "二叉树树",
-	bio: "Protect What You Love.",
+	avatar: "/img/author.webp", // 头像的路径，相对于“/src”目录。如果以“/”开头，则相对于“/public”目录
+	name: "YUME",
+	bio: "Ciallo～(∠・ω< )⌒",
 	links: [
 		{
 			name: "Bilibli",
 			icon: "fa6-brands:bilibili",
-			url: "https://space.bilibili.com/325903362",
+			url: "https://space.bilibili.com/523354432",
 		},
 		{
 			name: "GitHub",
 			icon: "fa6-brands:github",
-			url: "https://github.com/afoim",
+			url: "https://github.com/YUME-0721",
 		},
 	],
 };
@@ -120,25 +114,35 @@ export const licenseConfig: LicenseConfig = {
 };
 
 export const imageFallbackConfig: ImageFallbackConfig = {
-	enable: false,
-	originalDomain: "https://eopfapi.acofork.com/pic?img=ua",
-	fallbackDomain: "https://eopfapi.acofork.com/pic?img=ua",
+	enable: true,
+	originalDomain: "https://pixport.072199.xyz/image_api.php?return=redirect",
+	fallbackDomain: "https://pixport.072199.xyz/image_api.php?return=redirect",
 };
 
 export const umamiConfig: UmamiConfig = {
-	enable: true,
-	baseUrl: "https://umami.acofork.com",
-	shareId: "CdkXbGgZr6ECKOyK",
-	timezone: "Asia/Shanghai",
+	enabled: true, // 是否显示 Umami 统计
+	apiKey:
+		import.meta.env.UMAMI_API_KEY || "api_TG4nwbBTUa2ngoD5B42cibGYw35u4Feo", // API 密钥优先从环境变量读取，否则使用配置文件中的值
+	baseUrl: "https://api.umami.is", // Umami Cloud API 地址
+	websiteId: "5f9ad5b6-7834-44f3-a341-35ae12b273e3", // Umami 网站 ID
+	scripts: `
+<script defer src="https://cloud.umami.is/script.js" data-website-id="5f9ad5b6-7834-44f3-a341-35ae12b273e3"></script>
+  `.trim(), // 上面填你要插入的 Script，不用再去 Layout 中插入
 };
 
 export const expressiveCodeConfig: ExpressiveCodeConfig = {
 	theme: "github-dark",
+	//"github-light" - GitHub 浅色
+	// 	"github-dark" - GitHub 深色（当前）
+	// "dracula" - Dracula 主题
+	// "one-dark-pro" - One Dark Pro
+	// "material-theme-darker" - Material 深色
+	// "vitesse-dark" / "vitesse-light" - Vitesse 主题
 };
 
 export const gitHubEditConfig: GitHubEditConfig = {
 	enable: true,
-	baseUrl: "https://github.com/afoim/fuwari/blob/main/src/content/posts",
+	baseUrl: "https://github.com/YUME-0721/YUMEkit/tree/main/src/content/posts",
 };
 
-// todoConfig removed from here
+// “todoConfig”已从此处移除

@@ -84,15 +84,24 @@ const className = Astro.props.class;
 
     // 获取访问量统计
     async function fetchPageViews() {
-        if (!umamiConfig.enable) return;
+        if (!umamiConfig.enabled) return;
+        
+        // 检查 API 函数是否可用
+        if (typeof window.getUmamiPageStats !== 'function') {
+            console.warn('Umami API 函数未加载');
+            return;
+        }
+        
         try {
-            const statsData = await fetchUmamiStats(umamiConfig.baseUrl, umamiConfig.shareId, {
-                timezone: umamiConfig.timezone,
-                path: `eq./posts/${slug}/`
-            });
+            const statsData = await window.getUmamiPageStats(
+                umamiConfig.baseUrl,
+                umamiConfig.apiKey,
+                umamiConfig.websiteId,
+                `/posts/${slug}/`
+            );
             
-            const pageViews = (statsData.pageviews && statsData.pageviews.value) || statsData.pageviews || 0;
-            const visits = (statsData.visitors && statsData.visitors.value) || statsData.visitors || 0;
+            const pageViews = statsData.pageviews || 0;
+            const visits = statsData.visitors || 0;
             
             const viewsElement = document.getElementById(`page-views-${slug}`);
             const visitorsElement = document.getElementById(`page-visitors-${slug}`);

@@ -1,13 +1,13 @@
 ---
-
 import { getSortedPosts } from "../utils/content-utils";
 import { getPostUrlBySlug } from "../utils/url-utils";
 
-interface Props {
-	keyword?: string;
-}
-
 let posts = await getSortedPosts();
+
+// 归档页面显示时，按发布时间排序（不受置顶影响）
+posts = posts.slice().sort((a, b) => 
+	b.data.published.getTime() - a.data.published.getTime()
+);
 
 const groups: { year: number; posts: typeof posts }[] = (() => {
 	const groupedPosts = posts.reduce(
@@ -38,23 +38,47 @@ function formatDate(date: Date) {
 	const day = date.getDate().toString().padStart(2, "0");
 	return `${month}-${day}`;
 }
+
+function formatTag(tagList: string[]) {
+	return tagList.map((t) => `#${t}`).join(" ");
+}
 ---
 
-<div class="card-base px-8 py-6">
+<div id="archive-panel" class="card-base px-8 py-6">
+    <!-- 筛选头部，默认隐藏，由 JS 控制显示 -->
+    <div id="filter-header" class="mb-4 flex items-center justify-between hidden">
+        <div class="text-lg font-bold text-75">
+            <span id="filter-text"></span>
+            <span id="filter-count" class="text-sm font-normal text-50 ml-2"></span>
+        </div>
+        <a href="/archive/" class="btn-regular text-sm px-3 py-1 rounded-lg" data-no-swup>
+            清除筛选
+        </a>
+    </div>
+    
+    <!-- 无结果提示，默认隐藏 -->
+    <div id="no-results" class="text-center text-50 py-8 hidden">
+        没有找到符合条件的文章
+    </div>
+    
     {
         groups.map(group => (
-            <div>
+            <div class="year-group" data-year={group.year}>
                 <div class="flex flex-row w-full items-center h-[3.75rem]">
                     <div class="w-[15%] md:w-[10%] transition text-2xl font-bold text-right text-75">{group.year}</div>
                     <div class="w-[15%] md:w-[10%]">
                         <div class="h-3 w-3 bg-none rounded-full outline outline-[var(--primary)] mx-auto -outline-offset-[2px] z-50 outline-3"></div>
                     </div>
-                    <div class="w-[70%] md:w-[80%] transition text-left text-50">{group.posts.length} 篇文章</div>
+                    <div class="w-[70%] md:w-[80%] transition text-left text-50">
+                        <span class="year-post-count">{group.posts.length}</span> 篇文章
+                    </div>
                 </div>
                 {group.posts.map(post => (
                     <a href={getPostUrlBySlug(post.slug)}
                        aria-label={post.data.title}
-                       class="group btn-plain !block h-10 w-full rounded-lg hover:text-[initial]"
+                       class="post-item group btn-plain !block h-10 w-full rounded-lg hover:text-[initial]"
+                       data-tags={JSON.stringify(post.data.tags)}
+                       data-category={post.data.category || ""}
                     >
                         <div class="flex flex-row justify-start items-center h-full">
                             <!-- date -->
@@ -83,7 +107,7 @@ function formatDate(date: Date) {
                             <div class="hidden md:block md:w-[15%] text-left text-sm transition
                             whitespace-nowrap overflow-ellipsis overflow-hidden
                             text-30"
-                            ></div>
+                            >{formatTag(post.data.tags)}</div>
                         </div>
                     </a>
                 ))}
@@ -91,3 +115,120 @@ function formatDate(date: Date) {
         ))
     }
 </div>
+
+<script is:inline>
+// 客户端筛选逻辑
+function filterArchive() {
+    const params = new URLSearchParams(window.location.search);
+    const tag = params.get('tag');
+    const category = params.get('category');
+    const uncategorized = params.get('uncategorized') === 'true';
+    
+    const filterHeader = document.getElementById('filter-header');
+    const filterText = document.getElementById('filter-text');
+    const filterCount = document.getElementById('filter-count');
+    const noResults = document.getElementById('no-results');
+    const postItems = document.querySelectorAll('.post-item');
+    const yearGroups = document.querySelectorAll('.year-group');
+    
+    if (!filterHeader || !filterText || !filterCount || !noResults) return;
+    
+    // 如果没有筛选条件，显示所有文章
+    if (!tag && !category && !uncategorized) {
+        filterHeader.classList.add('hidden');
+        postItems.forEach(item => {
+            item.classList.remove('filtered-hidden');
+        });
+        yearGroups.forEach(function(group) {
+            group.classList.remove('filtered-hidden');
+            updateYearCount(group);
+        });
+        noResults.classList.add('hidden');
+        return;
+    }
+    
+    // 显示筛选头部
+    filterHeader.classList.remove('hidden');
+    
+    // 构建筛选文本
+    if (tag) {
+        filterText.textContent = `标签: ${tag}`;
+    } else if (category) {
+        filterText.textContent = `分类: ${category}`;
+    } else if (uncategorized) {
+        filterText.textContent = '未分类';
+    }
+    
+    // 筛选文章
+    let visibleCount = 0;
+    postItems.forEach(item => {
+        const itemTags = JSON.parse(item.getAttribute('data-tags') || '[]');
+        const itemCategory = item.getAttribute('data-category') || '';
+        
+        let show = false;
+        
+        if (tag) {
+            show = itemTags.includes(tag);
+        } else if (category) {
+            show = itemCategory === category;
+        } else if (uncategorized) {
+            show = !itemCategory || itemCategory === '';
+        }
+        
+        if (show) {
+            item.classList.remove('filtered-hidden');
+            visibleCount++;
+        } else {
+            item.classList.add('filtered-hidden');
+        }
+    });
+    
+    // 更新筛选计数
+    filterCount.textContent = `(${visibleCount} 篇文章)`;
+    
+    // 更新年份组显示
+    yearGroups.forEach(function(group) {
+        var visiblePosts = group.querySelectorAll('.post-item:not(.filtered-hidden)');
+        if (visiblePosts.length === 0) {
+            group.classList.add('filtered-hidden');
+        } else {
+            group.classList.remove('filtered-hidden');
+            updateYearCount(group, visiblePosts.length);
+        }
+    });
+    
+    // 显示或隐藏无结果提示
+    if (visibleCount === 0) {
+        noResults.classList.remove('hidden');
+    } else {
+        noResults.classList.add('hidden');
+    }
+}
+
+function updateYearCount(group, count) {
+    const countSpan = group.querySelector('.year-post-count');
+    if (countSpan) {
+        if (count !== undefined) {
+            countSpan.textContent = String(count);
+        } else {
+            const allPosts = group.querySelectorAll('.post-item');
+            countSpan.textContent = String(allPosts.length);
+        }
+    }
+}
+
+// 立即执行筛选（脚本在 DOM 之后，可以直接执行）
+filterArchive();
+
+// 支持 Swup 页面切换
+document.addEventListener('swup:contentReplaced', filterArchive);
+
+// 监听 URL 变化（popstate）
+window.addEventListener('popstate', filterArchive);
+</script>
+
+<style>
+    .filtered-hidden {
+        display: none !important;
+    }
+</style>
