@@ -59,7 +59,7 @@ export const siteConfig: SiteConfig = {
 	],
 	officialSites: [
 		{ url: "https://blog.YUMEkai.top", alias: "CN" },
-		{ url: "https://blog072199.xyz", alias: "Global" },
+		{ url: "https://blog.072199.xyz", alias: "Global" },
 	],
 	server: [
 		{ url: "", text: "博客本体节点" },
