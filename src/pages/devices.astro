@@ -1,0 +1,205 @@
+---
+import { Icon } from "astro-icon/components";
+import { siteConfig } from "../config";
+import { devicesData } from "../data/devices";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+
+// 检查设备页面是否启用
+if (siteConfig.featurePages?.devices === false) {
+	return Astro.redirect("/404/");
+}
+
+// 设备数据
+const devices = devicesData;
+const brands = Object.keys(devices);
+---
+
+<MainGridLayout title="设备" description="我的设备清单">
+  <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
+      <!-- 页面标题 -->
+      <div class="flex flex-col items-start justify-center mb-8">
+        <h1 class="text-3xl font-bold text-black/90 dark:text-white/90 mb-2 relative
+                  before:w-1 before:h-8 before:rounded-md before:bg-[var(--primary)]
+                  before:absolute before:top-1/2 before:-translate-y-1/2 before:-left-4">
+          设备
+        </h1>
+        <p class="text-base text-black/60 dark:text-white/60">
+          我正在使用的设备清单
+        </p>
+      </div>
+
+      <!-- 过滤按钮 -->
+      <div class="mb-6">
+        <div class="filter-container flex flex-wrap gap-2">
+          {brands.map((brand, index) => (
+            <button 
+              data-brand={brand}
+              class={`filter-tag px-4 py-2 rounded-lg font-medium transition-all ${
+                index === 0 ? 'active' : ''
+              }`}
+            >
+              {brand}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- 设备列表 -->
+      <div id="devices-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {devices[brands[0]].map((device, index) => (
+          <a 
+            href={device.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="device-card group relative overflow-hidden rounded-xl border border-[var(--line-divider)] bg-[var(--card-bg)] transition-all duration-300 hover:border-[var(--primary)]/50 hover:shadow-md hover:scale-[1.02] block cursor-pointer"
+            style={`animation-delay: ${index * 100}ms`}
+          >
+            <!-- 设备图片区域 -->
+            <div class="relative p-6 pb-0">
+              <div class="flex justify-center items-center h-48 bg-gradient-to-br from-[var(--card-bg)] to-[var(--btn-regular-bg)] rounded-lg overflow-hidden relative">
+                <div class="absolute inset-0 bg-[var(--primary)]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <img 
+                  src={device.image} 
+                  alt={device.name}
+                  class="w-auto h-full max-h-full object-contain group-hover:scale-110 transition-all duration-500 drop-shadow-md relative z-10"
+                  onerror="this.src='/images/devices/placeholder.png'"
+                />
+              </div>
+            </div>
+            
+            <!-- 设备信息区域 -->
+            <div class="p-6 pt-4 relative z-10">
+              <div class="flex items-start justify-between mb-3">
+                <h3 class="text-lg font-bold text-black/90 dark:text-white/90 group-hover:text-[var(--primary)] transition-colors duration-300">
+                  {device.name}
+                </h3>
+                <div class="p-1.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <Icon name="material-symbols:open-in-new" class="text-lg" />
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--btn-regular-bg)] text-black/70 dark:text-white/70 text-sm mb-3">
+                  <Icon name="material-symbols:settings-suggest-outline" class="text-sm" />
+                  <span class="font-medium">{device.specs}</span>
+                </div>
+                
+                <p class="text-sm text-black/60 dark:text-white/60 leading-relaxed line-clamp-2">
+                  {device.description}
+                </p>
+              </div>
+              
+              <!-- 查看详情按钮 -->
+              <div class="flex items-center justify-between pt-3 border-t border-[var(--line-divider)] border-dashed opacity-0 group-hover:opacity-100 transition-all duration-300">
+                <span class="text-sm font-medium text-[var(--primary)]">查看详情</span>
+                <Icon name="material-symbols:arrow-forward-rounded" class="text-lg text-[var(--primary)]" />
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <script is:inline define:vars={{ devices }}>
+    const brandTabs = document.querySelectorAll('.filter-tag');
+    const devicesContainer = document.getElementById('devices-container');
+
+    brandTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const brand = tab.dataset.brand;
+        
+        brandTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        const brandDevices = devices[brand] || [];
+        devicesContainer.innerHTML = brandDevices.map((device, index) => `
+          <a 
+            href="${device.link}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="device-card group relative overflow-hidden rounded-xl border border-[var(--line-divider)] bg-[var(--card-bg)] transition-all duration-300 hover:border-[var(--primary)]/50 hover:shadow-md hover:scale-[1.02] block cursor-pointer"
+            style="animation-delay: ${index * 100}ms; animation: fadeInUp 0.6s ease forwards; opacity: 0;"
+          >
+            <div class="relative p-6 pb-0">
+              <div class="flex justify-center items-center h-48 bg-gradient-to-br from-[var(--card-bg)] to-[var(--btn-regular-bg)] rounded-lg overflow-hidden relative">
+                <img 
+                  src="${device.image}" 
+                  alt="${device.name}"
+                  class="w-auto h-full max-h-full object-contain group-hover:scale-110 transition-all duration-500 drop-shadow-md relative z-10"
+                  onerror="this.src='/images/devices/placeholder.png'"
+                />
+              </div>
+            </div>
+            
+            <div class="p-6 pt-4 relative z-10">
+              <div class="flex items-start justify-between mb-3">
+                <h3 class="text-lg font-bold text-black/90 dark:text-white/90 group-hover:text-[var(--primary)] transition-colors duration-300">
+                  ${device.name}
+                </h3>
+              </div>
+              
+              <div class="mb-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--btn-regular-bg)] text-black/70 dark:text-white/70 text-sm mb-3">
+                  <span class="font-medium">${device.specs}</span>
+                </div>
+                
+                <p class="text-sm text-black/60 dark:text-white/60 leading-relaxed line-clamp-2">
+                  ${device.description}
+                </p>
+              </div>
+              
+              <div class="flex items-center justify-between pt-3 border-t border-[var(--line-divider)] border-dashed opacity-0 group-hover:opacity-100 transition-all duration-300">
+                <span class="text-sm font-medium text-[var(--primary)]">查看详情</span>
+              </div>
+            </div>
+          </a>
+        `).join('');
+      });
+    });
+  </script>
+</MainGridLayout>
+
+<style>
+  .filter-tag {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--line-divider);
+    border-radius: var(--radius-large);
+    background: var(--btn-regular-bg);
+    color: var(--btn-content);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .filter-tag:hover:not(.active) {
+    background: var(--btn-hover-bg);
+    border-color: var(--primary);
+  }
+  
+  .filter-tag.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

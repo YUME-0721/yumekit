@@ -10,14 +10,27 @@ import DisplaySettings from "./widget/DisplaySettings.svelte";
 import NavMenuPanel from "./widget/NavMenuPanel.astro";
 const className = Astro.props.class;
 
-let links: NavBarLink[] = navBarConfig.links.map(
-	(item: NavBarLink | LinkPreset): NavBarLink => {
-		if (typeof item === "number") {
-			return LinkPresets[item];
-		}
-		return item;
-	},
-);
+// 处理导航链接，将 LinkPreset 转换为 NavBarLink
+function processLink(item: NavBarLink | LinkPreset): NavBarLink {
+	if (typeof item === "number") {
+		return LinkPresets[item];
+	}
+	return item;
+}
+
+// 处理顶级链接
+let links: NavBarLink[] = navBarConfig.links.map(processLink);
+
+// 处理子链接
+links = links.map((link) => {
+	if (link.children) {
+		return {
+			...link,
+			children: link.children.map(processLink),
+		};
+	}
+	return link;
+});
 ---
 <div id="navbar" class="z-50 onload-animation">
     <div class="absolute h-8 left-0 right-0 -top-8 bg-[var(--card-bg)] transition"></div> <!-- used for onload animation -->
@@ -30,16 +43,59 @@ let links: NavBarLink[] = navBarConfig.links.map(
                 {siteConfig.title}
             </div>
         </a>
-        <div class="hidden md:flex">
+        <div class="hidden md:flex items-center space-x-1">
             {links.map((l) => {
-                return <a aria-label={l.name} href={l.external ? l.url : url(l.url)} target={l.external ? "_blank" : null}
-                          class="btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95"
-                >
-                    <div class="flex items-center">
-                        {l.name}
-                        {l.external && <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.875rem] transition -translate-y-[1px] ml-1 text-black/[0.2] dark:text-white/[0.2]"></Icon>}
-                    </div>
-                </a>;
+                // 检查是否有子菜单
+                const hasChildren = l.children && l.children.length > 0;
+                
+                if (hasChildren) {
+                    // 渲染下拉菜单
+                    return (
+                        <div class="dropdown-container relative" data-dropdown>
+                            <button 
+                                class="btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95 dropdown-trigger flex items-center"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                            >
+                                {l.icon && <Icon name={l.icon} class="text-[1.1rem] mr-2" />}
+                                {l.name}
+                                <Icon name="material-symbols:keyboard-arrow-down-rounded" class="text-[1.25rem] transition-transform duration-200 dropdown-arrow ml-1" />
+                            </button>
+                            <div class="dropdown-menu absolute top-full left-0 pt-2 opacity-0 invisible pointer-events-none transition-all duration-200 ease-out transform translate-y-[-8px] z-50">
+                                <div class="dropdown-content bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-xl border border-black/5 dark:border-white/10 py-2 min-w-[10rem]">
+                                    {l.children?.map((child) => (
+                                        <a 
+                                            href={child.external ? child.url : url(child.url)} 
+                                            target={child.external ? "_blank" : null}
+                                            class="dropdown-item flex items-center justify-between px-4 py-2.5 text-black/75 dark:text-white/75 hover:text-[var(--primary)] hover:bg-[var(--btn-plain-bg-hover)] transition-colors duration-150 font-medium"
+                                        >
+                                            <div class="flex items-center">
+                                                {child.icon && <Icon name={child.icon} class="text-[1rem] mr-2" />}
+                                                <span>{child.name}</span>
+                                            </div>
+                                            {child.external && (
+                                                <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.75rem] text-black/25 dark:text-white/25" />
+                                            )}
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                } else {
+                    // 渲染普通链接
+                    return (
+                        <a aria-label={l.name} href={l.external ? l.url : url(l.url)} target={l.external ? "_blank" : null}
+                           class="btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95"
+                        >
+                            <div class="flex items-center">
+                                {l.icon && <Icon name={l.icon} class="text-[1.1rem] mr-2" />}
+                                {l.name}
+                                {l.external && <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.875rem] transition -translate-y-[1px] ml-1 text-black/[0.2] dark:text-white/[0.2]"></Icon>}
+                            </div>
+                        </a>
+                    );
+                }
             })}
         </div>
         <div class="flex">
@@ -59,6 +115,29 @@ let links: NavBarLink[] = navBarConfig.links.map(
         <DisplaySettings client:only="svelte"></DisplaySettings>
     </div>
 </div>
+
+<style>
+    .dropdown-container:hover .dropdown-menu,
+    .dropdown-container:focus-within .dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+
+    .dropdown-container:hover .dropdown-arrow,
+    .dropdown-container:focus-within .dropdown-arrow {
+        transform: rotate(180deg);
+    }
+
+    .dropdown-item:first-child {
+        border-radius: calc(var(--radius-large) - 0.5rem) calc(var(--radius-large) - 0.5rem) 0 0;
+    }
+
+    .dropdown-item:last-child {
+        border-radius: 0 0 calc(var(--radius-large) - 0.5rem) calc(var(--radius-large) - 0.5rem);
+    }
+</style>
 
 <script>
 function loadButtonScript() {
@@ -86,3 +165,4 @@ function loadButtonScript() {
 
 loadButtonScript();
 </script>
+

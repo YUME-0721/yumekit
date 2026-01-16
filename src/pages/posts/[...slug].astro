@@ -97,14 +97,18 @@ const jsonLd = {
                         tags={entry.data.tags}
                         slug={entry.slug}
                 ></PostMetadata>
-                {!entry.data.image && <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>}
+                {(!entry.data.image || (entry.data.image && !siteConfig.showCoverInContent)) && (
+                    <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>
+                )}
             </div>
 
-            <!-- always show cover as long as it has one -->
-
-            {entry.data.image &&
-                <ImageWrapper id="post-cover" src={entry.data.image} basePath={path.join("content/posts/", getDir(entry.id))} class="mb-8 rounded-xl banner-container onload-animation"/>
-            }
+            <!-- 根据 showCoverInContent 配置决定是否在正文显示封面 -->
+            {entry.data.image && siteConfig.showCoverInContent && (
+                <>
+                    <div class="mt-4" />
+                    <ImageWrapper id="post-cover" src={entry.data.image} basePath={path.join("content/posts/", getDir(entry.id))} class="mb-8 rounded-xl banner-container onload-animation"/>
+                </>
+            )}
 
 
             <Markdown class="mb-6 markdown-content onload-animation">

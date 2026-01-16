@@ -1,5 +1,23 @@
 import type { AUTO_MODE, DARK_MODE, LIGHT_MODE } from "@constants/constants";
 
+// 功能页面开关配置
+export type FeaturePages = {
+	anime: boolean; // 番剧页面开关
+	diary: boolean; // 日记页面开关
+	albums: boolean; // 相册页面开关
+	devices: boolean; // 设备页面开关
+};
+
+// Bangumi 配置
+export type BangumiConfig = {
+	userId?: string; // Bangumi 用户 ID
+};
+
+// 番剧页面配置
+export type AnimeConfig = {
+	mode?: "bangumi" | "local"; // 番剧页面模式
+};
+
 export type SiteConfig = {
 	title: string;
 	subtitle: string;
@@ -37,12 +55,21 @@ export type SiteConfig = {
 		depth: 1 | 2 | 3;
 	};
 
+	showCoverInContent: false; // 是否在文章正文中显示封面图片（true: 显示，false: 不显示）
+
 	favicon: Favicon[];
 	officialSites?: (string | { url: string; alias: string })[];
 	server?: {
 		url: string;
 		text: string;
 	}[];
+
+	// 功能页面开关配置
+	featurePages?: FeaturePages;
+	// Bangumi 配置
+	bangumi?: BangumiConfig;
+	// 番剧页面配置
+	anime?: AnimeConfig;
 };
 
 export type Favicon = {
@@ -54,12 +81,18 @@ export type Favicon = {
 export enum LinkPreset {
 	Home = 0,
 	Archive = 1,
+	Anime = 2,
+	Diary = 3,
+	Albums = 4,
+	Devices = 5,
 }
 
 export type NavBarLink = {
 	name: string;
 	url: string;
 	external?: boolean;
+	icon?: string; // 菜单项图标
+	children?: (NavBarLink | LinkPreset)[]; // 支持子菜单
 };
 
 export type NavBarConfig = {
@@ -125,3 +158,4 @@ export type GitHubEditConfig = {
 	enable: boolean;
 	baseUrl: string;
 };
+

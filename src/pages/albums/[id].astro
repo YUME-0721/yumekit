@@ -1,0 +1,158 @@
+---
+import { siteConfig } from "../../config";
+import MainGridLayout from "../../layouts/MainGridLayout.astro";
+import { getAlbumById, scanAlbums } from "../../utils/album-scanner";
+
+// 检查相册页面是否启用
+if (siteConfig.featurePages?.albums === false) {
+	return Astro.redirect("/404/");
+}
+
+// 获取相册 ID
+const { id } = Astro.params;
+if (!id) {
+	return Astro.redirect("/404/");
+}
+
+// 获取相册数据
+const album = await getAlbumById(id);
+if (!album) {
+	return Astro.redirect("/404/");
+}
+
+// 获取所有相册用于生成静态路径
+export async function getStaticPaths() {
+	const albums = await scanAlbums();
+	return albums.map((album) => ({
+		params: { id: album.id },
+	}));
+}
+---
+
+<MainGridLayout title={album.title} description={album.description}>
+  <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
+      
+      <!-- 返回按钮和标题 -->
+      <header class="mb-8">
+        <a href="/albums/" class="inline-flex items-center gap-2 text-black/60 dark:text-white/60 hover:text-[var(--primary)] transition-colors mb-4">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          返回相册列表
+        </a>
+        <h1 class="text-3xl font-bold text-black/90 dark:text-white/90 mb-2">
+          {album.title}
+        </h1>
+        {album.description && (
+          <p class="text-black/60 dark:text-white/60 mb-4">
+            {album.description}
+          </p>
+        )}
+        <div class="flex items-center gap-4 text-sm text-black/50 dark:text-white/50">
+          <span>{album.photos.length} 张照片</span>
+          {album.location && (
+            <span class="flex items-center gap-1">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+              </svg>
+              {album.location}
+            </span>
+          )}
+          <span>{new Date(album.date).toLocaleDateString('zh-CN')}</span>
+        </div>
+      </header>
+
+      <!-- 照片网格 -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {album.photos.map((photo, index) => (
+          <div 
+            class="photo-item relative aspect-square overflow-hidden rounded-lg cursor-pointer group"
+            data-index={index}
+            data-src={photo.src}
+          >
+            <img 
+              src={photo.src} 
+              alt={photo.alt || photo.title || `Photo ${index + 1}`}
+              class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"></div>
+          </div>
+        ))}
+      </div>
+
+      <!-- 空状态 -->
+      {album.photos.length === 0 && (
+        <div class="text-center py-12">
+          <p class="text-black/60 dark:text-white/60">
+            此相册暂无照片
+          </p>
+        </div>
+      )}
+    </div>
+  </div>
+
+  <!-- Lightbox 模态框 -->
+  <div id="lightbox" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center">
+    <button id="lightbox-close" class="absolute top-4 right-4 text-white/80 hover:text-white text-3xl">×</button>
+    <button id="lightbox-prev" class="absolute left-4 text-white/80 hover:text-white text-3xl">‹</button>
+    <button id="lightbox-next" class="absolute right-4 text-white/80 hover:text-white text-3xl">›</button>
+    <img id="lightbox-img" src="" alt="" class="max-w-[90vw] max-h-[90vh] object-contain" />
+  </div>
+
+  <script is:inline>
+    const photos = document.querySelectorAll('.photo-item');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const closeBtn = document.getElementById('lightbox-close');
+    const prevBtn = document.getElementById('lightbox-prev');
+    const nextBtn = document.getElementById('lightbox-next');
+    let currentIndex = 0;
+    const photoList = Array.from(photos);
+
+    function showPhoto(index) {
+      if (index < 0) index = photoList.length - 1;
+      if (index >= photoList.length) index = 0;
+      currentIndex = index;
+      const src = photoList[index].getAttribute('data-src');
+      lightboxImg.src = src;
+    }
+
+    photos.forEach((photo, index) => {
+      photo.addEventListener('click', () => {
+        currentIndex = index;
+        showPhoto(index);
+        lightbox.classList.remove('hidden');
+        lightbox.classList.add('flex');
+      });
+    });
+
+    closeBtn.addEventListener('click', () => {
+      lightbox.classList.add('hidden');
+      lightbox.classList.remove('flex');
+    });
+
+    prevBtn.addEventListener('click', () => showPhoto(currentIndex - 1));
+    nextBtn.addEventListener('click', () => showPhoto(currentIndex + 1));
+
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        lightbox.classList.add('hidden');
+        lightbox.classList.remove('flex');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (lightbox.classList.contains('hidden')) return;
+      if (e.key === 'Escape') {
+        lightbox.classList.add('hidden');
+        lightbox.classList.remove('flex');
+      } else if (e.key === 'ArrowLeft') {
+        showPhoto(currentIndex - 1);
+      } else if (e.key === 'ArrowRight') {
+        showPhoto(currentIndex + 1);
+      }
+    });
+  </script>
+</MainGridLayout>

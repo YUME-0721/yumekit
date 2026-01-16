@@ -48,6 +48,7 @@ export const siteConfig: SiteConfig = {
 		enable: true, // 在文章右侧显示目录
 		depth: 2, // 显示目录的最大标题深度，从 1 到 3
 	},
+	showCoverInContent: false, // 是否在文章正文中显示封面图片（true: 显示，false: 不显示）
 	favicon: [
 		// 将此数组留空，即可使用默认的网站图标。
 		{
@@ -65,6 +66,24 @@ export const siteConfig: SiteConfig = {
 		{ url: "https://pic.YUMEkai.top", text: "随机图节点" },
 		// { url: "https://status.acofork.com", text: "状态检测节点" }
 	],
+
+	// 功能页面开关配置
+	featurePages: {
+		anime: true, // 番剧页面开关
+		diary: true, // 日记页面开关
+		albums: true, // 相册页面开关
+		devices: true, // 设备页面开关
+	},
+
+	// Bangumi 配置
+	bangumi: {
+		userId: "1015457", // 在此处设置你的 Bangumi 用户 ID
+	},
+
+	// 番剧页面配置
+	anime: {
+		mode: "bangumi", // 番剧页面模式："bangumi" 使用 Bangumi API，"local" 使用本地配置
+	},
 };
 
 export const navBarConfig: NavBarConfig = {
@@ -73,19 +92,41 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.Archive,
 		{
 			name: "友链",
-			url: "/friends/", // 内部链接不应包含基础路径，因为它会自动添加
-			external: false, // 显示外部链接图标并在新标签页中打开
+			url: "/friends/",
+			external: false,
+		},
+		{
+			name: "我的",
+			url: "#",
+			icon: "material-symbols:person",
+			children: [
+				{
+					name: "番剧",
+					url: "/anime/",
+					icon: "material-symbols:movie",
+				},
+				{
+					name: "日记",
+					url: "/diary/",
+					icon: "material-symbols:book-2",
+				},
+				{
+					name: "相册",
+					url: "/albums/",
+					icon: "material-symbols:photo-library",
+				},
+				{
+					name: "设备",
+					url: "/devices/",
+					icon: "material-symbols:devices",
+				},
+			],
 		},
 		{
 			name: "统计",
-			url: "https://cloud.umami.is/share/Euu7elNJGcNr6rUR", // 内部链接不应包含基础路径，因为它会自动添加
-			external: true, // 显示外部链接图标并在新标签页中打开
+			url: "https://cloud.umami.is/share/Euu7elNJGcNr6rUR",
+			external: true,
 		},
-		// {
-		// 	name: "监控",
-		// 	url: "https://status.acofork.com", // 内部链接不应包含基础路径，因为它会自动添加
-		// 	external: true, // 显示外部链接图标并在新标签页中打开
-		// },
 	],
 };
 

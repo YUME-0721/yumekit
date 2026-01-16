@@ -1,0 +1,30 @@
+{
+    "title": "电影般梦幻的八月",
+    "description": "胶卷：FUJI C200 135胶卷",
+    "date": "2025-09-22",
+    "location": "陕西省 咸阳市",
+    "tags": [
+        "摄影",
+        "胶卷"
+    ],
+    "mode": "external",
+    "cover": "https://pixport.072199.xyz/images/2026/01/16/af1537671c7ea5a55a6236c71144339b90326c612e866e070c0b7f51bd78e8cc.webp",
+    "photos": [
+        {
+            "src": "https://pixport.072199.xyz/images/2026/01/16/af1537671c7ea5a55a6236c71144339b90326c612e866e070c0b7f51bd78e8cc.webp",
+            "title": "照片1"
+        },
+        {
+            "src": "https://pixport.072199.xyz/images/2026/01/16/c5b04479ee645a4c737047ae08735105896663c8870a958251c7f52cc4d0711d.webp",
+            "title": "照片2"
+        },
+        {
+            "src": "https://pixport.072199.xyz/images/2026/01/16/1c86b546808b84415922e6d132771e5b839801d802a21fb305ba7e6ff041b7a7.webp",
+            "title": "照片3"
+        },
+        {
+            "src": "https://pixport.072199.xyz/images/2026/01/16/e2f7b47cbd3efc09870b6581ddcf2ac7bd1459318843f3da02ab8b4b004912b9.webp",
+            "title": "照片4"
+        }
+    ]
+}
