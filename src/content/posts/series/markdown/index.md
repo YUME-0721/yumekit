@@ -127,12 +127,12 @@ Markdown 正成为数字笔记的首选格式：
 
 本教程将带你系统地学习 Markdown 的各个方面：
 
-- [Markdown 编辑器](/posts/series/markdown/part-01/part-01-/) - 介绍常用的 Markdown 编辑器工具
-- Markdown 基础语法 - 标题、段落、列表等基本语法
+- [Markdown 编辑器](/posts/series/markdown/Markdown-01) - 介绍常用的 Markdown 编辑器工具
+- [Markdown 基础语法](/posts/series/markdown/Markdown-02) - 标题、段落、列表等基本语法
 - Markdown 进阶语法 - 表格、代码块、链接、图片等
 - Markdown 扩展语法 - 任务列表、删除线、数学公式等
 - Markdown 最佳实践 - 编写规范和技巧
 
 ## 开始学习
 
-准备好开始你的 Markdown 学习之旅了吗？让我们从了解常用的 [Markdown 编辑器](/posts/series/markdown/part-01/part-01-/) 开始吧！
+准备好开始你的 Markdown 学习之旅了吗？让我们从了解常用的 [Markdown 编辑器]() 开始吧！
