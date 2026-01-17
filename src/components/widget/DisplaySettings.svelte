@@ -4,8 +4,6 @@ import Icon from "@iconify/svelte";
 import {
 	getBgBlur,
 	getDefaultHue,
-	getDevMode,
-	getDevServer,
 	getHideBg,
 	getHue,
 	getRainbowMode,
@@ -13,8 +11,6 @@ import {
 	getStoredTheme,
 	setBgBlur,
 	setBgHueRotate,
-	setDevMode,
-	setDevServer,
 	setHideBg,
 	setHue,
 	setRainbowMode,
@@ -29,8 +25,6 @@ let isRainbowMode = getRainbowMode();
 let rainbowSpeed = getRainbowSpeed();
 let bgBlur = getBgBlur();
 let hideBg = getHideBg();
-let isDevMode = getDevMode();
-	let devServer = getDevServer();
 	let animationId: number;
 
 	const defaultHue = getDefaultHue();
@@ -71,14 +65,7 @@ let isDevMode = getDevMode();
 		setHideBg(hideBg);
 	}
 
-	function toggleDevMode() {
-		isDevMode = !isDevMode;
-		setDevMode(isDevMode);
-	}
 
-	function onDevServerChange() {
-		setDevServer(devServer);
-	}
 
 	function onSpeedChange() {
 		setRainbowSpeed(rainbowSpeed);
@@ -212,31 +199,7 @@ let isDevMode = getDevMode();
                class="slider" step="1" style="width: 100%; --value-percent: {bgBlur / 20 * 100}%">
     </div>
 
-    <div class="flex flex-row gap-2 mb-3 mt-3 items-center justify-between">
-        <div class="flex gap-2 font-bold text-lg text-neutral-900 dark:text-neutral-100 transition relative ml-3
-            before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)]
-            before:absolute before:-left-3 before:top-[0.33rem]"
-        >
-            开发模式
-        </div>
-        <input type="checkbox" class="toggle-switch" checked={isDevMode} on:change={toggleDevMode} />
-    </div>
 
-    {#if isDevMode}
-    <div class="flex flex-row gap-2 mb-3 items-center justify-between transition-all" >
-        <div class="flex gap-2 font-bold text-lg text-neutral-900 dark:text-neutral-100 transition relative ml-3
-            before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)]
-            before:absolute before:-left-3 before:top-[0.33rem]"
-        >
-            Server
-        </div>
-        <div class="flex gap-1">
-             <input aria-label="Server Value" type="text" bind:value={devServer} on:input={onDevServerChange}
-                   class="transition bg-[var(--btn-regular-bg)] w-32 h-7 rounded-md text-center font-bold text-sm text-[var(--btn-content)] outline-none"
-            />
-        </div>
-    </div>
-    {/if}
 </div>
 
 

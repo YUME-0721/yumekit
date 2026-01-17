@@ -7,7 +7,7 @@ tags:
   - Markdown
   - 学习
   - 教程
-category: 教程
+category: Markdown
 licenseName: MIT
 author: YUME
 sourceLink: https://www.runoob.com/markdown/md-tutorial.html
@@ -127,8 +127,8 @@ Markdown 正成为数字笔记的首选格式：
 
 本教程将带你系统地学习 Markdown 的各个方面：
 
-- [Markdown 编辑器](/posts/series/markdown/Markdown-01) - 介绍常用的 Markdown 编辑器工具
-- [Markdown 基础语法](/posts/series/markdown/Markdown-02) - 标题、段落、列表等基本语法
+- [Markdown 编辑器](01-editor/Markdown-01.md) - 介绍常用的 Markdown 编辑器工具
+- [Markdown 基础语法](02-basics/Markdown-02.md) - 标题、段落、列表等基本语法
 - Markdown 进阶语法 - 表格、代码块、链接、图片等
 - Markdown 扩展语法 - 任务列表、删除线、数学公式等
 - Markdown 最佳实践 - 编写规范和技巧

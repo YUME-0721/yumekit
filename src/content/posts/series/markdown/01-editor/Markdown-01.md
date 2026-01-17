@@ -8,7 +8,7 @@ tags:
   - 编辑器
   - 工具
   - 教程
-category: 教程
+category: Markdown
 licenseName: MIT
 author: YUME
 sourceLink: https://www.runoob.com/markdown/md-editor.html

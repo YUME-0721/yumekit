@@ -30,19 +30,36 @@ const albumsData = await scanAlbums();
 
       <!-- 相册网格 -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {albumsData.map(album => (
+        {albumsData.map(album => {
+          const previewPhotos = album.photos.slice(0, 4);
+          const remainingCount = album.photos.length - 4;
+          return (
           <article 
             class="album-card group bg-[var(--card-bg)] rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-[var(--line-divider)]"
           >
             <a href={`/albums/${album.id}/`} class="block">
-              <!-- 封面图片 -->
-              <div class="aspect-[4/3] overflow-hidden bg-neutral-100 dark:bg-neutral-700">
-                <img 
-                  src={album.cover} 
-                  alt={album.title}
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
-                />
+              <!-- 图片预览网格 -->
+              <div class="aspect-[4/3] overflow-hidden bg-neutral-100 dark:bg-neutral-700 grid grid-cols-2 grid-rows-2 gap-0.5">
+                {previewPhotos.map((photo, index) => (
+                  <div class={`relative overflow-hidden ${previewPhotos.length === 1 ? 'col-span-2 row-span-2' : previewPhotos.length === 2 ? 'row-span-2' : previewPhotos.length === 3 && index === 0 ? 'row-span-2' : ''}`}>
+                    <img 
+                      src={photo.thumbnail || photo.src} 
+                      alt={photo.alt || album.title}
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                    {/* 显示剩余数量 */}
+                    {index === 3 && remainingCount > 0 && (
+                      <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                        <span class="text-white text-2xl font-bold">+{remainingCount}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {/* 填充空白格子 */}
+                {previewPhotos.length === 3 && (
+                  <div class="bg-neutral-200 dark:bg-neutral-600"></div>
+                )}
               </div>
               
               <!-- 相册信息 -->
@@ -91,7 +108,7 @@ const albumsData = await scanAlbums();
               </div>
             </a>
           </article>
-        ))}
+        )})}
       </div>
       
       <!-- 空状态 -->

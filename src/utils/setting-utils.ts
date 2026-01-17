@@ -97,24 +97,6 @@ export function setHideBg(hide: boolean): void {
 	}
 }
 
-export function getDevMode(): boolean {
-	const stored = localStorage.getItem("dev-mode");
-	return stored === "true";
-}
-
-export function setDevMode(enabled: boolean): void {
-	localStorage.setItem("dev-mode", String(enabled));
-}
-
-export function getDevServer(): string {
-	const stored = localStorage.getItem("dev-server");
-	return stored || "";
-}
-
-export function setDevServer(server: string): void {
-	localStorage.setItem("dev-server", server);
-}
-
 export function applyThemeToDocument(theme: LIGHT_DARK_MODE) {
 	switch (theme) {
 		case LIGHT_MODE:
