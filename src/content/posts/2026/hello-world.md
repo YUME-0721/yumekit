@@ -2,7 +2,10 @@
 title: 欢迎来到 YUME Blog
 published: 2026-01-15
 description: 这是我的第一篇博客文章，用于展示文章的基本格式和功能。
-tags: [博客, 示例, 入门]
+tags:
+  - 博客
+  - 示例
+  - 入门
 category: 博客
 lang: zh_CN
 pinned: true

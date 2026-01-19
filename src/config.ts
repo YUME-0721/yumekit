@@ -58,13 +58,13 @@ export const siteConfig: SiteConfig = {
 		},
 	],
 	officialSites: [
-		{ url: "https://blog.YUMEkai.top", alias: "CN" },
+		{ url: "https://blog.yumekai.top", alias: "CN" },
 		{ url: "https://blog.072199.xyz", alias: "Global" },
 	],
 	server: [
 		{ url: "", text: "博客本体节点" },
-		{ url: "https://pic.YUMEkai.top", text: "随机图节点" },
-		// { url: "https://status.acofork.com", text: "状态检测节点" }
+		{ url: "https://pic.yumekai.top", text: "随机图节点" },
+		{ url: "https://cfstatus.072199.xyz", text: "状态检测节点" }
 	],
 
 	// 功能页面开关配置
@@ -119,6 +119,11 @@ export const navBarConfig: NavBarConfig = {
 		{
 			name: "统计",
 			url: "https://cloud.umami.is/share/Euu7elNJGcNr6rUR",
+			external: true,
+		},
+		{
+			name: "监控",
+			url: "https://cfstatus.072199.xyz",
 			external: true,
 		},
 	],
@@ -177,7 +182,7 @@ export const expressiveCodeConfig: ExpressiveCodeConfig = {
 
 export const gitHubEditConfig: GitHubEditConfig = {
 	enable: true,
-	baseUrl: "https://github.com/YUME-0721/YUMEkit/tree/main/src/content/posts",
+	baseUrl: "https://github.com/YUME-0721/yumekit/tree/main/src/content/posts",
 };
 
 // “todoConfig”已从此处移除

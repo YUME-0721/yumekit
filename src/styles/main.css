@@ -26,10 +26,14 @@
     html.is-rainbow-mode .card-base {
         animation: rainbow-rotate linear infinite;
         animation-duration: var(--rainbow-duration, 5s);
-        overflow: visible;
         will-change: filter;
         opacity: 1 !important;
         /* 强制显示，防止被 onload-animation 的初始透明状态覆盖 */
+    }
+
+    /* NOTE: 彩虹模式下保持 TOC 的滚动功能 */
+    html.is-rainbow-mode #toc-sidebar {
+        overflow-y: auto !important;
     }
 
     /* Reverse filter for images to keep original colors */
