@@ -30,6 +30,8 @@ try {
 <div class="transition border-t border-black/10 dark:border-white/15 my-10 border-dashed mx-4 md:mx-32"></div>
 <div class="card-base w-fit mx-auto rounded-xl mt-4 mb-4">
     <div class="transition text-50 text-sm text-center p-6">
+        <a class="transition link text-[var(--primary)] font-medium inline-flex items-center" href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank"><img alt="" src="/favicon/foot-icp.png" class="h-4 mr-1">陕ICP备2026001365号</a>
+        <br>
         &copy; <span id="copyright-year">2024 - {currentYear}</span> <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://space.bilibili.com/325903362"> {profileConfig.name} </a>，采用
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可
         <br>
@@ -43,10 +45,15 @@ try {
         本网站代码
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://github.com/YUME-0721/yumekit">已开源</a>
         <a class="transition link text-black/30 dark:text-white/30 hover:text-[var(--primary)] text-xs ml-1" target="_blank" href={`https://github.com/YUME-0721/yumekit/commit/${commitHash}`}>({commitHash} @ {buildDate})</a>
+        <!-- 服务器信息暂时注释
         <br>
+        <div class="server-info-container flex flex-col items-center justify-center gap-1 mt-1">
+        </div>
+        -->
     </div>
 </div>
 
+<!-- 服务器信息脚本暂时注释
 <script is:inline define:vars={{ serverConfig: siteConfig.server || [] }}>
     (() => {
         if (window.__footerServerInit) return;
@@ -126,3 +133,4 @@ try {
         document.addEventListener('content:replace', initServerInfo);
     })();
 </script>
+-->

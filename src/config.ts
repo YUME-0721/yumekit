@@ -37,7 +37,7 @@ export const siteConfig: SiteConfig = {
 	},
 	background: {
 		enable: true, // 启用背景图片
-		src: "", // 背景图片 URL（支持 HTTPS）
+		src: "https://pic.yumekai.top/pic?img=ua", // 背景图片 URL（支持 HTTPS）
 		position: "center", // 背景位置：'top'（顶部）、'center'（居中）、'bottom'（底部）
 		size: "cover", // 背景尺寸：'cover'（覆盖）、'contain'（包含）、'auto'（自动）
 		repeat: "no-repeat", // 背景重复：'no-repeat'（不重复）、'repeat'（重复）、'repeat-x'（水平重复）、'repeat-y'（垂直重复）
@@ -154,7 +154,7 @@ export const licenseConfig: LicenseConfig = {
 };
 
 export const imageFallbackConfig: ImageFallbackConfig = {
-	enable: true,
+	enable: false,
 	originalDomain: "https://pixport.072199.xyz/image_api.php?return=redirect",
 	fallbackDomain: "https://pixport.072199.xyz/image_api.php?return=redirect",
 };
