@@ -87,6 +87,17 @@ const bannerOffset =
 	  data-overlayscrollbars-initialize>  <!-- 手机端适配 -->
 
 	<head>
+		<!-- 域名重定向脚本（立即执行，在页面渲染前） -->
+		<script is:inline>
+			// 立即检测并重定向 yumekai.top 和 www.yumekai.top 到 blog.yumekai.top
+			(function() {
+				var hostname = window.location.hostname;
+				if (hostname === 'yumekai.top' || hostname === 'www.yumekai.top') {
+					var redirectUrl = 'https://blog.yumekai.top' + window.location.pathname + window.location.search + window.location.hash;
+					window.location.replace(redirectUrl);
+				}
+			})();
+		</script>
 
 		<title>{pageTitle}</title>
 

@@ -1,8 +1,0 @@
-# Redirect root domain and www to blog subdomain
-# This file is compatible with Cloudflare Pages, Netlify, etc.
-# For EdgeOne Pages, configure redirects in the control panel
-
-https://yumekai.top/* https://blog.yumekai.top/:splat 301
-https://www.yumekai.top/* https://blog.yumekai.top/:splat 301
-http://yumekai.top/* https://blog.yumekai.top/:splat 301
-http://www.yumekai.top/* https://blog.yumekai.top/:splat 301
