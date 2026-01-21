@@ -9,19 +9,18 @@ tags:
 category: Markdown
 draft: false
 ---
-
 # 一. 标题：
 支持两种语法，推荐使用 Atx 形式（更灵活）
 - Atx 形式（推荐）
 
 | Markdown语法               | HTML                       | 预览效果            |
 | ------------------------ | -------------------------- | --------------- |
-| `# Heading level 1`      | `<h1>Heading level 1</h1>` | Heading level 1 |
-| `## Heading level 2`     | `<h2>Heading level 2</h2>` | Heading level 2 |
-| `### Heading level 3`    | `<h3>Heading level 3</h3>` | Heading level 3 |
-| `#### Heading level 4`   | `<h4>Heading level 4</h4>` | Heading level 4 |
-| `##### Heading level 5`  | `<h5>Heading level 5</h5>` | Heading level 5 |
-| `###### Heading level 6` | `<h6>Heading level 6</h6>` | Heading level 6 |
+| `# Heading level 1`      | `<h1>Heading level 1</h1>` | # Heading level 1 |
+| `## Heading level 2`     | `<h2>Heading level 2</h2>` | ## Heading level 2 |
+| `### Heading level 3`    | `<h3>Heading level 3</h3>` | ### Heading level 3 |
+| `#### Heading level 4`   | `<h4>Heading level 4</h4>` | #### Heading level 4 |
+| `##### Heading level 5`  | `<h5>Heading level 5</h5>` | ##### Heading level 5 |
+| `###### Heading level 6` | `<h6>Heading level 6</h6>` | ###### Heading level 6 |
 
 - Setext 形式（可选，仅支持H1-H2）
 
