@@ -130,7 +130,7 @@ Markdown 正成为数字笔记的首选格式：
 - [Markdown 编辑器](01-editor/Markdown-01.md) - 介绍常用的 Markdown 编辑器工具
 - [Markdown 基础语法](02-basics/Markdown-02.md) - 标题、段落、列表等基本语法
 - [Markdown 进阶语法](posts/series/markdown/03-advanced/Markdown-03.md) - 表格、代码块、链接、图片等
-- Markdown 扩展语法 - 任务列表、删除线、数学公式等
+- [Markdown 扩展语法](posts/series/markdown/04-extend/Markdown-04) - 任务列表、删除线、数学公式等
 
 ## 开始学习
 
