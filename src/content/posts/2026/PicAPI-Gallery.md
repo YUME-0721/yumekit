@@ -1,12 +1,12 @@
 ---
-title: 自建静态图片画廊 - 绮想絵廊
+title: 静态图片画廊 - 绮想絵廊
 published: 2026-01-24T16:00:00
 description: 基于 EdgeOne Pages 的高性能静态图片画廊与 API 项目
 tags:
   - 图库
   - 博客
   - API接口
-category: 建站系列
+category: 项目
 pinned: false
 ---
 # 项目功能
