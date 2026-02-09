@@ -10,7 +10,7 @@ pinned: false
 ---
 # 准备阶段
 ## 取片头
-<img src="../../assets/images/MVIMG_20260203_185704.webp" width="400">
+![取片头操作](../../assets/images/MVIMG_20260203_185704.webp){width=400}
 
 > 使用取片器取出片头，并剪成平的
 
