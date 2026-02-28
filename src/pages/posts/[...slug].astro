@@ -2,16 +2,19 @@
 import path from "node:path";
 import License from "@components/misc/License.astro";
 import Markdown from "@components/misc/Markdown.astro";
+import PostDiffInArticle from "../../components/widget/PostDiffInArticle.astro";
+import PostUpdateNotice from "../../components/widget/PostUpdateNotice.astro";
 
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { getSortedPosts } from "@utils/content-utils";
+import { getCommitUrl, getPostHistory } from "@utils/git-history";
 import { getDir, getPostUrlBySlug } from "@utils/url-utils";
 import { Icon } from "astro-icon/components";
 import { gitHubEditConfig, licenseConfig } from "src/config";
 import PostMetadata from "../../components/PostMeta.astro";
 import ImageWrapper from "../../components/misc/ImageWrapper.astro";
 import { profileConfig, siteConfig, umamiConfig } from "../../config";
-import { formatDateToYYYYMMDD } from "../../utils/date-utils";
+import { formatDateToYYYYMMDD, formatPostDateForDisplay } from "../../utils/date-utils";
 
 export async function getStaticPaths() {
 	const blogEntries = await getSortedPosts();
@@ -26,6 +29,9 @@ const { Content, headings } = await entry.render();
 
 const { remarkPluginFrontmatter } = await entry.render();
 
+const history = getPostHistory(entry.id);
+const lastUpdateTime = history[0]?.date || entry.data.updated || entry.data.published;
+
 const jsonLd = {
 	"@context": "https://schema.org",
 	"@type": "BlogPosting",
@@ -37,9 +43,10 @@ const jsonLd = {
 		url: Astro.site,
 	},
 	datePublished: formatDateToYYYYMMDD(entry.data.published),
-	inLanguage: entry.data.lang
-		? entry.data.lang.replace("_", "-")
-		: siteConfig.lang.replace("_", "-"),
+		dateModified: formatDateToYYYYMMDD(new Date(lastUpdateTime)),
+		inLanguage: entry.data.lang
+			? entry.data.lang.replace("_", "-")
+			: siteConfig.lang.replace("_", "-"),
 	// TODO include cover image here
 };
 ---
@@ -94,7 +101,6 @@ const jsonLd = {
                         class="mb-5"
                         published={entry.data.published}
                         updated={entry.data.updated}
-                        tags={entry.data.tags}
                         slug={entry.slug}
                 ></PostMetadata>
                 {(!entry.data.image || (entry.data.image && !siteConfig.showCoverInContent)) && (
@@ -111,6 +117,10 @@ const jsonLd = {
             )}
 
 
+            <PostDiffInArticle />
+            
+            <PostUpdateNotice publishedAt={entry.data.published} lastUpdated={lastUpdateTime} />
+            
             <Markdown class="mb-6 markdown-content onload-animation">
                 <Content />
             </Markdown>
@@ -161,6 +171,36 @@ const jsonLd = {
                                 </a>
                             </div>
                         </div>
+
+                        <!-- 修订历史 -->
+                        {history.length > 0 && (
+                            <div id="revision-history" class="flex items-start gap-3 mt-4 scroll-mt-20">
+                                <div class="h-5 w-5 rounded bg-[var(--primary)] flex items-center justify-center">
+                                    <Icon name="material-symbols:history-rounded" class="text-[0.875rem] text-white dark:text-black/70"></Icon>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-black/80 dark:text-white/80 text-sm mb-1">文章修订历史 ({history.length} 次)</p>
+                                    <details class="group">
+                                        <summary class="cursor-pointer text-sm text-[var(--primary)] font-medium hover:underline select-none">
+                                            查看变更记录
+                                        </summary>
+                                        <div class="mt-2 space-y-2 max-h-48 overflow-y-auto">
+                                            {history.map(commit => (
+                                                <div class="flex flex-col text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded">
+                                                    <div class="flex justify-between items-center mb-1">
+                                                        <span class="font-bold text-black/70 dark:text-white/70">{formatPostDateForDisplay(new Date(commit.date))}</span>
+                                                        <a href={getCommitUrl(commit.hash)} target="_blank" class="text-[var(--primary)] hover:underline font-mono">
+                                                            {commit.hash.substring(0, 7)}
+                                                        </a>
+                                                    </div>
+                                                    <p class="text-black/60 dark:text-white/60 break-all">{commit.message}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                        )}
                     </>
                 )}
             </div>

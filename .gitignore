@@ -33,3 +33,26 @@ ori
 
 # EdgeOne
 .edgeone
+
+# Obsidian 配置文件
+.obsidian/
+
+# 临时文件
+*.tmp
+*.temp
+
+# 编辑器备份文件
+*.swp
+*.swo
+*~
+
+# 系统文件
+Thumbs.db
+
+# 构建生成的文件
+build/
+out/
+
+# 本地开发文件
+.local/
+.cache/
