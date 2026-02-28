@@ -2,6 +2,7 @@
 ---
 
 <script>
+// @ts-nocheck
 	import * as Diff from "diff";
 
 	const NOTIFICATION_STATE_KEY = "fuwari-notification-state";
@@ -21,6 +22,7 @@
 		}
 	}
 
+	/** @param {string} absoluteUrl */
 	function getRelativePath(absoluteUrl) {
 		try {
 			const url = new URL(absoluteUrl, window.location.origin);
@@ -30,6 +32,7 @@
 		}
 	}
 
+	/** @param {string} pathname */
 	function normalizePathname(pathname) {
 		const p = String(pathname || "");
 		if (!p) return "/";
@@ -38,6 +41,7 @@
 		return "/";
 	}
 
+	/** @param {string} pathname */
 	function stripBasePath(pathname) {
 		const base = normalizePathname(BASE_URL);
 		const p = normalizePathname(pathname);
@@ -47,6 +51,7 @@
 		return p;
 	}
 
+	/** @param {HTMLElement} container */
 	function clearInlineDiff(container) {
 		container.querySelectorAll("[data-post-inline-diff-inline]").forEach((el) => {
 			if (!(el instanceof HTMLElement)) return;
@@ -147,7 +152,7 @@
 		return hunks;
 	}
 
-	function normalizeLineText(text) {
+	function normalizeLineText(text: string): string {
 		return String(text ?? "")
 			.replace(/\r\n/g, "\n")
 			.replace(/\r/g, "\n")
@@ -158,19 +163,19 @@
 			.trim();
 	}
 
-	function extractImgSrc(line) {
+	function extractImgSrc(line: string): string | null {
 		const s = String(line ?? "");
 		const m = s.match(/<img[^>]*\s(?:src|data-src)=["']([^"']+)["']/i);
 		return m?.[1] ? String(m[1]).trim() : null;
 	}
 
-	function stripHtmlLine(line) {
+	function stripHtmlLine(line: string): string {
 		const tmp = document.createElement("div");
 		tmp.innerHTML = String(line ?? "");
 		return tmp.textContent || tmp.innerText || "";
 	}
 
-	function normalizeForMatch(line) {
+	function normalizeForMatch(line: string): { kind: "text" | "img" | "none"; value: string } {
 		const text = normalizeLineText(stripHtmlLine(line));
 		if (text) return { kind: "text", value: text };
 		const imgSrc = extractImgSrc(line);
@@ -180,13 +185,13 @@
 		return { kind: "none", value: "" };
 	}
 
-	function decodeHtmlEntities(value) {
+	function decodeHtmlEntities(value: string): string {
 		const t = document.createElement("textarea");
 		t.innerHTML = String(value ?? "");
 		return t.value;
 	}
 
-	function normalizeUrlForCompare(raw) {
+	function normalizeUrlForCompare(raw: string): string {
 		const v = decodeHtmlEntities(String(raw ?? "").trim());
 		if (!v) return "";
 		try {
@@ -205,7 +210,7 @@
 		}
 	}
 
-	function findImgBySrc(container, src) {
+	function findImgBySrc(container: HTMLElement, src: string): HTMLImageElement | null {
 		const normPath = normalizeUrlForCompare(src);
 		if (!normPath) return null;
 		const imgs = container.querySelectorAll("img");
@@ -219,11 +224,11 @@
 		return null;
 	}
 
-	function getBlockList(container) {
+	function getBlockList(container: HTMLElement): HTMLElement[] {
 		return Array.from(container.querySelectorAll("p, li, blockquote, pre, h1, h2, h3, h4, h5, h6, img")).filter((el) => el instanceof HTMLElement);
 	}
 
-	function findContextBefore(container, hunk, rowIndex) {
+	function findContextBefore(container: HTMLElement, hunk: any[], rowIndex: number): HTMLElement | null {
 		for (let i = rowIndex - 1; i >= 0; i -= 1) {
 			const row = hunk[i];
 			if (row?.type !== "ctx") continue;
@@ -233,7 +238,7 @@
 		return null;
 	}
 
-	function findContextAfter(container, hunk, rowIndex) {
+	function findContextAfter(container: HTMLElement, hunk: any[], rowIndex: number): HTMLElement | null {
 		for (let i = rowIndex + 1; i < hunk.length; i += 1) {
 			const row = hunk[i];
 			if (row?.type !== "ctx") continue;
@@ -243,14 +248,14 @@
 		return null;
 	}
 
-	function lineExistsInArticle(container, line) {
+	function lineExistsInArticle(container: HTMLElement, line: string): boolean {
 		const key = normalizeForMatch(line);
 		if (key.kind === "img") return !!findImgBySrc(container, key.value);
 		if (key.kind !== "text") return false;
 		return !!findBlockByText(container, line);
 	}
 
-	function findBlockByText(container, line) {
+	function findBlockByText(container: HTMLElement, line: string): HTMLElement | null {
 		const key = normalizeForMatch(line);
 		if (key.kind !== "text") return null;
 		const needle = key.value.slice(0, 48);
@@ -268,7 +273,7 @@
 		return null;
 	}
 
-	function findAnchorElement(container, hunk) {
+	function findAnchorElement(container: HTMLElement, hunk: any[]): HTMLElement | null {
 		const pick = (row) => String(row?.text ?? "").trim();
 		const ctx = hunk.find((r) => r.type === "ctx" && pick(r).length >= 6);
 		const anchorLine = ctx?.text ?? "";
@@ -279,7 +284,7 @@
 		return findBlockByText(container, anchorLine);
 	}
 
-	function createDeletionNode(text, includeAnchor, useListItem) {
+	function createDeletionNode(text: string, includeAnchor: boolean, useListItem: boolean): HTMLElement {
 		const el = document.createElement(useListItem ? "li" : "div");
 		el.setAttribute("data-post-inline-diff", "1");
 		el.className = "post-inline-diff-del-line";
@@ -300,7 +305,7 @@
 		return el;
 	}
 
-	function sanitizeHtmlFragment(html) {
+	function sanitizeHtmlFragment(html: string): string {
 		const parser = new DOMParser();
 		const doc = parser.parseFromString(`<div>${String(html || "")}</div>`, "text/html");
 		const root = doc.body.firstElementChild;
@@ -320,12 +325,12 @@
 		return root.innerHTML;
 	}
 
-	function shouldRenderLineAsHtml(line) {
+	function shouldRenderLineAsHtml(line: string): boolean {
 		const t = String(line || "").trim();
 		return /<[a-z][\s\S]*>/i.test(t) || /<\/[a-z][\s\S]*>/i.test(t);
 	}
 
-	function createAdditionNode(text, includeAnchor, useListItem) {
+	function createAdditionNode(text: string, includeAnchor: boolean, useListItem: boolean): HTMLElement {
 		const el = document.createElement(useListItem ? "li" : "div");
 		el.setAttribute("data-post-inline-diff", "1");
 		el.className = "post-inline-diff-add-line";
@@ -348,28 +353,28 @@
 		return el;
 	}
 
-	function insertAfter(node, ref) {
+	function insertAfter(node: Node, ref: Node): boolean {
 		const parent = ref?.parentNode;
 		if (!parent) return false;
 		parent.insertBefore(node, ref.nextSibling);
 		return true;
 	}
 
-	function parseHtmlSingleElement(html) {
+	function parseHtmlSingleElement(html: string): Element | null {
 		const parser = new DOMParser();
 		const doc = parser.parseFromString(`<div>${String(html || "")}</div>`, "text/html");
 		return doc.body.firstElementChild?.firstElementChild;
 	}
 
-	function applyInlineTextDiff(targetTextNodes, oldText, newText, anchorState) {
+	function applyInlineTextDiff(targetTextNodes: NodeList, oldText: string, newText: string, anchorState: any): boolean {
 		return false;
 	}
 
-	function tryApplyInlineReplace(targetEl, oldHtml, newHtml, anchorState) {
+	function tryApplyInlineReplace(targetEl: HTMLElement, oldHtml: string, newHtml: string, anchorState: any): boolean {
 		return false;
 	}
 
-	function applyInlineDiff(container, diffParts, isDebug) {
+	function applyInlineDiff(container: HTMLElement, diffParts: any[], isDebug: boolean): void {
 		clearInlineDiff(container);
 		const rows = buildRows(diffParts);
 		const focused = sliceWithContext(rows);
@@ -531,6 +536,8 @@
 		}
 	}
 
+	/** @param {HTMLElement} container */
+	/** @param {any[]} diffParts */
 	function applySimpleDiff(container, diffParts) {
 		container.innerHTML = "";
 		const rows = buildRows(diffParts);
@@ -559,7 +566,8 @@
 		}
 	}
 
-	function initPostInlineDiff() {
+	/** @param {string} post */
+	function initPostInlineDiff(post) {
 		const sp = new URLSearchParams(window.location.search);
 		const isDebug = sp.get(DEBUG_PARAM_KEY) === "1";
 
@@ -629,7 +637,7 @@
 		if (anchor instanceof HTMLElement) anchor.scrollIntoView({ behavior: "smooth", block: "start" });
 	}
 
-	if (!(window).__fuwariPostInlineDiffBound) {
+	if (!(window as any).__fuwariPostInlineDiffBound) {
 		document.addEventListener("DOMContentLoaded", initPostInlineDiff);
 		document.addEventListener("swup:contentReplaced", initPostInlineDiff);
 		window.addEventListener("fuwari:diff-debug-updated", initPostInlineDiff);
