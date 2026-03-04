@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "4d28872c147cd282",
+        "id": "57fa5615599ed77d",
         "type": "tabs",
         "children": [
           {
-            "id": "1ade782a3233e702",
+            "id": "771d23d17ffe91dd",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "posts/2026/black&white-film-developing.md",
-                "mode": "preview",
-                "source": true
+                "file": "posts/series/Software-Test/classify.md",
+                "mode": "source",
+                "source": false
               },
               "icon": "lucide-file",
-              "title": "black&white-film-developing"
+              "title": "classify"
             }
           }
         ]
@@ -208,29 +208,37 @@
       "obsidian-excalidraw-plugin:新建绘图文件": false
     }
   },
-  "active": "1ade782a3233e702",
+  "active": "771d23d17ffe91dd",
   "lastOpenFiles": [
-    "posts/2026/D76.md",
+    "assets/images/屏幕截图 2026-03-04 184640.png",
+    "assets/images/屏幕截图 2026-03-04 182854.png",
+    "assets/images/屏幕截图 2026-03-04 183409.png",
+    "assets/images/屏幕截图 2026-03-04 182818.png",
+    "assets/images/屏幕截图 2026-03-04 182609.png",
+    "assets/images/屏幕截图 2026-03-04 183851.png",
+    "posts/series/Software-Test/classify.md",
+    "assets/images/屏幕截图 2026-03-04 183951.png",
+    "assets/images/屏幕截图 2026-03-04 182131.png",
+    "assets/images/屏幕截图 2026-03-04 181136.png",
+    "assets/images/classify.png",
+    "assets/images/屏幕截图 2026-03-04 182217.png",
     "posts/2026/black&white-film-developing.md",
+    "posts/2026/D76.md",
     "posts/2026/PicAPI-Gallery.md",
-    "assets/images/MVIMG_20260203_185704.jpg",
-    "assets/images/MVIMG_20260203_185704.webp",
-    "assets/images/VERT_MVIMG_20260203_185704.webp",
+    "posts/series/markdown/01-editor/Markdown-01.md",
+    "posts/series/未命名.md",
+    "posts/series/Software-Test",
+    "posts/2026/测试分类.md",
+    "Excalidraw/Drawing 2026-03-04 16.32.17.excalidraw.md",
+    "Excalidraw",
     "posts/2026/TEST.md",
     "未命名.md",
     "posts/series/markdown/04-extend/Markdown-04.md",
     "posts/series/markdown/03-advanced/Markdown-03.md",
     "posts/series/markdown/02-basics/Markdown-02.md",
-    "posts/series/markdown/01-editor/Markdown-01.md",
     "未命名.base",
-    "assets/images/PicAPI-Gallery.png",
-    "assets/images/PicAPI-Gallery.png",
     "posts/2026/hello-world.md",
-    "assets/images/VERT_112945966_p0.webp",
-    "posts/series/markdown/cover.png",
     "posts/series/markdown/index.md",
-    "assets/images/VERT_112945966_p0 2.webp",
-    "assets/images/VERT_112945966_p0 1.webp",
     "未命名 1.base",
     "posts/series/markown/04-extend/Markdown-04.md",
     "posts/series/markown/04-extend",
@@ -245,16 +253,9 @@
     "未命名.canvas",
     "posts/series/markdown/03-advanced",
     "2026-01-17.md",
-    "posts/series/markdown/02-basics",
-    "posts/series/markdown/01-editor",
     "posts.md",
     "posts/series/markdowm/Markdown-01.md",
     "post/series/markdowm/Markdown-01.md",
-    "().md",
-    "posts/series/markdown/part-01/part-01-.md",
-    "posts/series/markdown/part-01/part-01- 2.md",
-    "posts/series/markdown/part-01/part-01- 1.md",
-    "docker.md",
-    "posts/series/markdown/index.png"
+    "().md"
   ]
 }

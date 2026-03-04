@@ -3,5 +3,7 @@
   "newLinkFormat": "relative",
   "attachmentFolderPath": "assets/images",
   "promptDelete": true,
-  "alwaysUpdateLinks": true
+  "alwaysUpdateLinks": true,
+  "strictLineBreaks": false,
+  "showUnsupportedFiles": false
 }
