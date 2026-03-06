@@ -31,11 +31,11 @@
       "message": "feat: 初始化 Astro 项目结构，包括基础布局、组件、配置和示例内容，并更新项目名称为 YUMEkit。"
     }
   ],
-  "series/markdown/03-advanced/Markdown-03.md": [
+  "series/Software-Test/classify.md": [
     {
-      "hash": "f2fa0eb801bb436f49a0bd9b7e96674b80608fed",
-      "date": "2026-01-21 19:07:20 +0800",
-      "message": "feat: 引入新的 Markdown 系列文章并配置域名重定向至博客子域名。"
+      "hash": "2b21974ce7b1cea811aa8fbdbcf668a65cc72aff",
+      "date": "2026-03-04 18:53:50 +0800",
+      "message": "feat: 添加软件测试基础文档和相关资源"
     }
   ],
   "series/markdown/04-extend/Markdown-04.md": [
@@ -50,7 +50,19 @@
       "message": "feat(markdown): 添加扩展语法文档并更新索引"
     }
   ],
+  "series/markdown/03-advanced/Markdown-03.md": [
+    {
+      "hash": "f2fa0eb801bb436f49a0bd9b7e96674b80608fed",
+      "date": "2026-01-21 19:07:20 +0800",
+      "message": "feat: 引入新的 Markdown 系列文章并配置域名重定向至博客子域名。"
+    }
+  ],
   "2026/PicAPI-Gallery.md": [
+    {
+      "hash": "17ba0f4dee82a2876c83fed0fdb4788dd9527ff6",
+      "date": "2026-03-06 15:18:36 +0800",
+      "message": "docs(PicAPI-Gallery): 更新图片API文档格式和示例URL"
+    },
     {
       "hash": "65a31c1f80fc09cef2ebf6f787e2d0a44a4c6ae4",
       "date": "2026-01-26 22:32:14 +0800",
