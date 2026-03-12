@@ -11,7 +11,7 @@ import type {
 import { LinkPreset } from "./types/config";
 
 export const siteConfig: SiteConfig = {
-	title: "YUME Blog",
+	title: "YUME",
 	subtitle: "技术分享与实践",
 	description:
 		"分享网络技术、服务器部署、内网穿透、静态网站搭建、CDN优化、容器化部署等技术教程与实践经验的个人技术博客，专注于云原生、无服务器架构和前后端开发，作者为YUME",
@@ -52,7 +52,7 @@ export const siteConfig: SiteConfig = {
 	favicon: [
 		// 将此数组留空，即可使用默认的网站图标。
 		{
-			src: "/favicon/favicon.ico", // 网站图标的路径，相对于“/public”目录
+			src: "/favicon/favicon.svg", // 网站图标的路径，相对于“/public”目录
 			//   theme: 'light',              // （可选）“light”或“dark”，仅在有不同亮暗模式的网站图标时设置
 			//   sizes: '32x32',              // （可选）网站图标的大小，仅在有不同尺寸的网站图标时设置
 		},
@@ -63,8 +63,8 @@ export const siteConfig: SiteConfig = {
 	],
 	server: [
 		{ url: "", text: "博客本体节点" },
-		{ url: "https://pic.yumekai.top", text: "随机图节点" },
-		{ url: "https://cfstatus.072199.xyz", text: "状态检测节点" }
+		{ url: "https://pic.yumekai.top", text: "随机图节点" }
+		// { url: "https://cfstatus.072199.xyz", text: "状态检测节点" }
 	],
 
 	// 功能页面开关配置
@@ -122,15 +122,15 @@ export const navBarConfig: NavBarConfig = {
 			external: true,
 		},
 		{
-			name: "监控",
-			url: "https://cfstatus.072199.xyz",
+			name: "画廊",
+			url: "https://img.072199.xyz/browse/wallpaper",
 			external: true,
 		},
 	],
 };
 
 export const profileConfig: ProfileConfig = {
-	avatar: "/img/author.webp", // 头像的路径，相对于“/src”目录。如果以“/”开头，则相对于“/public”目录
+	avatar: "https://img.072199.xyz/file/1773310074248.webp", // 头像的路径，相对于“/src”目录。如果以“/”开头，则相对于“/public”目录
 	name: "YUME",
 	bio: "Ciallo～(∠・ω< )⌒",
 	links: [
