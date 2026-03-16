@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "posts/2026/PicAPI-Gallery.md",
-                "mode": "source",
-                "source": false
+                "file": "posts/2026/YuNest.md",
+                "mode": "preview",
+                "source": true
               },
               "icon": "lucide-file",
-              "title": "PicAPI-Gallery"
+              "title": "YuNest"
             }
           }
         ]
@@ -210,7 +210,18 @@
   },
   "active": "771d23d17ffe91dd",
   "lastOpenFiles": [
+    "posts/2026/PicAPI-Gallery.md",
+    "posts/2026/YuNest.md",
     "posts/series/Software-Test/classify.md",
+    "posts/series/markdown/cover.png",
+    "posts/series/markdown/index.md",
+    "posts/series/markdown/03-advanced/Markdown-03.md",
+    "posts/series/markdown/02-basics/Markdown-02.md",
+    "posts/series/markdown/01-editor/Markdown-01.md",
+    "posts/2026/D76.md",
+    "posts/2026/black&white-film-developing.md",
+    "assets/images/yunest_homepage.png",
+    "assets/images/homepage.png",
     "assets/images/屏幕截图 2026-03-04 184640.png",
     "assets/images/屏幕截图 2026-03-04 182854.png",
     "assets/images/屏幕截图 2026-03-04 183409.png",
@@ -218,13 +229,6 @@
     "assets/images/屏幕截图 2026-03-04 182609.png",
     "assets/images/屏幕截图 2026-03-04 183851.png",
     "assets/images/屏幕截图 2026-03-04 183951.png",
-    "assets/images/屏幕截图 2026-03-04 182131.png",
-    "assets/images/屏幕截图 2026-03-04 181136.png",
-    "assets/images/classify.png",
-    "posts/2026/black&white-film-developing.md",
-    "posts/2026/D76.md",
-    "posts/2026/PicAPI-Gallery.md",
-    "posts/series/markdown/01-editor/Markdown-01.md",
     "posts/series/未命名.md",
     "posts/series/Software-Test",
     "posts/2026/测试分类.md",
@@ -233,11 +237,8 @@
     "posts/2026/TEST.md",
     "未命名.md",
     "posts/series/markdown/04-extend/Markdown-04.md",
-    "posts/series/markdown/03-advanced/Markdown-03.md",
-    "posts/series/markdown/02-basics/Markdown-02.md",
     "未命名.base",
     "posts/2026/hello-world.md",
-    "posts/series/markdown/index.md",
     "未命名 1.base",
     "posts/series/markown/04-extend/Markdown-04.md",
     "posts/series/markown/04-extend",
@@ -254,7 +255,6 @@
     "2026-01-17.md",
     "posts.md",
     "posts/series/markdowm/Markdown-01.md",
-    "post/series/markdowm/Markdown-01.md",
-    "().md"
+    "post/series/markdowm/Markdown-01.md"
   ]
 }
