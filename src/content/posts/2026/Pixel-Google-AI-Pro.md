@@ -23,7 +23,7 @@ Google为Pixel用户推出的专属福利：**免费12个月Google AI Pro（Gemi
 
 ### 地区限制
 - 只有部分地区才可以领到12个月完整优惠，需对照活动详情页核对设备所在地区是否符合要求（https://support.google.com/gemini/answer/13529884）
-- 例如：我的账号地区是新加坡（查看地区前往 https://policies.google.com/terms ）<img src="../../assets/images/Pixel-Google-AI-Pro-01.jpg" width="70%" height="70%" alt="账号地区">
+- 例如：我的账号地区是新加坡（查看地区前往 https://policies.google.com/terms ）![账号地区 | width=70%](../../assets/images/Pixel-Google-AI-Pro-01.jpg)
 
 ## 🌍 地区设置调整
 
@@ -48,20 +48,20 @@ https://one.idkey.cc/?ref=parkway
 2. 点击头像进入”管理您的Google账号”页面
 3. 点击进入“安全性与登录”，点击进入“身份验证器”，如果之前有点击“更改身份验证器应用”，没有则添加，出现二维码后点击下方的“无法扫描”
 4. 复制密钥到2FA验证网站，点击Submit活动返回密钥和6位验证码（主用验证器：https://2fa.vip ，备用地址： https://2fa.kennygmail.com ）
-<img src="../../assets/images/Pixel-Google-AI-Pro.png" width="70%" height="70%" alt="获得2FA验证密钥">
-<img src="../../assets/images/Pixel-Google-AI-Pro-3.png" width="70%" height="70%" alt="获取验证码">
+![获得2FA验证密钥 | width=70%](../../assets/images/Pixel-Google-AI-Pro.png)
+![获取验证码 | width=70%](../../assets/images/Pixel-Google-AI-Pro-3.png)
 5. 将6位验证码输入到Goole进行验证，点击上方的开启两步验证
 6. 点击“Goolge提示”，点击“管理设备”，退出已登陆的手机
-<img src="../../assets/images/Pixel-Google-AI-Pro-4.png" width="70%" height="70%" alt="管理设备">
-<img src="../../assets/images/Pixel-Google-AI-Pro-5.png" width="70%" height="70%" alt="退出登陆">
+![管理设备 | width=70%](../../assets/images/Pixel-Google-AI-Pro-4.png)
+![退出登陆 | width=70%](../../assets/images/Pixel-Google-AI-Pro-5.png)
 
 ### 第二步：资格验证
 1. 访问One.IDKey认证站（ https://one.idkey.cc/?ref=parkway ）
 2. 完成注册登陆
 3. 不想花钱可以签到100天或者拉人获得积分，也可以花15元直接获得积分（页面下滑找到“购买积分”，在新网站完成注册登录后点击购买“One.IDKey积分”，成功后复制密钥返回One.IDKey”兑换积分“）
-<img src="../../assets/images/Pixel-Google-AI-Pro-6.png" width="70%" height="70%" alt="积分购买">
+![积分购买 | width=70%](../../assets/images/Pixel-Google-AI-Pro-6.png)
 4. 在Pixel认证页面按要求填写 Google账号、Google密码，2FA密钥（如图，在第一步的4.中获得的密钥）
-<img src="../../assets/images/Pixel-Google-AI-Pro-7.png" width="70%" height="70%" alt="积分购买">
+![积分购买 | width=70%](../../assets/images/Pixel-Google-AI-Pro-7.png)
 5. 点击”开始认证“，网络纯净稳定的就成功了，不行的请检查账号密码，切换稳定的代理
 ![](../../assets/images/屏幕截图%202026-04-02%20210457.png)
 
