@@ -579,31 +579,31 @@
             w: 0,
         },
     };
-
+    const liuying = {
+        image: img,
+        initialState: {
+            i: 0.08,
+            s: 0.1,
+            d: 0.99,
+            r: 1,
+            y: 40,
+            t: 0,
+            w: 0,
+        },
+    };
     var characters = {
         zmdEndministrator,
         aigirl,
         frieren,
+        liuying,
     };
 
     var svgCloseUrl = "<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"sakana-widget-icon\" viewBox=\"0 0 512 512\"><path d=\"M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192 192-86 192-192z\" fill=\"none\" stroke=\"currentColor\" stroke-miterlimit=\"10\" stroke-width=\"32\"/><path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\" d=\"M320 320 192 192m0 128 128-128\"/></svg>";
 
-    var svgGitHubUrl = "<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"sakana-widget-icon\" viewBox=\"0 0 512 512\"><path fill=\"currentColor\" d=\"M256 32C132.3 32 32 134.9 32 261.7c0 101.5 64.2 187.5 153.2 217.9a17.56 17.56 0 0 0 3.8.4c8.3 0 11.5-6.1 11.5-11.4 0-5.5-.2-19.9-.3-39.1a102.4 102.4 0 0 1-22.6 2.7c-43.1 0-52.9-33.5-52.9-33.5-10.2-26.5-24.9-33.6-24.9-33.6-19.5-13.7-.1-14.1 1.4-14.1h.1c22.5 2 34.3 23.8 34.3 23.8 11.2 19.6 26.2 25.1 39.6 25.1a63 63 0 0 0 25.6-6c2-14.8 7.8-24.9 14.2-30.7-49.7-5.8-102-25.5-102-113.5 0-25.1 8.7-45.6 23-61.6-2.3-5.8-10-29.2 2.2-60.8a18.64 18.64 0 0 1 5-.5c8.1 0 26.4 3.1 56.6 24.1a208.21 208.21 0 0 1 112.2 0c30.2-21 48.5-24.1 56.6-24.1a18.64 18.64 0 0 1 5 .5c12.2 31.6 4.5 55 2.2 60.8 14.3 16.1 23 36.6 23 61.6 0 88.2-52.4 107.6-102.3 113.3 8 7.1 15.2 21.1 15.2 42.5 0 30.7-.3 55.5-.3 63 0 5.4 3.1 11.5 11.4 11.5a19.35 19.35 0 0 0 4-.4C415.9 449.2 480 363.1 480 261.7 480 134.9 379.7 32 256 32z\"/></svg>";
-
     var svgPersonUrl = "<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"sakana-widget-icon\" viewBox=\"0 0 512 512\"><path fill=\"currentColor\" d=\"M258.9 48C141.92 46.42 46.42 141.92 48 258.9c1.56 112.19 92.91 203.54 205.1 205.1 117 1.6 212.48-93.9 210.88-210.88C462.44 140.91 371.09 49.56 258.9 48zm126.42 327.25a4 4 0 0 1-6.14-.32 124.27 124.27 0 0 0-32.35-29.59C321.37 329 289.11 320 256 320s-65.37 9-90.83 25.34a124.24 124.24 0 0 0-32.35 29.58 4 4 0 0 1-6.14.32A175.32 175.32 0 0 1 80 259c-1.63-97.31 78.22-178.76 175.57-179S432 158.81 432 256a175.32 175.32 0 0 1-46.68 119.25z\"/><path fill=\"currentColor\" d=\"M256 144c-19.72 0-37.55 7.39-50.22 20.82s-19 32-17.57 51.93C191.11 256 221.52 288 256 288s64.83-32 67.79-71.24c1.48-19.74-4.8-38.14-17.68-51.82C293.39 151.44 275.59 144 256 144z\"/></svg>";
 
-    var svgSyncUrl = "<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"sakana-widget-icon\" viewBox=\"0 0 512 512\"><path d=\"M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192 192-86 192-192z\" fill=\"none\" stroke=\"currentColor\" stroke-miterlimit=\"10\" stroke-width=\"32\"/><path d=\"M351.82 271.87v-16A96.15 96.15 0 0 0 184.09 192m-24.2 48.17v16A96.22 96.22 0 0 0 327.81 320\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\"/><path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\" d=\"m135.87 256 23.59-23.6 24.67 23.6m192 0-23.59 23.6-24.67-23.6\"/></svg>";
-
-    var svgMutedUrl = "<svg class=\"icon\" viewBox=\"0 0 1024 1024\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M515.756 621.32v179.391L441.1 732.859 318.837 621.685a37.46 37.46 0 0 0-25.169-9.714l-113.981.036-.369-239.826h87.299l-74.687-74.687h-12.612c-41.107.164-74.341 33.553-74.318 74.651v239.862c0 41.171 33.348 74.651 74.318 74.651h99.929L441.1 833.808l59.382 53.965c14.977 13.596 29.165 17.387 40.332 17.387 8.621 0 15.496-2.26 19.455-4.028 9.113-4.028 30.245-17.241 30.245-52.981V696.08l-74.758-74.76zm330.878-80.591c0 72.792-18.663 125.298-39.116 161.239l52.156 52.161c29.753-45.873 58.512-115.439 58.512-213.436 0-199.056-123.02-281.288-128.283-284.678a35.316 35.316 0 0 0-26.859-4.848 35.397 35.397 0 0 0-22.289 15.747c-10.689 16.749-6.087 38.984 10.384 50.119 3.845 2.605 95.495 66.011 95.495 223.696z\" fill=\"#333\"/><path d=\"M647.697 428.133c2.278 1.185 55.865 29.416 55.865 109.935 0 20.759-3.012 38-7.463 52.47l54.616 54.621c13.733-26.828 24.363-61.51 24.363-107.055 0-127.905-92.616-173.577-96.534-175.472v.036a35.383 35.383 0 0 0-27.128-1.294 35.349 35.349 0 0 0-20.039 18.316c-8.475 17.916-1.267 39.312 16.32 48.443zM417.558 312.002l23.511-21.378 74.687-67.889V410.2l74.76 74.76V175.313c0-24.695-11.35-44.415-30.359-52.853-9.145-4.028-33.275-10.789-59.747 13.304l-59.309 53.91-76.405 69.456 52.862 52.872zm411.708 554.594c-9.55 0-19.1-3.645-26.39-10.935l-634.53-634.53c-14.58-14.58-14.58-38.2 0-52.78 14.58-14.58 38.2-14.58 52.78 0l634.53 634.529c14.58 14.58 14.58 38.2 0 52.78-7.29 7.291-16.84 10.936-26.39 10.936z\" fill=\"#333\"/></svg>";
-
-    var svgNoMutedUrl = "<svg class=\"icon\" viewBox=\"0 0 1024 1024\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M599.757 178.842v669.286L349.952 708.864c-9.165-5.12-19.456-7.834-29.952-7.834h-93.235a62.976 62.976 0 0 1-62.157-62.976V385.946c0-16.692 6.451-32.461 18.278-44.442 11.776-11.98 27.392-18.534 43.879-18.534H320c10.24 0 20.429-2.56 29.491-7.527l250.266-136.601m17.92-76.442c-11.06 0-23.552 4.71-36.66 15.053L320 259.943h-93.235c-68.403 0-124.365 56.729-124.365 126.003v252.108c0 69.274 55.962 126.004 124.365 126.004H320l261.018 145.561c12.953 8.09 25.344 11.981 36.403 11.981 26.112 0 44.544-21.658 44.544-60.57V166.042c0-38.144-18.33-63.642-44.237-63.642z\"/><path d=\"M320 259.942a31.386 31.386 0 0 0-31.078 31.488v441.14c0 17.305 13.977 31.488 31.078 31.488a31.386 31.386 0 0 0 31.078-31.488V291.43A31.386 31.386 0 0 0 320 259.942zM817.357 512c0-57.293-16.743-110.592-45.568-155.187l-.103.051a31.027 31.027 0 0 0-58.265 15.36 31.89 31.89 0 0 0 6.349 19.046A221.696 221.696 0 0 1 755.2 512c0 45.056-13.312 86.886-36.147 121.754a31.642 31.642 0 0 0 25.446 49.561c10.752 0 20.224-5.53 25.805-13.875C800 624.384 817.408 570.266 817.408 512zm62.054 273.05A442.982 442.982 0 0 0 972.8 512a442.982 442.982 0 0 0-93.286-272.896l-.052-.102a30.822 30.822 0 0 0-23.244-10.548 31.642 31.642 0 0 0-25.55 49.46l-.05.05A379.7 379.7 0 0 1 910.643 512c0 88.576-30.054 169.984-80.384 234.394l.154.102a31.693 31.693 0 0 0 25.805 49.05 30.822 30.822 0 0 0 22.835-10.087l.358-.41z\"/></svg>";
-
     const svgClose = svgCloseUrl;
-    const svgGitHub = svgGitHubUrl;
     const svgPerson = svgPersonUrl;
-    const svgSync = svgSyncUrl;
-    const svgMuted = svgMutedUrl;
-    const svgNoMuted = svgNoMutedUrl;
 
     function cloneDeep(source) {
         if (source === null || typeof source !== 'object') {
@@ -636,10 +636,16 @@
         for (const key in source) {
             if (Object.prototype.hasOwnProperty.call(source, key)) {
                 if (source[key] && typeof source[key] === 'object') {
-                    if (!target[key]) {
-                        target[key] = {};
+                    // 如果是数组，直接深拷贝覆写，不进行深合并
+                    if (Array.isArray(source[key])) {
+                        target[key] = cloneDeep(source[key]);
                     }
-                    mergeDeep(target[key], source[key]);
+                    else {
+                        if (!target[key]) {
+                            target[key] = {};
+                        }
+                        mergeDeep(target[key], source[key]);
+                    }
                 }
                 else {
                     target[key] = source[key];
@@ -741,7 +747,10 @@
             this._updateSize = (size) => {
                 this._options.size = size;
                 // different image size for different characters
-                if (this._char === 'frieren') {
+                if (this._char === 'liuying') {
+                    this._imageSize = this._options.size / 0.9; // liuying 角色更大
+                }
+                else if (this._char === 'frieren') {
                     this._imageSize = this._options.size / 1.15; // frieren 角色稍大
                 }
                 else {
@@ -805,6 +814,10 @@
                     img.style.bottom = '60px'; // frieren 底部间距 60px
                     img.style.transform = 'translateX(-50%)'; // 居中
                 }
+                else if (this._char === 'liuying') {
+                    img.style.bottom = '40px'; // liuying 底部间距 40px
+                    img.style.transform = 'translateX(-50%)'; // 居中
+                }
                 else {
                     img.style.bottom = '80px';
                     img.style.transform = 'translateX(-50%)'; // 保持其他角色居中
@@ -832,32 +845,6 @@
                 person.title = '切换角色';
                 this._domCtrlPerson = person;
                 ctrl.appendChild(person);
-                // 2. 自动模式
-                const magic = document.createElement('div');
-                magic.className = itemClass;
-                magic.innerHTML = svgSync;
-                magic.role = 'button';
-                magic.tabIndex = 0;
-                magic.title = '自动模式';
-                this._domCtrlMagic = magic;
-                ctrl.appendChild(magic);
-                // 3. 静音
-                const muted = document.createElement('div');
-                muted.className = itemClass;
-                muted.innerHTML = Voices.isMute ? svgMuted : svgNoMuted;
-                muted.role = 'button';
-                muted.tabIndex = 0;
-                muted.title = Voices.isMute ? '取消静音' : '静音';
-                this._domCtrlMuted = muted;
-                ctrl.appendChild(muted);
-                // 4. GitHub 仓库
-                const github = document.createElement('a');
-                github.className = itemClass;
-                github.href = '//github.com/YUME-0721/webpage-pet';
-                github.target = '_blank';
-                github.innerHTML = svgGitHub;
-                github.title = 'GitHub 仓库';
-                ctrl.appendChild(github);
                 // 5. 关闭
                 const close = document.createElement('div');
                 close.className = itemClass;
@@ -900,7 +887,13 @@
                 // note that canvas is 1.5 times larger than widget
                 ctx.translate(this._canvasSize / 2, size + (this._canvasSize - size) / 2);
                 ctx.strokeStyle = stroke.color;
-                ctx.lineWidth = stroke.width;
+                // different stroke width for liuying
+                if (this._char === 'liuying') {
+                    ctx.lineWidth = stroke.width * 0.8; // liuying 弹簧杆稍细
+                }
+                else {
+                    ctx.lineWidth = stroke.width;
+                }
                 ctx.lineCap = 'round';
                 if (this._options.rod) {
                     ctx.beginPath();
@@ -919,6 +912,11 @@
                     startY = -45; // 控制栏高度中间位置，frieren 离控制台较近
                     curveY = -85; // 曲线高度，frieren 弹簧杆适中
                     radiusMultiplier = 2.2 / 3; // 角色高度比例
+                }
+                else if (this._char === 'liuying') {
+                    startY = -40; // 控制栏高度中间位置，liuying 离控制台更近
+                    curveY = -90; // 曲线高度，liuying 弹簧杆更短且终点更上
+                    radiusMultiplier = 1.8 / 3; // 角色高度比例，终点更上
                 }
                 ctx.moveTo(0, startY);
                 if (this._options.rod) {
@@ -1051,55 +1049,36 @@
             };
             /**
              * @private
-             * do a force on widget (for auto mode)
-             */
-            this._magicForce = () => {
-                // 0.1 probability to randomly switch character
-                if (Math.random() < 0.1) {
-                    const available = Object.keys(_characters);
-                    const index = Math.floor(Math.random() * available.length);
-                    const _char = available[index];
-                    this.setCharacter(_char);
-                }
-                else {
-                    // 参考 sakana-main 的自走模式，施加随机大小的力
-                    this._state.t = this._state.t + (Math.random() - 0.5) * 180;
-                    this._state.w = this._state.w + (Math.random() - 0.5) * 220;
-                }
-                if (!this._running) {
-                    this._running = true;
-                    requestAnimationFrame(this._run);
-                }
-                // 参考 sakana-main 的随机间隔
-                this._magicForceTimeout = window.setTimeout(this._magicForce, Math.random() * 4000 + 1000);
-            };
-            /**
-             * @private
              * play voice effect based on character state
              */
             this._playVoice = () => {
-                if (Voices.isMute || !this._options.sound)
-                    return;
-                // 拖拽后播放 gugugaga 音效
-                Voices.gugugaga.play();
+                return;
             };
             /**
              * @private
              * handle control bar mouse down event for dragging
+             * NOTE: 必须区分「拖拽」和「单击」：只有移动超过阈值才判定为拖拽，
+             * 单纯点击时不应阻止子按钮的 click 事件
              */
             this._onCtrlMouseDown = (e) => {
-                // 防止事件冒泡到其他元素
-                e.stopPropagation();
                 const { pageX, pageY } = e;
                 const _downPageX = pageX;
                 const _downPageY = pageY;
                 const rect = this._domWrapper.getBoundingClientRect();
                 const startX = rect.left;
                 const startY = rect.top;
+                // 位移阈值（px）：超过此值才视为拖拽，否则视为点击
+                const DRAG_THRESHOLD = 5;
+                let isDragging = false;
                 const onMouseMove = (e) => {
                     const { pageX, pageY } = e;
                     const deltaX = pageX - _downPageX;
                     const deltaY = pageY - _downPageY;
+                    // 只有超过阈值才开始拖拽，避免轻微手抖触发移动
+                    if (!isDragging && Math.abs(deltaX) < DRAG_THRESHOLD && Math.abs(deltaY) < DRAG_THRESHOLD) {
+                        return;
+                    }
+                    isDragging = true;
                     const newX = startX + deltaX;
                     const newY = startY + deltaY;
                     this._domWrapper.style.position = 'fixed';
@@ -1112,17 +1091,26 @@
                 const onMouseUp = () => {
                     document.removeEventListener('mousemove', onMouseMove);
                     document.removeEventListener('mouseup', onMouseUp);
+                    document.removeEventListener('click', onClickCapture, true);
+                };
+                // 如果发生了拖拽，在捕获阶段拦截 click 事件，防止意外触发按钮
+                const onClickCapture = (e) => {
+                    if (isDragging) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                    }
+                    document.removeEventListener('click', onClickCapture, true);
                 };
                 document.addEventListener('mousemove', onMouseMove);
                 document.addEventListener('mouseup', onMouseUp);
+                document.addEventListener('click', onClickCapture, true);
             };
             /**
              * @private
              * handle control bar touch start event for dragging
+             * NOTE: 必须区分「拖拽」和「点击」：只有移动超过阈值才判定为拖拽
              */
             this._onCtrlTouchStart = (e) => {
-                // 防止事件冒泡到其他元素
-                e.stopPropagation();
                 if (!e.touches[0]) {
                     return;
                 }
@@ -1132,6 +1120,9 @@
                 const rect = this._domWrapper.getBoundingClientRect();
                 const startX = rect.left;
                 const startY = rect.top;
+                // 位移阈值（px）：超过此值才视为拖拽
+                const DRAG_THRESHOLD = 5;
+                let isDragging = false;
                 const onTouchMove = (e) => {
                     if (!e.touches[0]) {
                         return;
@@ -1139,6 +1130,11 @@
                     const { pageX, pageY } = e.touches[0];
                     const deltaX = pageX - _downPageX;
                     const deltaY = pageY - _downPageY;
+                    // 只有超过阈值才开始拖拽
+                    if (!isDragging && Math.abs(deltaX) < DRAG_THRESHOLD && Math.abs(deltaY) < DRAG_THRESHOLD) {
+                        return;
+                    }
+                    isDragging = true;
                     const newX = startX + deltaX;
                     const newY = startY + deltaY;
                     this._domWrapper.style.position = 'fixed';
@@ -1244,38 +1240,6 @@
             };
             /**
              * @public
-             * switch the auto mode
-             */
-            this.triggerAutoMode = () => {
-                this._magicForceEnabled = !this._magicForceEnabled;
-                // toggle icon rotate
-                const icon = this._domCtrlMagic.querySelector('svg');
-                if (this._magicForceEnabled) {
-                    icon.classList.add('sakana-widget-icon--rotate');
-                }
-                else {
-                    icon.classList.remove('sakana-widget-icon--rotate');
-                }
-                // clear the timer or start a timer
-                clearTimeout(this._magicForceTimeout);
-                if (this._magicForceEnabled) {
-                    this._magicForceTimeout = window.setTimeout(this._magicForce, Math.random() * 1000 + 500);
-                }
-            };
-            /**
-             * @public
-             * toggle mute state
-             */
-            this.toggleMute = () => {
-                Voices.isMute = !Voices.isMute;
-                Voices.gugugaga.muted = Voices.isMute;
-                // update icon
-                this._domCtrlMuted.innerHTML = Voices.isMute ? svgMuted : svgNoMuted;
-                // update title
-                this._domCtrlMuted.title = Voices.isMute ? '取消静音' : '静音';
-            };
-            /**
-             * @public
              * set current state of widget
              */
             this.setState = (state) => {
@@ -1309,12 +1273,19 @@
                         this._domImage.style.bottom = '60px'; // frieren 底部间距 60px
                         this._domImage.style.transform = 'translateX(-50%)'; // 居中
                     }
+                    else if (name === 'liuying') {
+                        this._domImage.style.bottom = '40px'; // liuying 底部间距 40px
+                        this._domImage.style.transform = 'translateX(-50%)'; // 居中
+                    }
                     else {
                         this._domImage.style.bottom = '80px';
                         this._domImage.style.transform = 'translateX(-50%)'; // 保持其他角色居中
                     }
                     // update image size for different characters
-                    if (name === 'frieren') {
+                    if (name === 'liuying') {
+                        this._imageSize = this._options.size / 0.9; // liuying 角色更大
+                    }
+                    else if (name === 'frieren') {
                         this._imageSize = this._options.size / 1.15; // frieren 角色稍大
                     }
                     else {
@@ -1373,8 +1344,6 @@
                     this._domImage.addEventListener('touchstart', this._onTouchStart);
                 }
                 this._domCtrlPerson.addEventListener('click', this.nextCharacter);
-                this._domCtrlMagic.addEventListener('click', this.triggerAutoMode);
-                this._domCtrlMuted.addEventListener('click', this.toggleMute);
                 this._domCtrlClose.addEventListener('click', this.unmount);
                 // if auto fit mode
                 if (this._options.autoFit) {
@@ -1408,8 +1377,6 @@
                 this._domImage.removeEventListener('mousedown', this._onMouseDown);
                 this._domImage.removeEventListener('touchstart', this._onTouchStart);
                 this._domCtrlPerson.removeEventListener('click', this.nextCharacter);
-                this._domCtrlMagic.removeEventListener('click', this.triggerAutoMode);
-                this._domCtrlMuted.removeEventListener('click', this.toggleMute);
                 this._domCtrlClose.removeEventListener('click', this.unmount);
                 // remove control bar drag event listeners
                 if (this._options.controls && this._domCtrlPerson.parentNode) {
