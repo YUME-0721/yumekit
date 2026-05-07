@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "posts/2026/PicAPI-Gallery.md",
-                "mode": "source",
-                "source": false
+                "file": "posts/series/Software-Test/03_Test_Case.md",
+                "mode": "preview",
+                "source": true
               },
               "icon": "lucide-file",
-              "title": "PicAPI-Gallery"
+              "title": "03_Test_Case"
             }
           }
         ]
@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 213.5
+    "width": 213.5,
+    "collapsed": true
   },
   "right": {
     "id": "d7298cce1c9aaf79",
@@ -197,6 +198,7 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "remotely-save:Remotely Save": false,
       "bases:新建数据库": false,
       "switcher:打开快速切换": false,
       "graph:查看关系图谱": false,
@@ -210,6 +212,12 @@
   },
   "active": "2ae22d5f79f093da",
   "lastOpenFiles": [
+    "posts/series/Software-Test/02_functional-test.md",
+    "posts/series/Software-Test/03_Test_Case.md",
+    "assets/images/03_Test_Case.png",
+    "posts/series/Software-Test/01_basic.md",
+    "assets/images/02_functional-test-5.png",
+    "posts/2026/PicAPI-Gallery.md",
     "posts/2026/Lucky STUN穿透 + Cloudflare实现无公网IPv4访问与智能分流配置指南.md",
     "posts/2026/Pixel-Google-AI-Pro.md",
     "assets/images/屏幕截图 2026-04-02 210457.png",
@@ -220,15 +228,10 @@
     "posts/2026/YuNest.md",
     "assets/images/Pixel-Google-AI-Pro-3.png",
     "assets/images/VERT_112945966_p0.webp",
-    "posts/2026/PicAPI-Gallery.md",
-    "posts/series/Software-Test/02_functional-test.md",
     "未命名.base",
     "assets/images/Pixel-Google-AI-Pro.png",
-    "assets/images/PicAPI-Gallery.png",
-    "assets/images/Pixel-Google-AI-Pro-会员实测方案-1.png",
     "posts/2026/D76.md",
     "posts/2026/black&white-film-developing.md",
-    "posts/series/Software-Test/01_basic.md",
     "posts/series/markdown/04-extend/Markdown-04.md",
     "Excalidraw/Drawing 2026-03-04 16.32.17.excalidraw.md",
     "posts/series/markdown/02-basics/Markdown-02.md",
@@ -254,7 +257,6 @@
     "03-advanced",
     "2026-01-21.md",
     "未命名.canvas",
-    "posts/series/markdown/03-advanced",
-    "2026-01-17.md"
+    "posts/series/markdown/03-advanced"
   ]
 }

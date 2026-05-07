@@ -1,5 +1,5 @@
 ---
-title: 软件功能测试
+title: 软件功能/非功能测试
 published: 2026-03-31T15:00:00
 description: 软件测试
 tags:
@@ -13,7 +13,7 @@ pinned: false
 软件程序或应用程序只提供一项核心功能或特性，而不包含其他附加功能。如电商系统：
 ![电商系统 | width=70%](../../../assets/images/02_functional-test.png)
 
-# 需求分析
+## 需求分析
 ![登录的需求分析 | width=70%](../../../assets/images/02_functional-test-1.png)
 
 分析：
@@ -31,4 +31,29 @@ pinned: false
 2. 划分无效等价类：不满足需求的数据集合。
 3. 每类中选取代表数据。
 
-![功能测试流程图 | width=50%](../../../assets/images/02_functional-test-4.png)
+## 边界值分析法
+![边界值分析法 | width=50%](../../../assets/images/02_functional-test-5.png)
+- <strong>选取：</strong>
+	1. 上点：刚好是边界上的点，必选（不考虑是否包含上点）100、300
+	2. 离点：距离上点最近的点，选择2个（不包含上点选择范围内的点，包含上点选择范围外的点）99、301
+	3. 内点：边界范围内的任意点，必选（建议选择中间范围）200
+- <strong>步骤：</strong>
+	1. 边界值分析（负责<font color="red">测试长度范围</font>）
+	2. 划分等价类（负责测试<font color="red">类型</font>和<font color="red">规则</font>）
+	3. 提取数据
+
+# 非功能测试
+非功能：除了软件功能测试，其他都是非功能测试。
+
+## 非功能测试范围：
+- 兼容性
+- 易用性
+- 安全性
+- 性能
+- 可移植性
+- 可维护性
+- 可靠性
+
+## 非功能重点测试项
+- 兼容性：Web项目测试浏览器兼容Chrome、Edge、FireFox、Safari等
+- 易用性：参考竞品，主观感受为主
