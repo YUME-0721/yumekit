@@ -70,8 +70,6 @@ export const siteConfig: SiteConfig = {
 	// 功能页面开关配置
 	featurePages: {
 		anime: true, // 番剧页面开关
-		albums: true, // 相册页面开关
-		devices: true, // 设备页面开关
 	},
 
 	// Bangumi 配置
@@ -103,16 +101,6 @@ export const navBarConfig: NavBarConfig = {
 					name: "番剧",
 					url: "/anime/",
 					icon: "material-symbols:movie",
-				},
-				{
-					name: "相册",
-					url: "/albums/",
-					icon: "material-symbols:photo-library",
-				},
-				{
-					name: "设备",
-					url: "/devices/",
-					icon: "material-symbols:devices",
 				},
 			],
 		},

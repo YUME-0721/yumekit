@@ -3,8 +3,6 @@ import type { AUTO_MODE, DARK_MODE, LIGHT_MODE } from "@constants/constants";
 // 功能页面开关配置
 export type FeaturePages = {
 	anime: boolean; // 番剧页面开关
-	albums: boolean; // 相册页面开关
-	devices: boolean; // 设备页面开关
 };
 
 // Bangumi 配置
@@ -81,8 +79,6 @@ export enum LinkPreset {
 	Home = 0,
 	Archive = 1,
 	Anime = 2,
-	Albums = 3,
-	Devices = 4,
 }
 
 export type NavBarLink = {

@@ -14,14 +14,4 @@ export const LinkPresets: { [key in LinkPreset]: NavBarLink } = {
 		url: "/anime/",
 		icon: "material-symbols:movie",
 	},
-	[LinkPreset.Albums]: {
-		name: "相册",
-		url: "/albums/",
-		icon: "material-symbols:photo-library",
-	},
-	[LinkPreset.Devices]: {
-		name: "设备",
-		url: "/devices/",
-		icon: "material-symbols:devices",
-	},
 };
