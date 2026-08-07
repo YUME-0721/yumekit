@@ -105,6 +105,13 @@ const className = Astro.props.class;
             
             const viewsElement = document.getElementById(`page-views-${slug}`);
             const visitorsElement = document.getElementById(`page-visitors-${slug}`);
+
+            // 若无法通过 API 鉴权，隐去全为 0 的标签避免死节点
+            if (window.__umamiApiUnauthorized && pageViews === 0 && visits === 0) {
+                if (viewsElement && viewsElement.parentElement) viewsElement.parentElement.style.display = 'none';
+                if (visitorsElement && visitorsElement.parentElement) visitorsElement.parentElement.style.display = 'none';
+                return;
+            }
             
             // 如果数据来自缓存，直接显示结果，跳过动画
             if (statsData._fromCache) {

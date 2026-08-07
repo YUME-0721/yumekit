@@ -106,6 +106,10 @@ const config = profileConfig;
             
             const viewsElement = document.getElementById('site-views');
             const visitorsElement = document.getElementById('site-visitors');
+
+            if (window.__umamiApiUnauthorized && pageviews === 0 && visitors === 0) {
+                return;
+            }
             
             if (viewsElement) {
                 const startVal = parseInt(viewsElement.textContent) || 0;
