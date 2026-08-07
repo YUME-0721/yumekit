@@ -1,6 +1,6 @@
 ---
 title: 从折腾到写作：我是如何把博客变成笔记的
-published: 2026-08-07 18:51
+published: 2026-08-07
 description: 分享自用的一套博客工作流
 tags:
   - 博客
