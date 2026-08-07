@@ -4,5 +4,9 @@
   "obsidian-excalidraw-plugin",
   "calendar",
   "obsidian-mind-map",
-  "remotely-save"
+  "remotely-save",
+  "fast-note-sync",
+  "astro-composer",
+  "cf-imagebed",
+  "obsidian-git"
 ]

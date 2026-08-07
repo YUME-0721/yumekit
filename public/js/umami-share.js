@@ -90,6 +90,10 @@
 			return { ...cachedData, _fromCache: true };
 		}
 
+		if (!apiKey || global.__umamiApiUnauthorized) {
+			return { pageviews: 0, visitors: 0, visits: 0, _fromCache: false };
+		}
+
 		try {
 			const currentTimestamp = Date.now();
 			const statsUrl = `${baseUrl}/v1/websites/${websiteId}/stats?startAt=0&endAt=${currentTimestamp}`;
@@ -97,6 +101,14 @@
 			const res = await fetch(statsUrl, {
 				headers: { "x-umami-api-key": apiKey },
 			});
+
+			if (res.status === 401 || res.status === 403) {
+				if (!global.__umamiApiUnauthorized) {
+					console.info("Umami API Key 未设置或无权限（Umami Cloud 免费版可能已取消 API 访问），取消后续 API 数据拉取。");
+					global.__umamiApiUnauthorized = true;
+				}
+				return { pageviews: 0, visitors: 0, visits: 0, _fromCache: false };
+			}
 
 			if (!res.ok) throw new Error(`API 错误: ${res.status}`);
 
@@ -139,6 +151,10 @@
 			return { ...cachedData, _fromCache: true };
 		}
 
+		if (!apiKey || global.__umamiApiUnauthorized) {
+			return { pageviews: 0, visitors: 0, visits: 0, _fromCache: false };
+		}
+
 		try {
 			const currentTimestamp = Date.now();
 			// 使用 /stats 端点 + path 参数获取单页统计（可同时获取 pageviews 和 visitors）
@@ -147,6 +163,14 @@
 			const res = await fetch(statsUrl, {
 				headers: { "x-umami-api-key": apiKey },
 			});
+
+			if (res.status === 401 || res.status === 403) {
+				if (!global.__umamiApiUnauthorized) {
+					console.info("Umami API Key 未设置或无权限（Umami Cloud 免费版可能已取消 API 访问），取消后续 API 数据拉取。");
+					global.__umamiApiUnauthorized = true;
+				}
+				return { pageviews: 0, visitors: 0, visits: 0, _fromCache: false };
+			}
 
 			if (!res.ok) throw new Error(`API 错误: ${res.status}`);
 

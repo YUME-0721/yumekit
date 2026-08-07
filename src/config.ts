@@ -150,7 +150,7 @@ export const imageFallbackConfig: ImageFallbackConfig = {
 export const umamiConfig: UmamiConfig = {
 	enabled: true, // 是否显示 Umami 统计
 	apiKey:
-		import.meta.env.UMAMI_API_KEY || "api_TG4nwbBTUa2ngoD5B42cibGYw35u4Feo", // API 密钥优先从环境变量读取，否则使用配置文件中的值
+		import.meta.env.UMAMI_API_KEY || "", // API 密钥优先从环境变量读取，由于 Umami Cloud 免费版取消了 API Key，未填则不发起查询
 	baseUrl: "https://api.umami.is", // Umami Cloud API 地址
 	websiteId: "5f9ad5b6-7834-44f3-a341-35ae12b273e3", // Umami 网站 ID
 	scripts: `

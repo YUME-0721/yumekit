@@ -1,8 +1,8 @@
 {
   "useMarkdownLinks": true,
   "newLinkFormat": "relative",
-  "attachmentFolderPath": "assets/images",
-  "promptDelete": true,
+  "attachmentFolderPath": "附件",
+  "promptDelete": false,
   "alwaysUpdateLinks": true,
   "strictLineBreaks": false,
   "showUnsupportedFiles": false
