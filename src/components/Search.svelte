@@ -180,24 +180,12 @@ $: search(keywordDesktop, true);
 <div class="relative flex items-center">
     <!-- 单一无缝 CSS 补展伸缩容器（0 物理销毁，纯 300ms 属性插值） -->
     <div id="search-bar" 
-         class:list={[
-             "flex items-center h-10 transition-all duration-300 ease-out select-none relative overflow-hidden",
-             isHeroHome ? "rounded-full" : "rounded-lg",
-             isExpanded 
-                 ? "w-48 sm:w-60 bg-black/[0.06] dark:bg-white/15 border border-black/15 dark:border-white/20 shadow-md px-3" 
-                 : isHeroHome 
-                     ? "w-10 bg-transparent hover:bg-black/5 dark:hover:bg-white/10 justify-center cursor-pointer" 
-                     : "w-10 md:w-36 bg-black/[0.04] dark:bg-white/5 hover:bg-black/[0.08] dark:hover:bg-white/10 px-3 cursor-pointer"
-         ]}
+         class="flex items-center h-10 transition-all duration-300 ease-out select-none relative overflow-hidden {isHeroHome ? 'rounded-full' : 'rounded-lg'} {isExpanded ? 'w-48 sm:w-60 bg-black/[0.06] dark:bg-white/15 border border-black/15 dark:border-white/20 shadow-md px-3' : isHeroHome ? 'w-10 bg-transparent hover:bg-black/5 dark:hover:bg-white/10 justify-center cursor-pointer' : 'w-10 md:w-36 bg-black/[0.04] dark:bg-white/5 hover:bg-black/[0.08] dark:hover:bg-white/10 px-3 cursor-pointer'}"
          on:click={handleContainerClick}
     >
         <!-- 搜索 Icon：黑暗模式下高亮纯亮 white/90 绝对清晰自适应 -->
         <Icon icon="material-symbols:search" 
-              class:list={[
-                  "text-[1.25rem] transition-colors duration-200 shrink-0",
-                  "text-neutral-800 dark:text-white/90 hover:text-[var(--primary)] dark:hover:text-[var(--primary)]",
-                  !isExpanded && !isHeroHome ? "mr-0 md:mr-2" : ""
-              ]}
+              class="text-[1.25rem] transition-colors duration-200 shrink-0 text-neutral-800 dark:text-white/90 hover:text-[var(--primary)] dark:hover:text-[var(--primary)] {!isExpanded && !isHeroHome ? 'mr-0 md:mr-2' : ''}"
         />
 
         {#if !isHeroHome && !isExpanded}
@@ -210,10 +198,7 @@ $: search(keywordDesktop, true);
                bind:value={keywordDesktop} 
                on:focus={() => search(keywordDesktop, true)}
                on:blur={handleBlur}
-               class:list={[
-                   "text-sm bg-transparent outline-0 transition-all duration-300 text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/40",
-                   isExpanded ? "w-full ml-2 opacity-100 pointer-events-auto" : "w-0 opacity-0 pointer-events-none absolute"
-               ]}
+               class="text-sm bg-transparent outline-0 transition-all duration-300 text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/40 {isExpanded ? 'w-full ml-2 opacity-100 pointer-events-auto' : 'w-0 opacity-0 pointer-events-none absolute'}"
         />
 
         {#if isExpanded && keywordDesktop}
