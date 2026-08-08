@@ -227,41 +227,22 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
    ============================================= */
 
 /* 内容面板 - 亮色模式（白色半透明遮罩） */
-/* 内容面板 - 亮色模式（与 Hero 底部精准无缝连成一体） */
+/* 全页统一背景遮罩 - 亮色模式（全页统一透明度与颜色） */
+#hero-overlay,
 #content-glass-panel {
+    background: rgba(245, 245, 250, 0.52);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    transition: background 0.4s ease;
     border-radius: 0;
-    transition: background 0.4s ease;
-    background: rgba(248, 248, 252, 0.85);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
 }
 
-/* 内容面板 - 暗色模式（与 Hero 底部精准无缝连成一体） */
+/* 全页统一背景遮罩 - 暗色模式（全页统一透明度与颜色） */
+:global(.dark) #hero-overlay,
 :global(.dark) #content-glass-panel {
-    background: rgba(10, 10, 12, 0.88);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
-}
-
-/* Hero 渐变遮罩 - 亮色模式（白色半透明，底部精准衔接 rgba(248, 248, 252, 0.85)） */
-#hero-overlay {
-    background: linear-gradient(
-        to top,
-        rgba(248, 248, 252, 0.85) 0%,
-        rgba(255, 255, 255, 0.30) 55%,
-        rgba(240, 240, 248, 0.45) 100%
-    );
-    transition: background 0.4s ease;
-}
-
-/* Hero 渐变遮罩 - 暗色模式（黑色半透明，底部精准衔接 rgba(10, 10, 12, 0.88)） */
-:global(.dark) #hero-overlay {
-    background: linear-gradient(
-        to top,
-        rgba(10, 10, 12, 0.88) 0%,
-        rgba(10, 10, 10, 0.30) 55%,
-        rgba(0, 0, 0, 0.45) 100%
-    );
+    background: rgba(12, 12, 18, 0.58);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
 }
 </style>
 
