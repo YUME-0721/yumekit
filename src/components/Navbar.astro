@@ -111,12 +111,11 @@ function isCurrentLink(targetUrl: string): boolean {
                                "btn-plain scale-animation font-bold active:scale-95 transition-all",
                                isHeroHome 
                                    ? "h-10 px-3.5 rounded-full text-sm"
-                                   : "h-11 px-5 rounded-lg",
-                               isHeroHome && isLinkActive ? "bg-black/10 dark:bg-white/15 text-[var(--primary)] font-black shadow-inner" : ""
+                                   : "h-11 px-5 rounded-lg"
                            ]}
                         >
                             <div class="flex items-center">
-                                {l.icon && <Icon name={l.icon} class:list={[isHeroHome ? "text-[1rem] mr-1.5 text-[var(--primary)]" : "text-[1.1rem] mr-2"]} />}
+                                {l.icon && <Icon name={l.icon} class:list={[isHeroHome ? "text-[1rem] mr-1.5 opacity-80" : "text-[1.1rem] mr-2"]} />}
                                 <span>{l.name}</span>
                                 {l.external && <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.875rem] transition -translate-y-[1px] ml-1 text-black/[0.2] dark:text-white/[0.2]"></Icon>}
                             </div>
