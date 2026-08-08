@@ -386,12 +386,19 @@ const bannerOffset =
 @layer components {
 	/* Sakana Widget 主页开屏隐藏，向下滑动渐显 */
 	.sakana-widget {
-		transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+		transform-origin: bottom left !important;
+		transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.5s !important;
+	}
+	@media (max-width: 768px) {
+		.sakana-widget {
+			transform: scale(0.75) !important;
+		}
 	}
 	body.is-home:not(.has-scrolled-hero) .sakana-widget {
 		opacity: 0 !important;
+		visibility: hidden !important;
 		pointer-events: none !important;
-		transform: translateY(30px) !important;
+		transform: translateY(30px) scale(0.75) !important;
 	}
 
 	.enable-banner.is-home #banner-wrapper {
