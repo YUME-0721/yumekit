@@ -6,8 +6,6 @@ import MainGridLayout from "../layouts/MainGridLayout.astro";
 import { getSortedPosts, getCategoryList, getTagList } from "../utils/content-utils";
 import { getPostUrlBySlug, url } from "../utils/url-utils";
 import { profileConfig, siteConfig, umamiConfig } from "../config";
-import Search from "../components/Search.svelte";
-import DisplaySettings from "../components/widget/DisplaySettings.svelte";
 
 const allPosts = await getSortedPosts();
 const categories = await getCategoryList();
@@ -96,50 +94,19 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                             <span>EXPLORE / 探秘全站</span>
                         </div>
                         <h3 class="text-sm sm:text-lg font-bold text-black/90 dark:text-white/90">进入技术与灵感的拾星之旅</h3>
-                        <div class="flex flex-wrap items-center gap-2 mt-1.5">
-                            <!-- 首页 -->
-                            <a href={url("/")} class="btn-regular px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition shadow-sm">
-                                <Icon name="material-symbols:home-outline-rounded" class="text-base text-[var(--primary)]" />
-                                <span>首页</span>
-                            </a>
-
-                            <!-- 文章/归档 -->
-                            <a href={url("/archive/")} class="btn-regular px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition shadow-sm">
+                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                            <a href={url("/archive/")} class="btn-regular px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
                                 <Icon name="material-symbols:library-books-outline-rounded" class="text-base text-[var(--primary)]" />
-                                <span>文章</span>
+                                <span>文章归档</span>
                             </a>
-
-                            <!-- 我的 -->
-                            <a href={url("/about/")} class="btn-regular px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition shadow-sm">
-                                <Icon name="material-symbols:person-outline-rounded" class="text-base text-[var(--primary)]" />
-                                <span>我的</span>
-                            </a>
-
-                            <!-- 统计 -->
-                            <a href="https://umami.yumekai.top/share/46vKiUC2hTE5PytG" target="_blank" rel="noopener" class="btn-regular px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition shadow-sm">
-                                <Icon name="material-symbols:analytics-outline-rounded" class="text-base text-[var(--primary)]" />
-                                <span>统计</span>
-                                <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[10px] opacity-40" />
-                            </a>
-
-                            <!-- 画廊 -->
-                            <a href="https://pic.yumekai.top" target="_blank" rel="noopener" class="btn-regular px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition shadow-sm">
+                            <a href="https://pic.yumekai.top" target="_blank" rel="noopener" class="btn-regular px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
                                 <Icon name="material-symbols:photo-library-outline-rounded" class="text-base text-[var(--primary)]" />
-                                <span>画廊</span>
-                                <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[10px] opacity-40" />
+                                <span>绮想絵廊</span>
                             </a>
-
-                            <!-- 搜索栏功能组 -->
-                            <div class="inline-flex items-center">
-                                <Search client:only="svelte" />
-                            </div>
-
-                            <!-- 主题与调色盘切换面板 -->
-                            {!siteConfig.themeColor.fixed && (
-                                <button aria-label="Display Settings" class="btn-regular p-2 rounded-xl border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition shadow-sm flex items-center justify-center h-10 w-10" id="display-settings-switch">
-                                    <Icon name="material-symbols:palette-outline" class="text-lg text-[var(--primary)]"></Icon>
-                                </button>
-                            )}
+                            <a href={url("/rss.xml")} target="_blank" class="btn-regular px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
+                                <Icon name="material-symbols:rss-feed-rounded" class="text-base text-[var(--primary)]" />
+                                <span>RSS 订阅</span>
+                            </a>
                         </div>
                     </div>
 
@@ -302,7 +269,6 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
             </div>
         </div>
 
-        <DisplaySettings client:only="svelte" />
     </div>
 </MainGridLayout>
 
@@ -312,20 +278,20 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
    ============================================= */
 
 /* 内容面板 - 亮色模式（白色半透明遮罩） */
-/* 贯穿全页的唯一背景遮罩蒙版 - 亮色模式（全页唯一统一透明度与颜色，包覆 Footer 绝无白色硬块） */
+/* 贯穿全页的唯一背景遮罩蒙版 - 亮色模式（清透无死白发雾，还原壁纸鲜艳原色） */
 #home-unified-overlay {
     bottom: -300px;
-    background: rgba(245, 245, 250, 0.52);
-    backdrop-filter: blur(20px) saturate(160%);
-    -webkit-backdrop-filter: blur(20px) saturate(160%);
-    transition: background 0.4s ease;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.18) 0%, rgba(245, 245, 250, 0.26) 100%);
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    transition: background 0.4s ease, backdrop-filter 0.4s ease;
 }
 
 /* 贯穿全页的唯一背景遮罩蒙版 - 暗色模式 */
 :global(.dark) #home-unified-overlay {
     background: rgba(12, 12, 18, 0.58);
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
 </style>
 
