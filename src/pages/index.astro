@@ -52,18 +52,18 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
 
             <!-- Hero 核心主体群组：标题与 Explore 卡片紧密组合 (gap-3)，在移动端适度下沉 (mt-auto mb-8) -->
             <div class="mt-auto mb-8 sm:mb-14 md:my-auto w-full flex flex-col gap-3 sm:gap-6 md:gap-8 relative">
-                <!-- 呼应左侧标题与探秘卡片的右翼大字号双纵列打字机标语（带有左侧赛博霓虹艺术装饰线） -->
+                <!-- 呼应左侧标题与探秘卡片的右翼大字号双纵列打字机标语（带有左侧精美二次元赛博星芒与双轨霓虹艺术装饰线） -->
                 <div class="hidden xl:block absolute right-4 xl:right-10 top-2 z-20 select-none pointer-events-none opacity-95 transition">
-                    <div class="flex items-center gap-3">
-                        <!-- 标语左侧的精致纵向艺术装饰线条组 -->
-                        <div class="flex flex-col items-center gap-2 py-2 opacity-75">
-                            <div class="w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse shadow-[0_0_10px_var(--primary)]"></div>
-                            <div class="w-[2px] h-16 bg-gradient-to-b from-[var(--primary)] via-pink-500/60 to-transparent"></div>
-                            <div class="w-1.5 h-1.5 rotate-45 border border-[var(--primary)] bg-white/20"></div>
-                            <div class="w-[1.5px] h-24 border-l-2 border-dashed border-[var(--primary)]/40"></div>
-                            <div class="w-1.5 h-1.5 rotate-45 border border-[var(--primary)] bg-white/20"></div>
-                            <div class="w-[2px] h-16 bg-gradient-to-t from-[var(--primary)] via-rose-500/60 to-transparent"></div>
-                            <div class="w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse shadow-[0_0_10px_var(--primary)]"></div>
+                    <div class="flex items-center gap-3.5">
+                        <!-- 标语左侧的精美纵向艺术装饰线条组 -->
+                        <div class="flex flex-col items-center gap-2.5 py-1 opacity-85">
+                            <Icon name="material-symbols:sparkles-outline" class="text-base text-[var(--primary)] animate-pulse drop-shadow-[0_0_8px_var(--primary)]" />
+                            <div class="w-[2px] h-20 bg-gradient-to-b from-[var(--primary)] via-pink-500/80 to-transparent"></div>
+                            <div class="w-2 h-2 rotate-45 border-2 border-[var(--primary)] bg-white/50 dark:bg-black/50 backdrop-blur-sm"></div>
+                            <div class="w-[1.5px] h-28 border-l-2 border-dotted border-[var(--primary)]/60"></div>
+                            <div class="w-2 h-2 rotate-45 border-2 border-[var(--primary)] bg-white/50 dark:bg-black/50 backdrop-blur-sm"></div>
+                            <div class="w-[2px] h-20 bg-gradient-to-t from-[var(--primary)] via-rose-500/80 to-transparent"></div>
+                            <Icon name="material-symbols:sparkles-outline" class="text-base text-[var(--primary)] animate-pulse drop-shadow-[0_0_8px_var(--primary)]" />
                         </div>
 
                         <!-- 纵向打字标语 -->
@@ -103,40 +103,61 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                         <!-- 左侧：快捷导航与探索指南 -->
                         <div class="flex flex-col gap-1.5 sm:gap-2">
                             <div class="text-[10px] sm:text-xs font-mono font-bold tracking-widest text-[var(--primary)] uppercase flex items-center gap-1.5">
-                                <span class="inline-block w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse"></span>
+                                <span class="inline-block w-2 h-2 rounded-full bg-[var(--primary)] animate-ping"></span>
                                 <span>EXPLORE / 探秘全站</span>
                             </div>
-                            <h3 class="text-sm sm:text-lg font-bold text-black/90 dark:text-white/90">进入技术与灵感的拾星之旅</h3>
-                            <div class="flex flex-wrap items-center gap-2 mt-1">
-                                <a href={url("/archive/")} class="btn-regular px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
-                                    <Icon name="material-symbols:library-books-outline-rounded" class="text-base text-[var(--primary)]" />
+                            <h3 class="text-base sm:text-lg md:text-xl font-bold text-neutral-800 dark:text-white transition-colors duration-300">进入技术与灵感的拾星之旅</h3>
+                            
+                            <!-- 快捷导航按钮组 -->
+                            <div class="flex flex-wrap items-center gap-2 mt-1 sm:mt-1.5">
+                                <a href={url('/archive/')} class="px-2.5 py-1.5 sm:px-3 sm:py-1.5 bg-white/60 dark:bg-white/10 hover:bg-[var(--primary)]/20 text-neutral-700 dark:text-neutral-200 hover:text-[var(--primary)] dark:hover:text-[var(--primary)] rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all border border-black/5 dark:border-white/10">
+                                    <Icon name="material-symbols:article-outline" class="text-sm text-[var(--primary)]" />
                                     <span>文章归档</span>
                                 </a>
-                                <a href="https://pic.yumekai.top" target="_blank" rel="noopener" class="btn-regular px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
-                                    <Icon name="material-symbols:photo-library-outline-rounded" class="text-base text-[var(--primary)]" />
-                                    <span>绮想絵廊</span>
+                                <a href={url('/gallery/')} class="px-2.5 py-1.5 sm:px-3 sm:py-1.5 bg-white/60 dark:bg-white/10 hover:bg-[var(--primary)]/20 text-neutral-700 dark:text-neutral-200 hover:text-[var(--primary)] dark:hover:text-[var(--primary)] rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all border border-black/5 dark:border-white/10">
+                                    <Icon name="material-symbols:photo-library-outline" class="text-sm text-[var(--primary)]" />
+                                    <span>绮想绘廊</span>
                                 </a>
-                                <a href={url("/rss.xml")} target="_blank" class="btn-regular px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
-                                    <Icon name="material-symbols:rss-feed-rounded" class="text-base text-[var(--primary)]" />
+                                <a href={url('/rss.xml')} target="_blank" class="px-2.5 py-1.5 sm:px-3 sm:py-1.5 bg-white/60 dark:bg-white/10 hover:bg-[var(--primary)]/20 text-neutral-700 dark:text-neutral-200 hover:text-[var(--primary)] dark:hover:text-[var(--primary)] rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all border border-black/5 dark:border-white/10">
+                                    <Icon name="material-symbols:rss-feed-rounded" class="text-sm text-[var(--primary)]" />
                                     <span>RSS 订阅</span>
                                 </a>
                             </div>
                         </div>
 
-                        <!-- 右侧：快看三元指标 -->
-                        <div class="flex items-center justify-around md:justify-end gap-3 sm:gap-6 pt-3 md:pt-0 border-t md:border-t-0 border-l-0 md:border-l border-black/10 dark:border-white/10 pl-0 md:pl-6">
-                            <div class="flex flex-col items-center md:items-start">
-                                <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono font-semibold uppercase">ARTICLES</span>
-                                <span class="text-base sm:text-xl font-black text-[var(--primary)]">{allPosts.length} <span class="text-xs font-normal text-neutral-600 dark:text-neutral-400">篇</span></span>
-                            </div>
-                            <div class="flex flex-col items-center md:items-start">
-                                <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono font-semibold uppercase">CATEGORIES</span>
-                                <span class="text-base sm:text-xl font-black text-[var(--primary)]">{categories.length} <span class="text-xs font-normal text-neutral-600 dark:text-neutral-400">类</span></span>
-                            </div>
-                            <div class="flex flex-col items-center md:items-start">
-                                <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono font-semibold uppercase">TAGS</span>
-                                <span class="text-base sm:text-xl font-black text-[var(--primary)]">{tags.length} <span class="text-xs font-normal text-neutral-600 dark:text-neutral-400">个</span></span>
-                            </div>
+                        <!-- 右侧：全局精干统计 -->
+                        <div class="flex items-center justify-around md:justify-end gap-3 sm:gap-6 pt-2 md:pt-0 border-t md:border-t-0 md:border-l border-black/10 dark:border-white/10 md:pl-6">
+                            <a href={url('/archive/')} class="flex flex-col items-center group/stat">
+                                <span class="text-[10px] font-mono uppercase text-neutral-700/80 dark:text-white/80 font-semibold group-hover/stat:text-[var(--primary)] transition-colors">ARTICLES</span>
+                                <span class="text-base sm:text-lg font-black text-neutral-800 dark:text-white group-hover/stat:text-[var(--primary)] transition-colors flex items-baseline gap-0.5">
+                                    {postsCount} <span class="text-[10px] font-normal text-neutral-700 dark:text-white/80">篇</span>
+                                </span>
+                            </a>
+                            <a href={url('/archive/category/')} class="flex flex-col items-center group/stat">
+                                <span class="text-[10px] font-mono uppercase text-neutral-700/80 dark:text-white/80 font-semibold group-hover/stat:text-[var(--primary)] transition-colors">CATEGORIES</span>
+                                <span class="text-base sm:text-lg font-black text-neutral-800 dark:text-white group-hover/stat:text-[var(--primary)] transition-colors flex items-baseline gap-0.5">
+                                    {categoriesCount} <span class="text-[10px] font-normal text-neutral-700 dark:text-white/80">类</span>
+                                </span>
+                            </a>
+                            <a href={url('/archive/tag/')} class="flex flex-col items-center group/stat">
+                                <span class="text-[10px] font-mono uppercase text-neutral-700/80 dark:text-white/80 font-semibold group-hover/stat:text-[var(--primary)] transition-colors">TAGS</span>
+                                <span class="text-base sm:text-lg font-black text-neutral-800 dark:text-white group-hover/stat:text-[var(--primary)] transition-colors flex items-baseline gap-0.5">
+                                    {tagsCount} <span class="text-[10px] font-normal text-neutral-700 dark:text-white/80">个</span>
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 下向沉浸引导件：在探秘全站卡片与下级面板间建立呼吸悬浮指示 -->
+                    <div class="w-full flex items-center justify-start pt-3 sm:pt-5 pb-1 opacity-80 hover:opacity-100 transition-opacity duration-300 select-none pointer-events-none pl-2 sm:pl-4">
+                        <div class="flex items-center gap-2.5 text-xs font-mono font-bold tracking-[0.2em] text-neutral-800/80 dark:text-white/80 uppercase">
+                            <span class="w-8 sm:w-16 h-[1.5px] bg-gradient-to-r from-[var(--primary)] to-transparent"></span>
+                            <span class="flex items-center gap-1.5 text-[var(--primary)] drop-shadow-[0_0_8px_var(--primary)]">
+                                <Icon name="material-symbols:keyboard-double-arrow-down-rounded" class="text-lg animate-bounce" />
+                                <span class="text-[11px] sm:text-xs">DISCOVER MORE</span>
+                                <Icon name="material-symbols:keyboard-double-arrow-down-rounded" class="text-lg animate-bounce" />
+                            </span>
+                            <span class="w-8 sm:w-16 h-[1.5px] bg-gradient-to-l from-[var(--primary)] to-transparent"></span>
                         </div>
                     </div>
                 </div>
