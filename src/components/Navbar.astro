@@ -48,10 +48,10 @@ function isCurrentLink(targetUrl: string): boolean {
     {!isHeroHome && <div class="absolute h-8 left-0 right-0 -top-8 bg-[var(--card-bg)] transition"></div>}
     <div class:list={[
         className,
-        "card-base border border-black/10 dark:border-white/15 !overflow-visible mx-auto flex items-center transition-all duration-300",
+        "card-base border border-black/10 dark:border-white/15 !overflow-visible flex items-center transition-all duration-300",
         isHeroHome 
-            ? "w-fit max-w-[95vw] h-14 rounded-full px-2.5 py-1.5 gap-1 justify-center bg-white/80 dark:bg-black/75 backdrop-blur-xl mt-3 shadow-xl"
-            : "max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none justify-between px-4"
+            ? "w-fit max-w-[95vw] h-12 md:h-14 rounded-full px-2.5 py-1.5 gap-1 justify-center bg-white/80 dark:bg-black/75 backdrop-blur-xl mt-3 shadow-xl ml-auto mr-3 md:mx-auto"
+            : "max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none justify-between px-4 mx-auto"
     ]}>
         {!isHeroHome && (
             <a href={url('/')} class="btn-plain scale-animation rounded-lg h-[3.25rem] px-5 font-bold active:scale-95">

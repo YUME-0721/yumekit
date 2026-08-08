@@ -42,7 +42,7 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
 ---
 
 <MainGridLayout title="首页" hideSidebar={true} isHeroHome={true}>
-    <div class="flex flex-col w-full relative" id="home-root">
+    <div class="flex flex-col w-full relative overflow-x-hidden" id="home-root">
         <!-- 贯穿全页的唯一统一遮罩蒙版：消灭任何两层遮罩重叠造成的色差横条 -->
         <div class="absolute inset-0 pointer-events-none z-0" id="home-unified-overlay"></div>
         
@@ -50,11 +50,11 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
              LAYER 2: Hero 内容层
              ==================================================== -->
         <div id="hero-content"
-             class="relative w-full min-h-screen flex flex-col justify-between pt-20 md:pt-24 pb-16 md:pb-12 px-4 sm:px-8 md:px-16 overflow-hidden"
+             class="relative w-full min-h-screen flex flex-col justify-between pt-16 sm:pt-20 md:pt-24 pb-16 md:pb-12 px-3 sm:px-8 md:px-16 overflow-hidden"
              style="z-index: 10;">
 
-            <!-- 呼应左侧标题与探秘卡片的右翼大字号双纵列打字机标语 -->
-            <div class="absolute right-8 sm:right-20 md:right-32 lg:right-44 top-24 sm:top-32 md:top-36 lg:top-40 z-20 select-none pointer-events-none opacity-95 transition">
+            <!-- 呼应左侧标题与探秘卡片的右翼大字号双纵列打字机标语（移动端 < md 自动隐去防止挤爆屏宽） -->
+            <div class="hidden md:block absolute right-8 sm:right-20 md:right-32 lg:right-44 top-24 sm:top-32 md:top-36 lg:top-40 z-20 select-none pointer-events-none opacity-95 transition">
                 <div class="flex items-center text-lg sm:text-xl md:text-2xl lg:text-3xl text-neutral-800 dark:text-white font-mono tracking-[0.22em] uppercase font-black drop-shadow-lg dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]" style="writing-mode: vertical-rl; white-space: pre-line;">
                     <span id="hero-typewriter"></span>
                     <span class="inline-block w-4.5 sm:w-5.5 h-2.5 sm:h-3 mt-1 bg-[var(--primary)] animate-pulse shadow-[0_0_14px_var(--primary)]" id="typewriter-cursor"></span>
@@ -278,8 +278,11 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
    ============================================= */
 
 /* 内容面板 - 亮色模式（白色半透明遮罩） */
-/* 贯穿全页的唯一背景遮罩蒙版 - 亮色模式（清透无重度偏白，恢复壁纸自然色彩） */
+/* 贯穿全页的唯一背景遮罩蒙版 - 亮色模式（左右负边距扩展覆盖，彻底消灭右侧无遮罩白线缝隙） */
 #home-unified-overlay {
+    top: 0;
+    left: -100px;
+    right: -100px;
     bottom: -300px;
     background: rgba(255, 255, 255, 0.18);
     backdrop-filter: blur(10px) saturate(135%);
