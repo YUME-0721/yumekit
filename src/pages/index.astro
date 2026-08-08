@@ -46,14 +46,12 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
         <!-- 贯穿全页的唯一统一遮罩蒙版：消灭任何两层遮罩重叠造成的色差横条 -->
         <div class="absolute inset-0 pointer-events-none z-0" id="home-unified-overlay"></div>
         
-        <!-- 右侧贯穿全页的垂直打字机印花列（z-30 浮在面板上方，第一条与首屏 Hero 垂直方向绝对对称） -->
-        <div class="absolute right-3 sm:right-6 md:right-8 top-0 bottom-0 z-30 select-none pointer-events-none flex flex-col justify-around items-center py-28 sm:py-36 md:py-44 opacity-85">
-            {Array.from({ length: 4 }).map((_, idx) => (
-                <div class="flex items-center text-[10px] sm:text-xs md:text-sm text-neutral-800 dark:text-white/90 font-mono tracking-[0.18em] uppercase font-bold drop-shadow-sm dark:drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] my-8 sm:my-12" style="writing-mode: vertical-rl;">
-                    <span class="hero-typewriter-text"></span>
-                    <span class="inline-block w-3 sm:w-3.5 h-1.5 sm:h-2 mt-1 bg-[var(--primary)] animate-pulse shadow-[0_0_8px_var(--primary)]"></span>
-                </div>
-            ))}
+        <!-- 右侧顶部独占大字号双纵列打字机标语（绝对与 Hero 大标题垂直方向居中线对称） -->
+        <div class="absolute right-4 sm:right-6 md:right-10 top-24 sm:top-28 md:top-36 z-30 select-none pointer-events-none opacity-90 transition">
+            <div class="flex items-center text-sm sm:text-base md:text-lg lg:text-xl text-neutral-800 dark:text-white/95 font-mono tracking-[0.2em] uppercase font-extrabold drop-shadow-md dark:drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]" style="writing-mode: vertical-rl; white-space: pre-line;">
+                <span id="hero-typewriter"></span>
+                <span class="inline-block w-3.5 sm:w-4 h-1.5 sm:h-2 mt-1 bg-[var(--primary)] animate-pulse shadow-[0_0_10px_var(--primary)]" id="typewriter-cursor"></span>
+            </div>
         </div>
         
         <!-- ====================================================
@@ -383,26 +381,23 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
     document.addEventListener('content:replace', loadMatrixSiteStats);
 
     // ============================================
-    // 3. 打字机效果（多标语同步从上到下逐字打出）
+    // 3. 打字机效果（双纵列换行打字）
     // ============================================
     function initTypewriter() {
-        const typewriterEls = document.querySelectorAll('.hero-typewriter-text');
-        if (!typewriterEls || !typewriterEls.length) return;
-        const text = "WELCOME TO MY BLOG, ENJOY YOUR STAY!";
+        const typewriterEl = document.getElementById('hero-typewriter');
+        if (!typewriterEl) return;
+        const text = "WELCOME TO MY BLOG\nENJOY YOUR STAY!";
         let idx = 0;
-        typewriterEls.forEach(el => { el.textContent = ''; });
+        typewriterEl.textContent = '';
         
         function typeChar() {
             if (idx < text.length) {
                 idx++;
-                const currentText = text.substring(0, idx);
-                typewriterEls.forEach(el => {
-                    el.textContent = currentText;
-                });
-                setTimeout(typeChar, 70);
+                typewriterEl.textContent = text.substring(0, idx);
+                setTimeout(typeChar, 65);
             }
         }
-        setTimeout(typeChar, 400);
+        setTimeout(typeChar, 350);
     }
 
     if (document.readyState === 'loading') {
