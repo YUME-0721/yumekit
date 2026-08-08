@@ -78,10 +78,15 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                 </p>
             </div>
 
-            <!-- 右下角毛玻璃悬浮状态栏（固定于 Hero 右下角） -->
-            <div class="absolute bottom-10 right-6 md:right-16 z-10 max-w-sm sm:max-w-md w-auto backdrop-blur-md bg-black/45 border border-white/20 rounded-2xl py-4 px-6 md:px-8 text-center text-white shadow-2xl onload-animation" style="animation-delay: calc(var(--content-delay) + 100ms);">
-                <div class="font-bold text-lg md:text-xl tracking-wider text-white mb-1">YUME</div>
-                <div class="text-xs md:text-sm text-white/75 font-mono tracking-wider uppercase">WELCOME TO MY BLOG, ENJOY YOUR STAY!</div>
+            <!-- 精美 YUME 悬浮卡片（位置向内侧拉回，高级毛玻璃+状态小点+宽字距字母排版） -->
+            <div class="absolute bottom-14 right-8 sm:right-16 md:right-24 z-10 backdrop-blur-xl bg-black/40 border border-white/15 rounded-2xl px-7 py-5 text-center shadow-[0_8px_32px_rgba(0,0,0,0.36)] transition-transform duration-300 hover:scale-[1.03] group onload-animation" style="animation-delay: calc(var(--content-delay) + 100ms);">
+                <div class="flex items-center justify-center gap-2 mb-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+                    <span class="font-bold text-lg md:text-xl text-white tracking-wider font-sans drop-shadow-md">YUME</span>
+                </div>
+                <div class="text-[11px] md:text-xs text-white/70 font-mono tracking-[0.2em] uppercase font-medium">
+                    WELCOME TO MY BLOG, ENJOY YOUR STAY!
+                </div>
             </div>
         </div>
 
