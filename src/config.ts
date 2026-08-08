@@ -89,7 +89,6 @@ export const navBarConfig: NavBarConfig = {
 		{
 			name: "文章",
 			url: "#",
-			icon: "material-symbols:article-outline-rounded",
 			children: [
 				{
 					name: "文章列表",
@@ -102,7 +101,6 @@ export const navBarConfig: NavBarConfig = {
 		{
 			name: "我的",
 			url: "#",
-			icon: "material-symbols:person",
 			children: [
 				{
 					name: "番剧",
