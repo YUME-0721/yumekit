@@ -145,31 +145,73 @@ onMount(async () => {
 	}
 });
 
+export let isHeroHome = false;
+
+let isExpanded = false;
+let inputEl: HTMLInputElement;
+
+function expandSearch() {
+	isExpanded = true;
+	setTimeout(() => {
+		inputEl?.focus();
+	}, 50);
+}
+
+function handleBlur() {
+	if (!keywordDesktop && isExpanded) {
+		isExpanded = false;
+	}
+}
+
+function handleKeydown(e: KeyboardEvent) {
+	if (e.key === "Escape" && isExpanded) {
+		keywordDesktop = "";
+		isExpanded = false;
+	}
+}
+
 $: search(keywordDesktop, true);
 $: search(keywordMobile, false);
 </script>
 
+<svelte:window on:keydown={handleKeydown} />
+
 <!-- search bar for desktop view -->
-<div id="search-bar" class="hidden lg:flex transition-all items-center h-9 mr-1 rounded-lg
-      bg-black/[0.04] hover:bg-black/[0.06] focus-within:bg-black/[0.06]
-      dark:bg-white/5 dark:hover:bg-white/10 dark:focus-within:bg-white/10
-">
-    <Icon icon="material-symbols:search" class="absolute text-[1.1rem] pointer-events-none ml-2.5 transition my-auto text-black/30 dark:text-white/30"></Icon>
-    <input placeholder="搜索" bind:value={keywordDesktop} on:focus={() => search(keywordDesktop, true)}
-           class="transition-all pl-9 text-xs sm:text-sm bg-transparent outline-0
-         h-full w-36 active:w-56 focus:w-56 text-black/70 dark:text-white/70"
-    >
-</div>
+{#if isHeroHome && !isExpanded}
+    <!-- 主页默认模式：极致紧凑圆形放大镜搜索按钮 -->
+    <button on:click={expandSearch} aria-label="Search Bar" 
+            class="hidden lg:flex btn-plain scale-animation rounded-full w-10 h-10 items-center justify-center active:scale-90 transition-all">
+        <Icon icon="material-symbols:search" class="text-[1.25rem]"></Icon>
+    </button>
+{:else}
+    <!-- 展开状态或非主页默认模式：平滑延伸拉长的输入框 -->
+    <div id="search-bar" 
+         class="hidden lg:flex transition-all duration-300 items-center h-10 mr-1 rounded-full relative overflow-hidden
+          bg-black/[0.05] hover:bg-black/[0.08] focus-within:bg-black/[0.08]
+          dark:bg-white/10 dark:hover:bg-white/15 dark:focus-within:bg-white/15
+          {isHeroHome ? 'w-48 sm:w-60 animate-in fade-in zoom-in-95' : 'w-40 focus-within:w-60'}
+    ">
+        <Icon icon="material-symbols:search" class="absolute text-[1.25rem] pointer-events-none ml-3 my-auto text-black/40 dark:text-white/40 z-10"></Icon>
+        <input bind:this={inputEl} placeholder="搜索文章..." bind:value={keywordDesktop} 
+               on:focus={() => search(keywordDesktop, true)}
+               on:blur={handleBlur}
+               class="pl-9 pr-3 text-sm bg-transparent outline-0 h-full w-full text-black/80 dark:text-white/80"
+        >
+        {#if keywordDesktop}
+            <button on:click={() => { keywordDesktop = ''; isExpanded = false; }} class="mr-2 text-xs text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white">✕</button>
+        {/if}
+    </div>
+{/if}
 
 <!-- toggle btn for phone/tablet view -->
 <button on:click={togglePanel} aria-label="Search Panel" id="search-switch"
-        class="btn-plain scale-animation lg:!hidden rounded-lg w-9 h-9 active:scale-90 flex items-center justify-center">
-    <Icon icon="material-symbols:search" class="text-[1.15rem]"></Icon>
+        class:list={["btn-plain scale-animation lg:!hidden active:scale-90 flex items-center justify-center", isHeroHome ? "rounded-full w-10 h-10" : "rounded-lg w-11 h-11"]}>
+    <Icon icon="material-symbols:search" class="text-[1.25rem]"></Icon>
 </button>
 
 <!-- search panel -->
 <div id="search-panel" class="float-panel float-panel-closed search-panel absolute md:w-[30rem]
-left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-2">
+top-20 left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-2">
 
     <!-- search bar inside panel for phone/tablet -->
     <div id="search-bar-inside" class="flex relative lg:hidden transition-all items-center h-11 rounded-xl

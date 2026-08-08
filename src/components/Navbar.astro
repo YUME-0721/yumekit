@@ -127,7 +127,7 @@ function isCurrentLink(targetUrl: string): boolean {
         </div>
         <div class="flex items-center gap-1">
             <!--<SearchPanel client:load>-->
-            <Search client:only="svelte"></Search>
+            <Search isHeroHome={isHeroHome} client:only="svelte"></Search>
             {!siteConfig.themeColor.fixed && (
                     <button aria-label="Display Settings" class:list={["btn-plain scale-animation active:scale-90 flex items-center justify-center", isHeroHome ? "h-10 w-10 rounded-full" : "h-11 w-11 rounded-lg"]} id="display-settings-switch">
                         <Icon name="material-symbols:palette-outline" class="text-[1.25rem]"></Icon>
