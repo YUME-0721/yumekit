@@ -86,12 +86,19 @@ export const siteConfig: SiteConfig = {
 export const navBarConfig: NavBarConfig = {
 	links: [
 		LinkPreset.Home,
-		LinkPreset.Archive,
-		// {
-		// 	name: "友链",
-		// 	url: "/friends/",
-		// 	external: false,
-		// },
+		{
+			name: "文章",
+			url: "#",
+			icon: "material-symbols:article-outline-rounded",
+			children: [
+				{
+					name: "文章列表",
+					url: "/posts/",
+					icon: "material-symbols:list-alt-rounded",
+				},
+				LinkPreset.Archive,
+			],
+		},
 		{
 			name: "我的",
 			url: "#",

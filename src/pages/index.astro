@@ -1,0 +1,107 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { Icon } from "astro-icon/components";
+import PostCard from "../components/PostCard.astro";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import { getSortedPosts } from "../utils/content-utils";
+import { getPostUrlBySlug, url } from "../utils/url-utils";
+import { profileConfig, siteConfig } from "../config";
+
+const allPosts = await getSortedPosts();
+const recentPosts = allPosts.slice(0, 4);
+
+let delay = 0;
+const interval = 50;
+---
+
+<MainGridLayout title="首页">
+    <div class="flex flex-col gap-4 mb-4">
+        <!-- Hero Header Section (匹配参考图2落地页风格) -->
+        <div class="card-base relative overflow-hidden rounded-[var(--radius-large)] p-6 md:p-10 border border-black/10 dark:border-white/10 shadow-lg onload-animation" style="animation-delay: calc(var(--content-delay) + 0ms);">
+            <!-- Background overlay with ambient glow -->
+            <div class="absolute inset-0 bg-gradient-to-br from-neutral-900/90 via-neutral-900/80 to-neutral-900/95 z-0"></div>
+            <div class="absolute inset-0 bg-[url('https://pic.yumekai.top/pic?img=ua')] bg-cover bg-center opacity-30 mix-blend-overlay z-0"></div>
+            <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-[var(--primary)]/20 rounded-full blur-3xl pointer-events-none z-0"></div>
+
+            <div class="relative z-10 text-white flex flex-col justify-between min-h-[16rem]">
+                <!-- Top Tag Badge -->
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg text-xs font-mono tracking-wider border border-white/15 text-white/90">
+                        [{siteConfig.subtitle || "记录 / 分享 / 个人博客"}]
+                    </span>
+                </div>
+
+                <!-- Hero Title -->
+                <div class="my-2">
+                    <h1 class="text-4xl md:text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-100 to-white/80 font-sans drop-shadow-sm">
+                        {siteConfig.title} <span class="text-[var(--primary)] font-serif italic text-3xl md:text-5xl font-normal ml-1">の 博客</span>
+                    </h1>
+                </div>
+
+                <!-- Social Badges & Motto -->
+                <div class="flex flex-wrap items-center gap-3 my-3">
+                    {profileConfig.links.map(link => (
+                        <a href={link.url} target="_blank" rel="noopener" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 active:scale-95 backdrop-blur-md rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 border border-white/10 transition-all text-white/90">
+                            {link.icon && <Icon name={link.icon} class="text-base" />}
+                            <span>{link.name}</span>
+                        </a>
+                    ))}
+                </div>
+
+                <!-- Motto Quote -->
+                <p class="text-sm md:text-base text-white/75 font-normal tracking-wide mt-2 border-l-2 border-[var(--primary)] pl-3 italic">
+                    躬身入局，心为主理，行有尺度，自持本心。
+                </p>
+
+                <!-- Bottom Mascot Welcome Bar -->
+                <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between flex-wrap gap-2 text-xs text-white/60">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="font-medium text-white/80">YUME 主理人？ WELCOME TO MY BLOG, ENJOY YOUR STAY!</span>
+                    </div>
+                    <a href={url("/posts/")} class="text-[var(--primary)] hover:underline font-bold flex items-center gap-1">
+                        <span>浏览全站文章</span>
+                        <Icon name="material-symbols:chevron-right-rounded" class="text-lg" />
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Title: 最新发布 -->
+        <div class="flex items-center justify-between px-2 pt-2 pb-1 onload-animation" style="animation-delay: calc(var(--content-delay) + 50ms);">
+            <div class="flex items-center gap-2 font-bold text-lg md:text-xl text-black/90 dark:text-white/90">
+                <Icon name="material-symbols:auto-awesome-outline-rounded" class="text-2xl text-[var(--primary)]" />
+                <span>最新发布</span>
+            </div>
+            <a href={url("/posts/")} class="btn-regular px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium text-[var(--primary)] flex items-center gap-1 hover:underline active:scale-95 transition">
+                <span>查看全部文章</span>
+                <Icon name="material-symbols:arrow-forward-rounded" class="text-base" />
+            </a>
+        </div>
+
+        <!-- Post Cards List -->
+        {recentPosts.map((entry: CollectionEntry<"posts">) => (
+            <div class="onload-animation" style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval + 100}ms);`}>
+                <PostCard
+                        entry={entry}
+                        title={entry.data.title}
+                        published={entry.data.published}
+                        updated={entry.data.updated}
+                        url={getPostUrlBySlug(entry.slug)}
+                        image={entry.data.image}
+                        description={entry.data.description}
+                        draft={entry.data.draft}
+                ></PostCard>
+            </div>
+        ))}
+
+        <!-- Bottom Call-To-Action Button -->
+        <div class="onload-animation text-center pt-2 pb-4" style={`animation-delay: calc(var(--content-delay) + ${delay * interval + 150}ms);`}>
+            <a href={url("/posts/")} class="btn-card inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-[var(--primary)] hover:bg-[var(--btn-card-bg-hover)] active:scale-95 transition shadow-sm border border-black/5 dark:border-white/10">
+                <Icon name="material-symbols:library-books-outline-rounded" class="text-xl" />
+                <span>浏览全站更多文章与分类 ({allPosts.length} 篇)</span>
+                <Icon name="material-symbols:chevron-right-rounded" class="text-xl" />
+            </a>
+        </div>
+    </div>
+</MainGridLayout>

@@ -2,6 +2,7 @@
 import type { Page } from "astro";
 import { Icon } from "astro-icon/components";
 import { url } from "../../utils/url-utils";
+
 interface Props {
 	page: Page;
 	class?: string;
@@ -17,7 +18,6 @@ const className = Astro.props.class;
 const ADJ_DIST = 2;
 const VISIBLE = ADJ_DIST * 2 + 1;
 
-// for test
 let count = 1;
 let l = page.currentPage;
 let r = page.currentPage;
@@ -45,15 +45,22 @@ if (r === page.lastPage - 2) pages.push(page.lastPage - 1);
 if (r < page.lastPage) pages.push(page.lastPage);
 
 const getPageUrl = (p: number) => {
-	if (p === 1) return "/";
-	return `/${p}/`;
+	if (p === 1) return "/posts/";
+	return `/posts/${p}/`;
 };
+
+const prevUrl = page.url.prev
+	? page.url.prev === "/" || page.url.prev === "/1/"
+		? url("/posts/")
+		: page.url.prev
+	: undefined;
+const nextUrl = page.url.next || undefined;
 ---
 
 <div class:list={[className, "flex flex-row gap-3 justify-center"]} style={style}>
-    <a href={page.url.prev || ""} aria-label={page.url.prev ? "Previous Page" : null}
+    <a href={prevUrl || ""} aria-label={prevUrl ? "Previous Page" : null}
        class:list={["btn-card overflow-hidden rounded-lg text-[var(--primary)] w-11 h-11",
-           {"disabled": page.url.prev == undefined}
+           {"disabled": prevUrl == undefined}
        ]}
     >
         <Icon name="material-symbols:chevron-left-rounded" class="text-[1.75rem]"></Icon>
@@ -68,14 +75,14 @@ const getPageUrl = (p: number) => {
                 >
                     {p}
                 </div>
-            return <a href={url(getPageUrl(p))} aria-label=`Page ${p}`
+            return <a href={url(getPageUrl(p))} aria-label={`Page ${p}`}
                 class="transition flex items-center justify-center w-11 h-11 rounded-lg overflow-hidden active:scale-[0.85] hover:bg-[var(--btn-card-bg-hover)] active:bg-[var(--btn-card-bg-active)] text-black/75 dark:text-white/75"
             >{p}</a>
         })}
     </div>
-    <a href={page.url.next || ""} aria-label={page.url.next ? "Next Page" : null}
+    <a href={nextUrl || ""} aria-label={nextUrl ? "Next Page" : null}
        class:list={["btn-card overflow-hidden rounded-lg text-[var(--primary)] w-11 h-11",
-           {"disabled": page.url.next == undefined}
+           {"disabled": nextUrl == undefined}
        ]}
     >
         <Icon name="material-symbols:chevron-right-rounded" class="text-[1.75rem]"></Icon>

@@ -1,0 +1,33 @@
+---
+import type { GetStaticPaths } from "astro";
+import PostPage from "../../components/PostPage.astro";
+import Pagination from "../../components/control/Pagination.astro";
+import { PAGE_SIZE } from "../../constants/constants";
+import MainGridLayout from "../../layouts/MainGridLayout.astro";
+import { getSortedPosts } from "../../utils/content-utils";
+import { url } from "../../utils/url-utils";
+
+export const getStaticPaths = (async ({ paginate }) => {
+	const allBlogPosts = await getSortedPosts();
+	return paginate(allBlogPosts, { pageSize: PAGE_SIZE });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+
+const formattedPage = {
+	...page,
+	url: {
+		...page.url,
+		prev: page.currentPage === 2 ? url("/posts/") : page.url.prev,
+		current: url(`/posts/${page.currentPage}/`),
+		next: page.url.next ? url(page.url.next) : undefined,
+	},
+};
+
+const len = formattedPage.data.length;
+---
+
+<MainGridLayout title={`文章列表 - 第 ${page.currentPage} 页`}>
+    <PostPage page={formattedPage}></PostPage>
+    <Pagination class="mx-auto onload-animation" page={formattedPage} style={`animation-delay: calc(var(--content-delay) + ${(len)*50}ms)`}></Pagination>
+</MainGridLayout>
