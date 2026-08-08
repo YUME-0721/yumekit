@@ -127,11 +127,11 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                     <Icon name="material-symbols:keyboard-double-arrow-down-rounded" class="text-xl text-[var(--primary)]" />
                 </div>
 
-                <!-- 贴着浏览器窗口最右侧固定的 90 度打字机标语（首字母固定不动，打字由上至下流畅喷发） -->
-                <div class="fixed right-3 sm:right-5 md:right-7 top-[35%] z-30 select-none pointer-events-none onload-animation" style="animation-delay: calc(var(--content-delay) + 100ms);">
-                    <div class="flex items-center text-[10px] sm:text-xs md:text-sm text-neutral-800 dark:text-white/90 font-mono tracking-[0.18em] uppercase font-bold drop-shadow-sm dark:drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] whitespace-nowrap" style="transform: rotate(90deg); transform-origin: 0 0;">
+                <!-- 固定靠右最右侧边缘的顺时针 90 度静态打字机标语（绝对死锁固定，无任何移动平移动画） -->
+                <div class="fixed right-4 sm:right-6 md:right-8 top-1/2 -translate-y-1/2 z-30 select-none pointer-events-none">
+                    <div class="flex items-center text-[10px] sm:text-xs md:text-sm text-neutral-800 dark:text-white/90 font-mono tracking-[0.18em] uppercase font-bold drop-shadow-sm dark:drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]" style="writing-mode: vertical-rl;">
                         <span id="hero-typewriter"></span>
-                        <span class="inline-block w-1.5 sm:w-2 h-3 sm:h-3.5 ml-1 bg-[var(--primary)] animate-pulse shadow-[0_0_8px_var(--primary)]" id="typewriter-cursor"></span>
+                        <span class="inline-block w-3 sm:w-3.5 h-1.5 sm:h-2 mt-1 bg-[var(--primary)] animate-pulse shadow-[0_0_8px_var(--primary)]" id="typewriter-cursor"></span>
                     </div>
                 </div>
             </div>
