@@ -350,6 +350,20 @@ const bannerOffset =
 					});
 					pet.mount('.sakana-widget');
 				}
+
+				// 主页滚动显示/隐藏 Sakana 小组件
+				function handleSakanaScroll() {
+					if (!document.body.classList.contains('is-home')) return;
+					const threshold = window.innerHeight * 0.4;
+					if (window.scrollY > threshold) {
+						document.body.classList.add('has-scrolled-hero');
+					} else {
+						document.body.classList.remove('has-scrolled-hero');
+					}
+				}
+				window.addEventListener('scroll', handleSakanaScroll, { passive: true });
+				handleSakanaScroll();
+				document.addEventListener('astro:page-load', handleSakanaScroll);
 			});
 		</script>
 	</body>
@@ -362,6 +376,16 @@ const bannerOffset =
 }}>
 @tailwind components;
 @layer components {
+	/* Sakana Widget 主页开屏隐藏，向下滑动渐显 */
+	.sakana-widget {
+		transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	}
+	body.is-home:not(.has-scrolled-hero) .sakana-widget {
+		opacity: 0 !important;
+		pointer-events: none !important;
+		transform: translateY(30px) !important;
+	}
+
 	.enable-banner.is-home #banner-wrapper {
 		@apply h-[var(--banner-height-home)] translate-y-[var(--banner-height-extend)]
 	}
