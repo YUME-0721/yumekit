@@ -5,7 +5,7 @@ import PostCard from "../components/PostCard.astro";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 import { getSortedPosts, getCategoryList, getTagList } from "../utils/content-utils";
 import { getPostUrlBySlug, url } from "../utils/url-utils";
-import { profileConfig, siteConfig } from "../config";
+import { profileConfig, siteConfig, umamiConfig } from "../config";
 
 const allPosts = await getSortedPosts();
 const categories = await getCategoryList();
@@ -110,13 +110,17 @@ const contactLinks = [
 
                 <!-- Grid Matrix Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Card A: Banner Image Preview -->
-                    <div class="card-base relative min-h-[10rem] overflow-hidden rounded-[var(--radius-large)] border border-black/10 dark:border-white/10 p-6 flex items-end justify-between group onload-animation" style="animation-delay: calc(var(--content-delay) + 200ms);">
-                        <div class="absolute inset-0 bg-cover bg-center opacity-70 group-hover:scale-105 transition-transform duration-700" style="background-image: url('https://pic.yumekai.top/pic?img=ua');"></div>
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                    <!-- Card A: 站点访问 -->
+                    <div class="card-base relative overflow-hidden rounded-[var(--radius-large)] border border-black/10 dark:border-white/10 p-6 flex flex-col justify-between min-h-[9.5rem] group onload-animation" style="animation-delay: calc(var(--content-delay) + 200ms);">
+                        <div class="absolute inset-0 bg-cover bg-center opacity-30 dark:opacity-20 group-hover:scale-105 transition-transform duration-700 pointer-events-none" style="background-image: url('https://pic.yumekai.top/pic?img=ua');"></div>
                         <div class="relative z-10">
-                            <div class="text-xs font-mono text-white/60">YUME LOGO</div>
-                            <div class="text-xl font-bold text-white tracking-wide">{siteConfig.title}</div>
+                            <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 dark:text-neutral-500 uppercase mb-1">VISITS</div>
+                            <h3 class="text-xl md:text-2xl font-bold text-black/90 dark:text-white/90">站点访问</h3>
+                        </div>
+                        <div class="relative z-10 mt-3 pt-3 border-t border-black/5 dark:border-white/10 text-sm md:text-base font-semibold text-neutral-600 dark:text-neutral-300">
+                            <span>访客 <strong id="matrix-site-visitors" class="text-[var(--primary)] font-bold text-lg">0</strong></span>
+                            <span class="mx-1 text-neutral-300 dark:text-neutral-600">/</span>
+                            <span>浏览 <strong id="matrix-site-views" class="text-[var(--primary)] font-bold text-lg">0</strong></span>
                         </div>
                     </div>
 
@@ -214,3 +218,43 @@ const contactLinks = [
 
     </div>
 </MainGridLayout>
+
+<script define:vars={{ umamiConfig }}>
+    function formatCount(num) {
+        if (num >= 1000) {
+            return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+        }
+        return num.toString();
+    }
+
+    async function loadMatrixSiteStats() {
+        if (!umamiConfig.enabled || typeof window.getUmamiPageStats !== 'function') return;
+        
+        try {
+            const statsData = await window.getUmamiPageStats(
+                umamiConfig.baseUrl,
+                umamiConfig.websiteId,
+                null,
+                umamiConfig.shareId
+            );
+            
+            const pageviews = statsData.pageviews || 0;
+            const visitors = statsData.visitors || 0;
+            
+            const viewsEl = document.getElementById('matrix-site-views');
+            const visitorsEl = document.getElementById('matrix-site-visitors');
+
+            if (viewsEl) viewsEl.textContent = formatCount(pageviews);
+            if (visitorsEl) visitorsEl.textContent = formatCount(visitors);
+        } catch (e) {
+            console.error('Failed to load matrix site stats', e);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadMatrixSiteStats);
+    } else {
+        loadMatrixSiteStats();
+    }
+    document.addEventListener('content:replace', loadMatrixSiteStats);
+</script>
