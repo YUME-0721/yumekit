@@ -85,9 +85,6 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.7)
-      '@vercel/analytics':
-        specifier: ^1.5.0
-        version: 1.5.0(react@19.2.3)(svelte@5.28.2)
       astro:
         specifier: 5.7.9
         version: 5.7.9(patch_hash=ysrllw3gj6hylybllnynya5oma)(@types/node@22.14.1)(jiti@1.21.7)(lightningcss@1.29.3)(rollup@2.79.2)(sass@1.80.4)(stylus@0.64.0)(terser@5.39.0)(typescript@5.8.3)(yaml@2.7.0)
