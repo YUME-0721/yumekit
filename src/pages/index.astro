@@ -40,14 +40,16 @@ const contactLinks = [
 ---
 
 <MainGridLayout title="首页" hideSidebar={true} isHeroHome={true}>
-    <div class="flex flex-col w-full">
+    <div class="flex flex-col w-full relative min-h-screen">
         
-        <!-- SECTION 1: 沉浸式全屏无框 HERO 落地横幅 (完全无内边框/黑框限制，通栏满铺，导航栏置顶悬浮) -->
-        <div class="w-full relative min-h-[85vh] md:min-h-screen flex flex-col justify-between pt-28 md:pt-36 pb-12 px-6 md:px-16 overflow-hidden group">
-            <!-- 满铺无缝背景图与大气微光渐变 -->
-            <div class="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105" style="background-image: url('https://pic.yumekai.top/pic?img=ua');"></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-black/50"></div>
+        <!-- 统一静止壁纸背景 (固定不动，解决壁纸分离/重复模糊问题) -->
+        <div class="fixed inset-0 z-0 bg-cover bg-center pointer-events-none" style="background-image: url('https://pic.yumekai.top/pic?img=ua');">
+            <!-- 沉浸式暗黑渐变氛围遮罩 -->
+            <div class="absolute inset-0 bg-gradient-to-b from-neutral-950/75 via-neutral-950/45 to-neutral-950/85"></div>
+        </div>
 
+        <!-- SECTION 1: 全屏 Hero 落地开屏展示区 -->
+        <div class="relative z-10 w-full min-h-screen flex flex-col justify-between pt-28 md:pt-36 pb-16 px-6 md:px-16">
             <!-- 顶部小标签 -->
             <div class="relative z-10 onload-animation" style="animation-delay: calc(var(--content-delay) + 0ms);">
                 <span class="inline-block px-3.5 py-1 bg-white/10 backdrop-blur-md rounded-lg text-xs md:text-sm font-mono tracking-wider border border-white/20 text-white/90 shadow-md">
@@ -97,123 +99,132 @@ const contactLinks = [
             </div>
         </div>
 
-        <!-- 下方布局容器 (收窄至标准版面，呈现图 3 矩阵与最新文章) -->
-        <div class="max-w-[var(--page-width)] w-full mx-auto px-4 py-8 flex flex-col gap-8">
+        <!-- SECTION 2 & 3: 液态玻璃高光滑动抽屉 (Liquid Glass Slide-Up Sheet) -->
+        <div class="relative z-20 w-full rounded-t-[2.5rem] md:rounded-t-[3.5rem] border-t-2 border-white/25 dark:border-white/15 bg-neutral-950/80 dark:bg-neutral-950/90 backdrop-blur-2xl shadow-[0_-20px_60px_rgba(0,0,0,0.8)] transition duration-500">
             
-            <!-- SECTION 2: 图3 能力矩阵 / 站点数据模块 -->
-            <div class="flex flex-col gap-4">
-                <!-- Section Sub-header -->
-                <div class="onload-animation" style="animation-delay: calc(var(--content-delay) + 150ms);">
-                    <div class="text-xs font-mono font-bold tracking-widest text-[var(--primary)] uppercase mb-1">CONTEXT</div>
-                    <h2 class="text-2xl md:text-3xl font-black text-black/90 dark:text-white/90">站点数据 & 能力矩阵</h2>
-                </div>
-
-                <!-- Grid Matrix Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Card A: 站点访问 -->
-                    <div class="card-base relative overflow-hidden rounded-[var(--radius-large)] border border-black/10 dark:border-white/10 p-6 flex flex-col justify-between min-h-[9.5rem] group onload-animation" style="animation-delay: calc(var(--content-delay) + 200ms);">
-                        <div class="absolute inset-0 bg-cover bg-center opacity-30 dark:opacity-20 group-hover:scale-105 transition-transform duration-700 pointer-events-none" style="background-image: url('https://pic.yumekai.top/pic?img=ua');"></div>
-                        <div class="relative z-10">
-                            <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 dark:text-neutral-500 uppercase mb-1">VISITS</div>
-                            <h3 class="text-xl md:text-2xl font-bold text-black/90 dark:text-white/90">站点访问</h3>
-                        </div>
-                        <div class="relative z-10 mt-3 pt-3 border-t border-black/5 dark:border-white/10 text-sm md:text-base font-semibold text-neutral-600 dark:text-neutral-300">
-                            <span>访客 <strong id="matrix-site-visitors" class="text-[var(--primary)] font-bold text-lg">0</strong></span>
-                            <span class="mx-1 text-neutral-300 dark:text-neutral-600">/</span>
-                            <span>浏览 <strong id="matrix-site-views" class="text-[var(--primary)] font-bold text-lg">0</strong></span>
-                        </div>
-                    </div>
-
-                    <!-- Card B: 文章档案 -->
-                    <a href={url("/archive/")} class="card-base relative overflow-hidden rounded-[var(--radius-large)] border border-black/10 dark:border-white/10 p-6 flex flex-col justify-between hover:border-[var(--primary)]/50 transition duration-300 group onload-animation" style="animation-delay: calc(var(--content-delay) + 250ms);">
-                        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-[var(--primary)]/10 rounded-full blur-2xl group-hover:scale-125 transition duration-500"></div>
-                        <div>
-                            <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 dark:text-neutral-500 uppercase mb-1">ARCHIVE</div>
-                            <h3 class="text-xl md:text-2xl font-bold text-black/90 dark:text-white/90 group-hover:text-[var(--primary)] transition">文章档案</h3>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-black/5 dark:border-white/10 flex items-center justify-between">
-                            <div class="text-sm md:text-base font-semibold text-neutral-600 dark:text-neutral-300">
-                                <span class="text-[var(--primary)] font-bold text-lg">{allPosts.length}</span> 篇文章 / <span class="text-[var(--primary)] font-bold text-lg">{categories.length}</span> 个分类 / <span class="text-[var(--primary)] font-bold text-lg">{tags.length}</span> 个标签
-                            </div>
-                            <Icon name="material-symbols:chevron-right-rounded" class="text-2xl text-[var(--primary)] group-hover:translate-x-1 transition" />
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Card C: 社交联系 (横向轨道) -->
-                <div class="card-base rounded-[var(--radius-large)] border border-black/10 dark:border-white/10 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 overflow-hidden onload-animation" style="animation-delay: calc(var(--content-delay) + 300ms);">
-                    <div class="flex-shrink-0">
-                        <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 dark:text-neutral-500 uppercase mb-1">CONTACT</div>
-                        <h3 class="text-xl font-bold text-black/90 dark:text-white/90 mb-1">社交联系</h3>
-                        <p class="text-xs text-neutral-500 dark:text-neutral-400">把散落的入口收束在一条缓慢移动的轨道里。</p>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2 max-w-full overflow-x-auto py-1">
-                        {contactLinks.map(item => (
-                            <a href={item.url} target={item.external ? "_blank" : undefined} rel={item.external ? "noopener" : undefined} class="btn-regular px-3.5 py-2 rounded-full text-xs font-semibold flex items-center gap-2 border border-black/5 dark:border-white/10 text-neutral-700 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
-                                <Icon name={item.icon} class="text-base text-[var(--primary)]" />
-                                <span>{item.name}</span>
-                            </a>
-                        ))}
-                    </div>
-                </div>
-
-                <!-- Card D: 技能图标 (栈工具列表) -->
-                <div class="card-base rounded-[var(--radius-large)] border border-black/10 dark:border-white/10 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 overflow-hidden onload-animation" style="animation-delay: calc(var(--content-delay) + 350ms);">
-                    <div class="flex-shrink-0">
-                        <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 dark:text-neutral-500 uppercase mb-1">SKILLS</div>
-                        <h3 class="text-xl font-bold text-black/90 dark:text-white/90 mb-1">技能图标</h3>
-                        <p class="text-xs text-neutral-500 dark:text-neutral-400">工程、内容和部署工具在同一条轨道上循环。</p>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-3 max-w-full overflow-x-auto py-1">
-                        {skillsList.map(skill => (
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 text-neutral-700 dark:text-neutral-200 text-xs font-medium hover:scale-105 transition" title={skill.name}>
-                                <Icon name={skill.icon} class="text-lg text-[var(--primary)]" />
-                                <span>{skill.name}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+            <!-- 液态玻璃滑动指示手柄 -->
+            <div class="w-full flex justify-center pt-4 pb-2">
+                <div class="w-16 h-1.5 bg-white/30 rounded-full animate-pulse"></div>
             </div>
 
-            <!-- SECTION 3: 最新发布文章列表 -->
-            <div class="flex flex-col gap-4 pt-2">
-                <div class="flex items-center justify-between px-2 pt-2 pb-1 onload-animation" style="animation-delay: calc(var(--content-delay) + 400ms);">
-                    <div class="flex items-center gap-2 font-bold text-lg md:text-xl text-black/90 dark:text-white/90">
-                        <Icon name="material-symbols:auto-awesome-outline-rounded" class="text-2xl text-[var(--primary)]" />
-                        <span>最新发布</span>
+            <!-- 内部收窄版面内容 (能力矩阵与最新文章) -->
+            <div class="max-w-[var(--page-width)] w-full mx-auto px-4 pb-12 pt-4 flex flex-col gap-8">
+                
+                <!-- 站点数据 & 能力矩阵 -->
+                <div class="flex flex-col gap-4">
+                    <!-- Section Sub-header -->
+                    <div class="onload-animation" style="animation-delay: calc(var(--content-delay) + 150ms);">
+                        <div class="text-xs font-mono font-bold tracking-widest text-[var(--primary)] uppercase mb-1">CONTEXT</div>
+                        <h2 class="text-2xl md:text-3xl font-black text-white/95">站点数据 & 能力矩阵</h2>
                     </div>
-                    <a href={url("/posts/")} class="btn-regular px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-medium text-[var(--primary)] flex items-center gap-1 hover:underline active:scale-95 transition">
-                        <span>查看全部文章</span>
-                        <Icon name="material-symbols:arrow-forward-rounded" class="text-base" />
-                    </a>
+
+                    <!-- Grid Matrix Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Card A: 站点访问 -->
+                        <div class="card-base relative overflow-hidden rounded-[var(--radius-large)] border border-white/10 p-6 flex flex-col justify-between min-h-[9.5rem] group onload-animation" style="animation-delay: calc(var(--content-delay) + 200ms);">
+                            <div class="absolute inset-0 bg-cover bg-center opacity-20 group-hover:scale-105 transition-transform duration-700 pointer-events-none" style="background-image: url('https://pic.yumekai.top/pic?img=ua');"></div>
+                            <div class="relative z-10">
+                                <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 uppercase mb-1">VISITS</div>
+                                <h3 class="text-xl md:text-2xl font-bold text-white/95">站点访问</h3>
+                            </div>
+                            <div class="relative z-10 mt-3 pt-3 border-t border-white/10 text-sm md:text-base font-semibold text-neutral-300">
+                                <span>访客 <strong id="matrix-site-visitors" class="text-[var(--primary)] font-bold text-lg">0</strong></span>
+                                <span class="mx-1 text-neutral-600">/</span>
+                                <span>浏览 <strong id="matrix-site-views" class="text-[var(--primary)] font-bold text-lg">0</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Card B: 文章档案 -->
+                        <a href={url("/archive/")} class="card-base relative overflow-hidden rounded-[var(--radius-large)] border border-white/10 p-6 flex flex-col justify-between hover:border-[var(--primary)]/50 transition duration-300 group onload-animation" style="animation-delay: calc(var(--content-delay) + 250ms);">
+                            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-[var(--primary)]/10 rounded-full blur-2xl group-hover:scale-125 transition duration-500"></div>
+                            <div>
+                                <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 uppercase mb-1">ARCHIVE</div>
+                                <h3 class="text-xl md:text-2xl font-bold text-white/95 group-hover:text-[var(--primary)] transition">文章档案</h3>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
+                                <div class="text-sm md:text-base font-semibold text-neutral-300">
+                                    <span class="text-[var(--primary)] font-bold text-lg">{allPosts.length}</span> 篇文章 / <span class="text-[var(--primary)] font-bold text-lg">{categories.length}</span> 个分类 / <span class="text-[var(--primary)] font-bold text-lg">{tags.length}</span> 个标签
+                                </div>
+                                <Icon name="material-symbols:chevron-right-rounded" class="text-2xl text-[var(--primary)] group-hover:translate-x-1 transition" />
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Card C: 社交联系 (横向轨道) -->
+                    <div class="card-base rounded-[var(--radius-large)] border border-white/10 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 overflow-hidden onload-animation" style="animation-delay: calc(var(--content-delay) + 300ms);">
+                        <div class="flex-shrink-0">
+                            <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 uppercase mb-1">CONTACT</div>
+                            <h3 class="text-xl font-bold text-white/95 mb-1">社交联系</h3>
+                            <p class="text-xs text-neutral-400">把散落的入口收束在一条缓慢移动的轨道里。</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 max-w-full overflow-x-auto py-1">
+                            {contactLinks.map(item => (
+                                <a href={item.url} target={item.external ? "_blank" : undefined} rel={item.external ? "noopener" : undefined} class="btn-regular px-3.5 py-2 rounded-full text-xs font-semibold flex items-center gap-2 border border-white/10 text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
+                                    <Icon name={item.icon} class="text-base text-[var(--primary)]" />
+                                    <span>{item.name}</span>
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+
+                    <!-- Card D: 技能图标 (栈工具列表) -->
+                    <div class="card-base rounded-[var(--radius-large)] border border-white/10 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 overflow-hidden onload-animation" style="animation-delay: calc(var(--content-delay) + 350ms);">
+                        <div class="flex-shrink-0">
+                            <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 uppercase mb-1">SKILLS</div>
+                            <h3 class="text-xl font-bold text-white/95 mb-1">技能图标</h3>
+                            <p class="text-xs text-neutral-400">工程、内容和部署工具在同一条轨道上循环。</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 max-w-full overflow-x-auto py-1">
+                            {skillsList.map(skill => (
+                                <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/5 text-neutral-200 text-xs font-medium hover:scale-105 transition" title={skill.name}>
+                                    <Icon name={skill.icon} class="text-lg text-[var(--primary)]" />
+                                    <span>{skill.name}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Post Cards List -->
-                {recentPosts.map((entry: CollectionEntry<"posts">) => (
-                    <div class="onload-animation" style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval + 450}ms);`}>
-                        <PostCard
-                                entry={entry}
-                                title={entry.data.title}
-                                published={entry.data.published}
-                                updated={entry.data.updated}
-                                url={getPostUrlBySlug(entry.slug)}
-                                image={entry.data.image}
-                                description={entry.data.description}
-                                draft={entry.data.draft}
-                        ></PostCard>
+                <!-- SECTION 3: 最新发布文章列表 -->
+                <div class="flex flex-col gap-4 pt-2">
+                    <div class="flex items-center justify-between px-2 pt-2 pb-1 onload-animation" style="animation-delay: calc(var(--content-delay) + 400ms);">
+                        <div class="flex items-center gap-2 font-bold text-lg md:text-xl text-white/95">
+                            <Icon name="material-symbols:auto-awesome-outline-rounded" class="text-2xl text-[var(--primary)]" />
+                            <span>最新发布</span>
+                        </div>
+                        <a href={url("/posts/")} class="btn-regular px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-medium text-[var(--primary)] flex items-center gap-1 hover:underline active:scale-95 transition">
+                            <span>查看全部文章</span>
+                            <Icon name="material-symbols:arrow-forward-rounded" class="text-base" />
+                        </a>
                     </div>
-                ))}
 
-                <!-- Bottom CTA Button -->
-                <div class="onload-animation text-center pt-2 pb-4" style={`animation-delay: calc(var(--content-delay) + ${delay * interval + 500}ms);`}>
-                    <a href={url("/posts/")} class="btn-card inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-[var(--primary)] hover:bg-[var(--btn-card-bg-hover)] active:scale-95 transition shadow-sm border border-black/5 dark:border-white/10">
-                        <Icon name="material-symbols:library-books-outline-rounded" class="text-xl" />
-                        <span>浏览全站更多文章与分类 ({allPosts.length} 篇)</span>
-                        <Icon name="material-symbols:chevron-right-rounded" class="text-xl" />
-                    </a>
+                    <!-- Post Cards List -->
+                    {recentPosts.map((entry: CollectionEntry<"posts">) => (
+                        <div class="onload-animation" style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval + 450}ms);`}>
+                            <PostCard
+                                    entry={entry}
+                                    title={entry.data.title}
+                                    published={entry.data.published}
+                                    updated={entry.data.updated}
+                                    url={getPostUrlBySlug(entry.slug)}
+                                    image={entry.data.image}
+                                    description={entry.data.description}
+                                    draft={entry.data.draft}
+                            ></PostCard>
+                        </div>
+                    ))}
+
+                    <!-- Bottom CTA Button -->
+                    <div class="onload-animation text-center pt-2 pb-4" style={`animation-delay: calc(var(--content-delay) + ${delay * interval + 500}ms);`}>
+                        <a href={url("/posts/")} class="btn-card inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-[var(--primary)] hover:bg-[var(--btn-card-bg-hover)] active:scale-95 transition shadow-sm border border-white/10">
+                            <Icon name="material-symbols:library-books-outline-rounded" class="text-xl" />
+                            <span>浏览全站更多文章与分类 ({allPosts.length} 篇)</span>
+                            <Icon name="material-symbols:chevron-right-rounded" class="text-xl" />
+                        </a>
+                    </div>
                 </div>
+
             </div>
-
         </div>
 
     </div>
