@@ -191,9 +191,9 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
 
                         <!-- Grid Matrix Cards -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
-                            <!-- Card A: 站点访问 -->
+                            <!-- Card A: 站点访问 (靠右，高度不裁切) -->
                             <div class="card-base relative overflow-hidden rounded-[var(--radius-large)] border border-black/15 dark:border-white/20 p-4 sm:p-6 flex flex-col justify-between min-h-[8.5rem] sm:min-h-[9.5rem] group shadow-lg hover:border-[var(--primary)]/60 transition duration-300 onload-animation" style="animation-delay: calc(var(--content-delay) + 200ms);">
-                                <div class="absolute inset-0 bg-cover bg-center opacity-25 dark:opacity-15 group-hover:scale-105 transition-transform duration-700 pointer-events-none" style="background-image: url('https://img.072199.xyz/file/wallpaper/IIDjQ94z.webp');"></div>
+                                <div class="absolute inset-0 bg-contain bg-right bg-no-repeat opacity-35 dark:opacity-25 pointer-events-none group-hover:scale-105 transition-transform duration-700" style="background-image: url('https://img.072199.xyz/file/wallpaper/ATqAzrSc.webp');"></div>
                                 <div class="relative z-10">
                                     <div class="text-xs font-mono font-bold tracking-widest text-neutral-500 dark:text-neutral-400 uppercase mb-1">VISITS</div>
                                     <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-black/90 dark:text-white/90">站点访问</h3>
@@ -205,30 +205,31 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                                 </div>
                             </div>
 
-                            <!-- Card B: 文章档案 -->
+                            <!-- Card B: 文章档案 (靠右，高度不裁切) -->
                             <a href={url("/archive/")} class="card-base relative overflow-hidden rounded-[var(--radius-large)] border border-black/15 dark:border-white/20 p-4 sm:p-6 flex flex-col justify-between hover:border-[var(--primary)]/60 shadow-lg transition duration-300 group onload-animation" style="animation-delay: calc(var(--content-delay) + 250ms);">
-                                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-[var(--primary)]/10 rounded-full blur-2xl group-hover:scale-125 transition duration-500"></div>
-                                <div>
+                                <div class="absolute inset-0 bg-contain bg-right bg-no-repeat opacity-35 dark:opacity-25 pointer-events-none group-hover:scale-105 transition-transform duration-700" style="background-image: url('https://img.072199.xyz/file/wallpaper/PQqOn8ks.webp');"></div>
+                                <div class="relative z-10">
                                     <div class="text-xs font-mono font-bold tracking-widest text-neutral-500 dark:text-neutral-400 uppercase mb-1">ARCHIVE</div>
                                     <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-black/90 dark:text-white/90 group-hover:text-[var(--primary)] transition">文章档案</h3>
                                 </div>
-                                <div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-black/10 dark:border-white/10 flex items-center justify-between">
+                                <div class="relative z-10 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-black/10 dark:border-white/10 flex items-center justify-between">
                                     <div class="text-xs sm:text-sm md:text-base font-semibold text-neutral-600 dark:text-neutral-300">
-                                        <span class="text-[var(--primary)] font-bold text-base sm:text-lg">{allPosts.length}</span> 篇文章 / <span class="text-[var(--primary)] font-bold text-base sm:text-lg">{categories.length}</span> 个分类 / <span class="text-[var(--primary)] font-bold text-base sm:text-lg">{tags.length}</span> 个标签
+                                        <span class="text-[var(--primary)] font-bold text-base sm:text-lg">{postsCount}</span> 篇文章 / <span class="text-[var(--primary)] font-bold text-base sm:text-lg">{categoriesCount}</span> 个分类 / <span class="text-[var(--primary)] font-bold text-base sm:text-lg">{tagsCount}</span> 个标签
                                     </div>
                                     <Icon name="material-symbols:chevron-right-rounded" class="text-xl sm:text-2xl text-[var(--primary)] group-hover:translate-x-1 transition" />
                                 </div>
                             </a>
                         </div>
 
-                        <!-- Card C: 社交联系 -->
-                        <div class="card-base rounded-[var(--radius-large)] border border-black/15 dark:border-white/20 p-4 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 overflow-hidden shadow-lg hover:border-[var(--primary)]/60 transition duration-300 onload-animation" style="animation-delay: calc(var(--content-delay) + 300ms);">
-                            <div class="flex-shrink-0">
+                        <!-- Card C: 社交联系 (靠左，高度不裁切) -->
+                        <div class="card-base relative rounded-[var(--radius-large)] border border-black/15 dark:border-white/20 p-4 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 overflow-hidden shadow-lg hover:border-[var(--primary)]/60 transition duration-300 onload-animation group" style="animation-delay: calc(var(--content-delay) + 300ms);">
+                            <div class="absolute inset-0 bg-contain bg-left bg-no-repeat opacity-30 dark:opacity-20 pointer-events-none group-hover:scale-105 transition-transform duration-700" style="background-image: url('https://img.072199.xyz/file/wallpaper/yEWkDqDS.webp');"></div>
+                            <div class="relative z-10 flex-shrink-0">
                                 <div class="text-xs font-mono font-bold tracking-widest text-neutral-500 dark:text-neutral-400 uppercase mb-1">CONTACT</div>
                                 <h3 class="text-lg sm:text-xl font-bold text-black/90 dark:text-white/90 mb-0.5 sm:mb-1">社交联系</h3>
                                 <p class="text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400">把散落的入口收束在一条缓慢移动的轨道里。</p>
                             </div>
-                            <div class="flex flex-wrap items-center gap-2 max-w-full py-0.5 sm:py-1">
+                            <div class="relative z-10 flex flex-wrap items-center gap-2 max-w-full py-0.5 sm:py-1">
                                 {contactLinks.map(item => (
                                     <a href={item.url} target={item.external ? "_blank" : undefined} rel={item.external ? "noopener" : undefined} class="btn-regular px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full text-xs font-semibold flex items-center gap-1.5 sm:gap-2 border border-black/10 dark:border-white/15 text-neutral-700 dark:text-neutral-200 hover:text-[var(--primary)] hover:border-[var(--primary)]/50 active:scale-95 transition">
                                         <Icon name={item.icon} class="text-sm sm:text-base text-[var(--primary)]" />
@@ -238,14 +239,15 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                             </div>
                         </div>
 
-                        <!-- Card D: 技能图标 -->
-                        <div class="card-base rounded-[var(--radius-large)] border border-black/15 dark:border-white/20 p-4 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 overflow-hidden shadow-lg hover:border-[var(--primary)]/60 transition duration-300 onload-animation" style="animation-delay: calc(var(--content-delay) + 350ms);">
-                            <div class="flex-shrink-0">
+                        <!-- Card D: 技能图标 (靠左，高度不裁切) -->
+                        <div class="card-base relative rounded-[var(--radius-large)] border border-black/15 dark:border-white/20 p-4 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 overflow-hidden shadow-lg hover:border-[var(--primary)]/60 transition duration-300 onload-animation group" style="animation-delay: calc(var(--content-delay) + 350ms);">
+                            <div class="absolute inset-0 bg-contain bg-left bg-no-repeat opacity-30 dark:opacity-20 pointer-events-none group-hover:scale-105 transition-transform duration-700" style="background-image: url('https://img.072199.xyz/file/wallpaper/yGLxlCHJ.webp');"></div>
+                            <div class="relative z-10 flex-shrink-0">
                                 <div class="text-xs font-mono font-bold tracking-widest text-neutral-500 dark:text-neutral-400 uppercase mb-1">SKILLS</div>
                                 <h3 class="text-lg sm:text-xl font-bold text-black/90 dark:text-white/90 mb-0.5 sm:mb-1">技能图标</h3>
                                 <p class="text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400">工程、内容和部署工具在同一条轨道上循环。</p>
                             </div>
-                            <div class="flex flex-wrap items-center gap-2 sm:gap-3 max-w-full py-0.5 sm:py-1">
+                            <div class="relative z-10 flex flex-wrap items-center gap-2 sm:gap-3 max-w-full py-0.5 sm:py-1">
                                 {skillsList.map(skill => (
                                     <div class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 text-neutral-700 dark:text-neutral-200 text-[11px] sm:text-xs font-medium hover:scale-105 transition" title={skill.name}>
                                         <Icon name={skill.icon} class="text-base sm:text-lg text-[var(--primary)]" />
