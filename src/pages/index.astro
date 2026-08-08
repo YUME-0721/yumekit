@@ -127,12 +127,14 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                     <Icon name="material-symbols:keyboard-double-arrow-down-rounded" class="text-xl text-[var(--primary)]" />
                 </div>
 
-                <!-- 固定靠右最右侧边缘的顺时针 90 度静态打字机标语（绝对死锁固定，无任何移动平移动画） -->
-                <div class="fixed right-4 sm:right-6 md:right-8 top-1/2 -translate-y-1/2 z-30 select-none pointer-events-none">
-                    <div class="flex items-center text-[10px] sm:text-xs md:text-sm text-neutral-800 dark:text-white/90 font-mono tracking-[0.18em] uppercase font-bold drop-shadow-sm dark:drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]" style="writing-mode: vertical-rl;">
-                        <span id="hero-typewriter"></span>
-                        <span class="inline-block w-3 sm:w-3.5 h-1.5 sm:h-2 mt-1 bg-[var(--primary)] animate-pulse shadow-[0_0_8px_var(--primary)]" id="typewriter-cursor"></span>
-                    </div>
+                <!-- 右侧贯穿全页的垂直打字机印花列（从上到下按平滑间距分布，第一条与首屏 Hero 大标题垂直居中线绝对对称） -->
+                <div class="absolute right-3 sm:right-6 md:right-8 top-0 bottom-0 z-10 select-none pointer-events-none flex flex-col justify-around items-center py-28 sm:py-36 md:py-44 opacity-80 transition">
+                    {Array.from({ length: 4 }).map((_, idx) => (
+                        <div class="flex items-center text-[10px] sm:text-xs md:text-sm text-neutral-800 dark:text-white/90 font-mono tracking-[0.18em] uppercase font-bold drop-shadow-sm dark:drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] my-8 sm:my-12" style="writing-mode: vertical-rl;">
+                            <span class="hero-typewriter-text"></span>
+                            <span class="inline-block w-3 sm:w-3.5 h-1.5 sm:h-2 mt-1 bg-[var(--primary)] animate-pulse shadow-[0_0_8px_var(--primary)]"></span>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
@@ -381,23 +383,26 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
     document.addEventListener('content:replace', loadMatrixSiteStats);
 
     // ============================================
-    // 3. 打字机效果
+    // 3. 打字机效果（多标语同步从上到下逐字打出）
     // ============================================
     function initTypewriter() {
-        const typewriterEl = document.getElementById('hero-typewriter');
-        if (!typewriterEl) return;
+        const typewriterEls = document.querySelectorAll('.hero-typewriter-text');
+        if (!typewriterEls || !typewriterEls.length) return;
         const text = "WELCOME TO MY BLOG, ENJOY YOUR STAY!";
         let idx = 0;
-        typewriterEl.textContent = '';
+        typewriterEls.forEach(el => { el.textContent = ''; });
         
         function typeChar() {
             if (idx < text.length) {
-                typewriterEl.textContent += text.charAt(idx);
                 idx++;
-                setTimeout(typeChar, 75);
+                const currentText = text.substring(0, idx);
+                typewriterEls.forEach(el => {
+                    el.textContent = currentText;
+                });
+                setTimeout(typeChar, 70);
             }
         }
-        setTimeout(typeChar, 500);
+        setTimeout(typeChar, 400);
     }
 
     if (document.readyState === 'loading') {
