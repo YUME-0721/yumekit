@@ -30,7 +30,6 @@ const skillsList = [
 	{ name: "Tailwind CSS", icon: "simple-icons:tailwindcss" },
 	{ name: "Node.js", icon: "fa6-brands:node-js" },
 	{ name: "Python", icon: "fa6-brands:python" },
-	{ name: "Golang", icon: "fa6-brands:golang" },
 ];
 
 const contactLinks = [
@@ -239,21 +238,23 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                             </div>
                         </div>
 
-                        <!-- Card D: 技能图标 (图片高度100%占满，左侧增加避让边距确保图片不被文字遮挡) -->
+                        <!-- Card D: 技能图标 (单行展示，多的隐藏，悬停时双倍列表无缝左右漫游循环滚动) -->
                         <div class="card-base relative rounded-[var(--radius-large)] border border-black/15 dark:border-white/20 p-4 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 overflow-hidden shadow-lg hover:border-[var(--primary)]/60 transition duration-300 onload-animation group" style="animation-delay: calc(var(--content-delay) + 350ms);">
                             <div class="absolute top-0 bottom-0 left-3 sm:left-6 h-full w-36 sm:w-48 bg-contain bg-left bg-no-repeat opacity-40 dark:opacity-30 pointer-events-none group-hover:scale-105 transition-transform duration-700" style="background-image: url('https://img.072199.xyz/file/wallpaper/4DUdFdIn.webp');"></div>
-                            <div class="relative z-10 flex-shrink-0 pl-16 sm:pl-24 md:pl-28">
+                            <div class="relative z-10 flex-shrink-0 pl-16 sm:pl-24 md:pl-28 pr-2">
                                 <div class="text-xs font-mono font-bold tracking-widest text-neutral-500 dark:text-neutral-400 uppercase mb-1">SKILLS</div>
                                 <h3 class="text-lg sm:text-xl font-bold text-black/90 dark:text-white/90 mb-0.5 sm:mb-1">技能图标</h3>
                                 <p class="text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400">工程、内容和部署工具在一条轨道上循环。</p>
                             </div>
-                            <div class="relative z-10 flex flex-wrap items-center gap-2 sm:gap-3 max-w-full py-0.5 sm:py-1">
-                                {skillsList.map(skill => (
-                                    <div class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 text-neutral-700 dark:text-neutral-200 text-[11px] sm:text-xs font-medium hover:scale-105 transition" title={skill.name}>
-                                        <Icon name={skill.icon} class="text-base sm:text-lg text-[var(--primary)]" />
-                                        <span>{skill.name}</span>
-                                    </div>
-                                ))}
+                            <div class="relative z-10 flex-1 overflow-hidden max-w-full py-0.5 sm:py-1 [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
+                                <div class="flex items-center gap-2 sm:gap-3 w-max flex-nowrap group-hover:animate-[marquee_14s_linear_infinite] hover:![animation-play-state:paused]">
+                                    {[...skillsList, ...skillsList].map(skill => (
+                                        <div class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 text-neutral-700 dark:text-neutral-200 text-[11px] sm:text-xs font-medium shrink-0 hover:scale-105 transition" title={skill.name}>
+                                            <Icon name={skill.icon} class="text-base sm:text-lg text-[var(--primary)]" />
+                                            <span>{skill.name}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -299,8 +300,18 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
             </div>
         </div>
 
-    </div>
 </MainGridLayout>
+
+<style>
+@keyframes marquee {
+    0% {
+        transform: translateX(0%);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+</style>
 
 
 
