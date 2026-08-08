@@ -61,15 +61,15 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                 </div>
             </div>
 
-            <!-- 上段：中央超大艺术字标题与座右铭（基于全屏中轴 max-w-[85rem] 靠左展放） -->
-            <div class="relative z-10 w-full max-w-[85rem] mx-auto px-4 sm:px-8 md:px-12 mt-3 sm:mt-6 md:mt-10 py-2 sm:py-4 onload-animation" style="animation-delay: calc(var(--content-delay) + 50ms);">
+            <!-- 上段：中央超大艺术字标题与座右铭（移动端居中对齐参考图2，桌面端居左） -->
+            <div class="relative z-10 w-full max-w-[85rem] mx-auto px-4 sm:px-8 md:px-12 mt-3 sm:mt-6 md:mt-10 py-2 sm:py-4 flex flex-col items-center md:items-start text-center md:text-left onload-animation" style="animation-delay: calc(var(--content-delay) + 50ms);">
                 <h1 class="text-4xl min-[360px]:text-5xl min-[410px]:text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-neutral-800 dark:text-white font-sans drop-shadow-xl dark:drop-shadow-2xl mb-3 sm:mb-4 leading-[1.1] sm:leading-none select-none transition-colors duration-300">
                     <span class="block md:inline">放课后の</span>
                     <span class="bg-gradient-to-r from-[var(--primary)] via-pink-600 to-rose-600 dark:from-[var(--primary)] dark:via-pink-400 dark:to-rose-400 bg-clip-text text-transparent font-black ml-0 md:ml-2 drop-shadow-[0_4px_16px_rgba(255,100,150,0.4)] dark:drop-shadow-[0_4px_16px_rgba(255,100,150,0.6)]">技术部</span>
                 </h1>
                 
                 <!-- 链接胶囊组 -->
-                <div class="flex flex-wrap items-center gap-2.5 sm:gap-3 my-3 sm:my-4 md:my-5">
+                <div class="flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 my-3 sm:my-4 md:my-5">
                     {profileConfig.links.map(link => (
                         <a href={link.url} target="_blank" rel="noopener" class="px-3.5 py-2 sm:px-4 sm:py-2 bg-white/85 dark:bg-black/60 hover:bg-[var(--primary)] dark:hover:bg-[var(--primary)] active:scale-95 backdrop-blur-md rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 border border-black/10 dark:border-white/20 transition-all text-neutral-800 dark:text-white hover:text-white dark:hover:text-white shadow-md">
                             {link.icon && <Icon name={link.icon} class="text-base sm:text-lg text-[var(--primary)]" />}
@@ -79,7 +79,7 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                 </div>
 
                 <!-- 座右铭 -->
-                <p class="text-sm sm:text-base md:text-2xl text-neutral-800/95 dark:text-white/95 font-semibold tracking-wider max-w-3xl leading-relaxed mt-3 sm:mt-4 drop-shadow-sm dark:drop-shadow-md border-l-3 border-[var(--primary)] pl-3.5 sm:pl-4 transition-colors duration-300">
+                <p class="text-sm sm:text-base md:text-2xl text-neutral-800/95 dark:text-white/95 font-semibold tracking-wider max-w-3xl leading-relaxed mt-2 sm:mt-3 md:mt-4 drop-shadow-sm dark:drop-shadow-md border-l-0 md:border-l-3 border-[var(--primary)] pl-0 md:pl-4 transition-colors duration-300">
                     出发！去互联网世界里捡星星✨
                 </p>
             </div>
