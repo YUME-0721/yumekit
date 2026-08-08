@@ -1,6 +1,6 @@
 <script lang="ts">
 import Icon from "@iconify/svelte";
-import { url } from "@utils/url-utils.ts";
+import { getPostUrlBySlug, url } from "@utils/url-utils.ts";
 import { onMount } from "svelte";
 
 interface SearchResult {
@@ -41,6 +41,15 @@ const highlightText = (text: string, keyword: string): string => {
 	return text.replace(regex, "<mark>$1</mark>");
 };
 
+const extractSlugFromUrl = (rawUrl: string): string => {
+	if (!rawUrl) return "";
+	const match = rawUrl.match(/\/posts\/(.+?)\/?$/);
+	if (match && match[1]) {
+		return match[1].replace(/^\/+|\/+$/g, "");
+	}
+	return rawUrl.replace(/.*\/posts\//, "").replace(/^\/+|\/+$/g, "");
+};
+
 const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
 	if (!keyword) {
 		setPanelVisibility(false, isDesktop);
@@ -56,7 +65,7 @@ const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
 				const keywordLower = keyword.toLowerCase();
 				const searchText =
 					`${post.title} ${post.description} ${post.content}`.toLowerCase();
-				const urlPath = `/posts/${post.link}`;
+				const urlPath = `/posts/${post.link}/`;
 
 				// 支持内容搜索和URL后缀搜索
 				return (
@@ -81,13 +90,14 @@ const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
 					excerpt = post.description || `${post.content.substring(0, 150)}...`;
 				}
 
+				const targetUrl = getPostUrlBySlug(post.link);
 				return {
-					url: url(`/posts/${post.link}/`),
+					url: targetUrl,
 					meta: {
 						title: post.title,
 					},
 					excerpt: highlightText(excerpt, keyword),
-					urlPath: `/posts/${post.link}`,
+					urlPath: targetUrl,
 				};
 			});
 
@@ -122,14 +132,12 @@ onMount(async () => {
 				content = contentEncoded.replace(/<[^>]*>/g, "");
 			}
 
+			const rawLink = item.querySelector("link")?.textContent || "";
 			return {
 				title: item.querySelector("title")?.textContent || "",
 				description: item.querySelector("description")?.textContent || "",
 				content: content,
-				link:
-					item
-						.querySelector("link")
-						?.textContent?.replace(/.*\/posts\/(.*?)\//, "$1") || "",
+				link: extractSlugFromUrl(rawLink),
 			};
 		});
 	} catch (error) {
