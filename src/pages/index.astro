@@ -50,7 +50,7 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
              LAYER 2: Hero 内容层
              ==================================================== -->
         <div id="hero-content"
-             class="relative w-full min-h-screen flex flex-col justify-between pt-10 sm:pt-20 md:pt-24 pb-8 md:pb-12 px-2 sm:px-8 md:px-16 overflow-hidden"
+             class="relative w-full min-h-screen flex flex-col justify-between pt-14 sm:pt-20 md:pt-24 pb-8 md:pb-12 px-3 sm:px-8 md:px-16 overflow-hidden"
              style="z-index: 10;">
 
             <!-- 呼应左侧标题与探秘卡片的右翼大字号双纵列打字机标语（移动端 < md 自动隐去防止挤爆屏宽） -->
@@ -61,15 +61,15 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                 </div>
             </div>
 
-            <!-- 上段：中央超大艺术字标题与座右铭 -->
-            <div class="relative z-10 mt-1 sm:mt-6 md:mt-10 py-1 sm:py-4 ml-2 sm:ml-8 md:ml-16 onload-animation" style="animation-delay: calc(var(--content-delay) + 50ms);">
+            <!-- 上段：中央超大艺术字标题与座右铭（具备自然顶边距，不再窒息顶紧） -->
+            <div class="relative z-10 mt-3 sm:mt-6 md:mt-10 py-2 sm:py-4 ml-2 sm:ml-8 md:ml-16 onload-animation" style="animation-delay: calc(var(--content-delay) + 50ms);">
                 <h1 class="text-[2.25rem] min-[360px]:text-4xl min-[410px]:text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-neutral-800 dark:text-white font-sans drop-shadow-lg dark:drop-shadow-2xl mb-2 sm:mb-3 md:mb-4 leading-tight sm:leading-none select-none transition-colors duration-300">
                     <span class="block md:inline">放课后の</span>
                     <span class="bg-gradient-to-r from-[var(--primary)] via-pink-600 to-rose-600 dark:from-[var(--primary)] dark:via-pink-400 dark:to-rose-400 bg-clip-text text-transparent font-black ml-0 md:ml-2 drop-shadow-[0_4px_12px_rgba(255,100,150,0.3)] dark:drop-shadow-[0_4px_12px_rgba(255,100,150,0.5)]">技术部</span>
                 </h1>
                 
                 <!-- 链接胶囊组 -->
-                <div class="flex flex-wrap items-center gap-2 sm:gap-3 my-2 sm:my-3 md:my-4">
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3 my-2.5 sm:my-3 md:my-4">
                     {profileConfig.links.map(link => (
                         <a href={link.url} target="_blank" rel="noopener" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-white/80 dark:bg-black/50 hover:bg-[var(--primary)] dark:hover:bg-[var(--primary)] active:scale-95 backdrop-blur-md rounded-xl text-xs md:text-sm font-semibold flex items-center gap-1.5 sm:gap-2 border border-black/10 dark:border-white/20 transition-all text-neutral-800 dark:text-white hover:text-white dark:hover:text-white shadow-md">
                             {link.icon && <Icon name={link.icon} class="text-sm sm:text-base text-[var(--primary)]" />}
@@ -79,13 +79,13 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                 </div>
 
                 <!-- 座右铭 -->
-                <p class="text-xs sm:text-base md:text-2xl text-neutral-800/90 dark:text-white/90 font-medium tracking-wider max-w-3xl leading-relaxed mt-2 sm:mt-3 md:mt-4 drop-shadow-sm dark:drop-shadow-md border-l-2 border-[var(--primary)] pl-3 sm:pl-4 transition-colors duration-300">
+                <p class="text-xs sm:text-base md:text-2xl text-neutral-800/90 dark:text-white/90 font-medium tracking-wider max-w-3xl leading-relaxed mt-2.5 sm:mt-3 md:mt-4 drop-shadow-sm dark:drop-shadow-md border-l-2 border-[var(--primary)] pl-3 sm:pl-4 transition-colors duration-300">
                     出发！去互联网世界里捡星星✨
                 </p>
             </div>
 
-            <!-- 中段：饱满高质感展示大卡片（移动端紧凑缩短宽度与上下空隙） -->
-            <div class="relative z-10 my-2 sm:my-3 md:my-auto py-1 sm:py-4 w-[calc(100%-2rem)] max-w-4xl mx-auto md:ml-16 onload-animation" style="animation-delay: calc(var(--content-delay) + 120ms);">
+            <!-- 中段：饱满高质感展示大卡片（my-auto 弹性居中消灭下半屏空洞留白） -->
+            <div class="relative z-10 my-auto py-3 sm:py-4 w-[calc(100%-2rem)] max-w-4xl mx-auto md:ml-16 onload-animation" style="animation-delay: calc(var(--content-delay) + 120ms);">
                 <div class="card-base p-3.5 sm:p-6 rounded-2xl border border-black/15 dark:border-white/20 bg-white/40 dark:bg-black/40 backdrop-blur-md shadow-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4 hover:border-[var(--primary)]/50 transition duration-300">
                     <!-- 左侧：快捷导航与探索指南 -->
                     <div class="flex flex-col gap-1.5 sm:gap-2">
