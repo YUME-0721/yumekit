@@ -23,6 +23,7 @@ interface Props {
 	setOGTypeArticle?: boolean;
 	headings?: MarkdownHeading[];
 	hideSidebar?: boolean;
+	isHeroHome?: boolean;
 }
 
 const {
@@ -33,14 +34,17 @@ const {
 	setOGTypeArticle,
 	headings = [],
 	hideSidebar = false,
+	isHeroHome = false,
 } = Astro.props;
 const hasBannerCredit =
 	siteConfig.banner.enable && siteConfig.banner.credit.enable;
 const hasBannerLink = !!siteConfig.banner.credit.url;
 
-const mainPanelTop = siteConfig.banner.enable
-	? `calc(${BANNER_HEIGHT}vh - ${MAIN_PANEL_OVERLAPS_BANNER_HEIGHT}rem)`
-	: "5.5rem";
+const mainPanelTop = isHeroHome
+	? "0rem"
+	: siteConfig.banner.enable
+		? `calc(${BANNER_HEIGHT}vh - ${MAIN_PANEL_OVERLAPS_BANNER_HEIGHT}rem)`
+		: "5.5rem";
 ---
 
 <Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle}>
@@ -64,10 +68,10 @@ const mainPanelTop = siteConfig.banner.enable
 <!-- Main content -->
 <div class="absolute w-full z-30 pointer-events-none" style=`top: ${mainPanelTop}`>
     <!-- The pointer-events-none here prevent blocking the click event of the TOC -->
-    <div class="relative max-w-[var(--page-width)] mx-auto pointer-events-auto">
+    <div class:list={["relative mx-auto pointer-events-auto", isHeroHome ? "w-full" : "max-w-[var(--page-width)]"]}>
         <div id="main-grid" class:list={[
-            "transition duration-700 w-full left-0 right-0 grid mx-auto gap-4 px-4 md:px-4",
-            hideSidebar ? "grid-cols-1" : "grid-cols-[17.5rem_auto] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto]"
+            "transition duration-700 w-full left-0 right-0 grid mx-auto gap-4",
+            isHeroHome ? "grid-cols-1 px-0 gap-0" : (hideSidebar ? "grid-cols-1 px-4 md:px-4" : "grid-cols-[17.5rem_auto] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto] px-4 md:px-4")
         ]}>
             <!-- Banner image credit -->
             {hasBannerCredit && <a href={siteConfig.banner.credit.url} id="banner-credit" target="_blank" rel="noopener" aria-label="Visit image source"
