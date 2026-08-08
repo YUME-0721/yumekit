@@ -5,7 +5,7 @@ import PostCard from "../components/PostCard.astro";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 import { getSortedPosts } from "../utils/content-utils";
 import { getPostUrlBySlug, url } from "../utils/url-utils";
-import { profileConfig, siteConfig } from "../config";
+import { profileConfig, siteConfig, umamiConfig } from "../config";
 
 const allPosts = await getSortedPosts();
 const recentPosts = allPosts.slice(0, 4);
@@ -14,56 +14,91 @@ let delay = 0;
 const interval = 50;
 ---
 
-<MainGridLayout title="首页">
+<MainGridLayout title="首页" hideSidebar={true}>
     <div class="flex flex-col gap-4 mb-4">
-        <!-- Hero Header Section (匹配参考图2落地页风格) -->
-        <div class="card-base relative overflow-hidden rounded-[var(--radius-large)] p-6 md:p-10 border border-black/10 dark:border-white/10 shadow-lg onload-animation" style="animation-delay: calc(var(--content-delay) + 0ms);">
+        <!-- Hero Header Section (整合头像、个人简介、全站统计与个性标语) -->
+        <div class="card-base relative overflow-hidden rounded-[var(--radius-large)] p-6 md:p-8 border border-black/10 dark:border-white/10 shadow-xl onload-animation" style="animation-delay: calc(var(--content-delay) + 0ms);">
             <!-- Background overlay with ambient glow -->
-            <div class="absolute inset-0 bg-gradient-to-br from-neutral-900/90 via-neutral-900/80 to-neutral-900/95 z-0"></div>
-            <div class="absolute inset-0 bg-[url('https://pic.yumekai.top/pic?img=ua')] bg-cover bg-center opacity-30 mix-blend-overlay z-0"></div>
-            <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-[var(--primary)]/20 rounded-full blur-3xl pointer-events-none z-0"></div>
+            <div class="absolute inset-0 bg-gradient-to-br from-neutral-900/90 via-neutral-900/85 to-neutral-950/95 z-0"></div>
+            <div class="absolute inset-0 bg-[url('https://pic.yumekai.top/pic?img=ua')] bg-cover bg-center opacity-25 mix-blend-overlay z-0"></div>
+            <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-[var(--primary)]/20 rounded-full blur-3xl pointer-events-none z-0"></div>
 
-            <div class="relative z-10 text-white flex flex-col justify-between min-h-[16rem]">
-                <!-- Top Tag Badge -->
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg text-xs font-mono tracking-wider border border-white/15 text-white/90">
-                        [{siteConfig.subtitle || "记录 / 分享 / 个人博客"}]
-                    </span>
-                </div>
-
-                <!-- Hero Title -->
-                <div class="my-2">
-                    <h1 class="text-4xl md:text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-100 to-white/80 font-sans drop-shadow-sm">
-                        {siteConfig.title} <span class="text-[var(--primary)] font-serif italic text-3xl md:text-5xl font-normal ml-1">の 博客</span>
-                    </h1>
-                </div>
-
-                <!-- Social Badges & Motto -->
-                <div class="flex flex-wrap items-center gap-3 my-3">
-                    {profileConfig.links.map(link => (
-                        <a href={link.url} target="_blank" rel="noopener" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 active:scale-95 backdrop-blur-md rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 border border-white/10 transition-all text-white/90">
-                            {link.icon && <Icon name={link.icon} class="text-base" />}
-                            <span>{link.name}</span>
-                        </a>
-                    ))}
-                </div>
-
-                <!-- Motto Quote -->
-                <p class="text-sm md:text-base text-white/75 font-normal tracking-wide mt-2 border-l-2 border-[var(--primary)] pl-3 italic">
-                    躬身入局，心为主理，行有尺度，自持本心。
-                </p>
-
-                <!-- Bottom Mascot Welcome Bar -->
-                <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between flex-wrap gap-2 text-xs text-white/60">
-                    <div class="flex items-center gap-2">
-                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span class="font-medium text-white/80">YUME 主理人？ WELCOME TO MY BLOG, ENJOY YOUR STAY!</span>
+            <div class="relative z-10 text-white flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
+                <!-- Avatar Block -->
+                <div class="relative flex-shrink-0 group">
+                    <div class="w-28 h-28 md:w-36 md:h-36 rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl transition duration-500 group-hover:scale-105 group-hover:border-[var(--primary)]">
+                        <img src={profileConfig.avatar} alt="Profile Image of the Author" class="w-full h-full object-cover" />
                     </div>
-                    <a href={url("/posts/")} class="text-[var(--primary)] hover:underline font-bold flex items-center gap-1">
-                        <span>浏览全站文章</span>
-                        <Icon name="material-symbols:chevron-right-rounded" class="text-lg" />
-                    </a>
+                    <div class="absolute -bottom-2 -right-2 bg-[var(--primary)] text-white text-xs px-2.5 py-0.5 rounded-full font-bold shadow-md flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                        <span>博主</span>
+                    </div>
                 </div>
+
+                <!-- Details & Content Block -->
+                <div class="flex-grow flex flex-col justify-between text-center md:text-left min-w-0 w-full">
+                    <!-- Top Tag & Subtitle -->
+                    <div class="flex items-center justify-center md:justify-start gap-2 mb-2 flex-wrap">
+                        <span class="px-3 py-0.5 bg-white/10 backdrop-blur-md rounded-md text-xs font-mono tracking-wider border border-white/15 text-white/90">
+                            [{siteConfig.subtitle || "技术分享与实践"}]
+                        </span>
+                        <span class="px-2.5 py-0.5 bg-[var(--primary)]/20 backdrop-blur-md rounded-md text-xs font-medium text-[var(--primary)] border border-[var(--primary)]/30">
+                            {profileConfig.bio}
+                        </span>
+                    </div>
+
+                    <!-- Hero Title -->
+                    <div class="my-1">
+                        <h1 class="text-3xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-100 to-white/80 font-sans">
+                            {profileConfig.name} <span class="text-[var(--primary)] font-serif italic text-2xl md:text-4xl font-normal ml-1">の 博客</span>
+                        </h1>
+                    </div>
+
+                    <!-- Motto Quote -->
+                    <p class="text-xs md:text-sm text-white/75 font-normal tracking-wide my-2 border-l-0 md:border-l-2 border-[var(--primary)] md:pl-3 italic">
+                        躬身入局，心为主理，行有尺度，自持本心。
+                    </p>
+
+                    <!-- Social Links & Site Stats Bar -->
+                    <div class="flex flex-wrap items-center justify-center md:justify-between gap-4 mt-3 pt-3 border-t border-white/10">
+                        <!-- Social Links -->
+                        <div class="flex items-center gap-2">
+                            {profileConfig.links.map(link => (
+                                <a href={link.url} target="_blank" rel="noopener" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 active:scale-95 backdrop-blur-md rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-white/10 transition text-white/90">
+                                    {link.icon && <Icon name={link.icon} class="text-base text-[var(--primary)]" />}
+                                    <span>{link.name}</span>
+                                </a>
+                            ))}
+                        </div>
+
+                        <!-- Site Stats Pill -->
+                        <div class="flex items-center gap-3 px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-lg text-xs border border-white/10 text-white/80">
+                            <div class="flex items-center gap-1">
+                                <Icon name="material-symbols:visibility-outline" class="text-sm text-[var(--primary)]" />
+                                <span>访问量</span>
+                                <span id="site-views" class="font-bold text-white ml-0.5">0</span>
+                            </div>
+                            <span class="text-white/20">|</span>
+                            <div class="flex items-center gap-1">
+                                <Icon name="material-symbols:person" class="text-sm text-[var(--primary)]" />
+                                <span>访客数</span>
+                                <span id="site-visitors" class="font-bold text-white ml-0.5">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Welcome Bar -->
+            <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between flex-wrap gap-2 text-xs text-white/60 relative z-10">
+                <div class="flex items-center gap-2">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="font-medium text-white/80">YUME 主理人？ WELCOME TO MY BLOG, ENJOY YOUR STAY!</span>
+                </div>
+                <a href={url("/posts/")} class="text-[var(--primary)] hover:underline font-bold flex items-center gap-1">
+                    <span>浏览全站文章</span>
+                    <Icon name="material-symbols:chevron-right-rounded" class="text-lg" />
+                </a>
             </div>
         </div>
 
@@ -105,3 +140,72 @@ const interval = 50;
         </div>
     </div>
 </MainGridLayout>
+
+<script define:vars={{ umamiConfig }}>
+    // 数字动画函数
+    function animateValue(obj, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start);
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            } else {
+                obj.innerHTML = end;
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    // 获取全站访问量统计
+    async function loadHeroSiteStats() {
+        if (!umamiConfig.enabled) return;
+        
+        if (typeof window.getUmamiPageStats !== 'function') {
+            return;
+        }
+        
+        try {
+            const statsData = await window.getUmamiPageStats(
+                umamiConfig.baseUrl,
+                umamiConfig.websiteId,
+                null,
+                umamiConfig.shareId
+            );
+            
+            const pageviews = statsData.pageviews || 0;
+            const visitors = statsData.visitors || 0;
+            
+            const viewsElement = document.getElementById('site-views');
+            const visitorsElement = document.getElementById('site-visitors');
+
+            if (window.__umamiApiUnauthorized && pageviews === 0 && visitors === 0) {
+                return;
+            }
+            
+            if (viewsElement) {
+                const startVal = parseInt(viewsElement.textContent) || 0;
+                if (startVal !== pageviews) {
+                    animateValue(viewsElement, startVal, pageviews, 1000);
+                }
+            }
+            
+            if (visitorsElement) {
+                const startVal = parseInt(visitorsElement.textContent) || 0;
+                if (startVal !== visitors) {
+                    animateValue(visitorsElement, startVal, visitors, 1000);
+                }
+            }
+        } catch (error) {
+            console.error('获取全站统计失败:', error);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadHeroSiteStats);
+    } else {
+        loadHeroSiteStats();
+    }
+    document.addEventListener('content:replace', loadHeroSiteStats);
+</script>
