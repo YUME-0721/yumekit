@@ -36,9 +36,9 @@ links = links.map((link) => {
     <div class="absolute h-8 left-0 right-0 -top-8 bg-[var(--card-bg)] transition"></div> <!-- used for onload animation -->
     <div class:list={[
         className,
-        "card-base border border-black/10 dark:border-white/10 !overflow-visible max-w-[var(--page-width)] h-[3.75rem] !rounded-t-none mx-auto flex items-center justify-between px-3"]}>
-        <a href={url('/')} class="btn-plain scale-animation rounded-lg h-[2.5rem] px-3.5 font-bold active:scale-95">
-            <div class="flex flex-row text-[var(--primary)] items-center text-[1.15rem] tracking-wider">
+        "card-base border border-black/10 dark:border-white/10 !overflow-visible max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none mx-auto flex items-center justify-between px-4"]}>
+        <a href={url('/')} class="btn-plain scale-animation rounded-lg h-[3.25rem] px-5 font-bold active:scale-95">
+            <div class="flex flex-row text-[var(--primary)] items-center text-[1.2rem] tracking-wider">
                 YUME
             </div>
         </a>
@@ -52,28 +52,28 @@ links = links.map((link) => {
                     return (
                         <div class="dropdown-container relative" data-dropdown>
                             <button 
-                                class="btn-plain scale-animation rounded-lg h-9 font-semibold px-3.5 active:scale-95 dropdown-trigger flex items-center text-sm"
+                                class="btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95 dropdown-trigger flex items-center"
                                 aria-expanded="false"
                                 aria-haspopup="true"
                             >
-                                {l.icon && <Icon name={l.icon} class="text-[1rem] mr-1.5" />}
+                                {l.icon && <Icon name={l.icon} class="text-[1.1rem] mr-2" />}
                                 {l.name}
-                                <Icon name="material-symbols:keyboard-arrow-down-rounded" class="text-[1.15rem] transition-transform duration-200 dropdown-arrow ml-0.5" />
+                                <Icon name="material-symbols:keyboard-arrow-down-rounded" class="text-[1.25rem] transition-transform duration-200 dropdown-arrow ml-1" />
                             </button>
-                            <div class="dropdown-menu absolute top-full left-0 pt-1.5 opacity-0 invisible pointer-events-none transition-all duration-200 ease-out transform translate-y-[-8px] z-50">
-                                <div class="dropdown-content bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-xl border border-black/5 dark:border-white/10 py-1.5 min-w-[9.5rem]">
+                            <div class="dropdown-menu absolute top-full left-0 pt-2 opacity-0 invisible pointer-events-none transition-all duration-200 ease-out transform translate-y-[-8px] z-50">
+                                <div class="dropdown-content bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-xl border border-black/5 dark:border-white/10 py-2 min-w-[10rem]">
                                     {l.children?.map((child) => (
                                         <a 
                                             href={child.external ? child.url : url(child.url)} 
                                             target={child.external ? "_blank" : null}
-                                            class="dropdown-item flex items-center justify-between px-3.5 py-2 text-black/75 dark:text-white/75 hover:text-[var(--primary)] hover:bg-[var(--btn-plain-bg-hover)] transition-colors duration-150 text-xs md:text-sm font-medium"
+                                            class="dropdown-item flex items-center justify-between px-4 py-2.5 text-black/75 dark:text-white/75 hover:text-[var(--primary)] hover:bg-[var(--btn-plain-bg-hover)] transition-colors duration-150 font-medium"
                                         >
                                             <div class="flex items-center">
-                                                {child.icon && <Icon name={child.icon} class="text-[0.95rem] mr-1.5" />}
+                                                {child.icon && <Icon name={child.icon} class="text-[1rem] mr-2" />}
                                                 <span>{child.name}</span>
                                             </div>
                                             {child.external && (
-                                                <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.7rem] text-black/25 dark:text-white/25" />
+                                                <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.75rem] text-black/25 dark:text-white/25" />
                                             )}
                                         </a>
                                     ))}
@@ -85,29 +85,29 @@ links = links.map((link) => {
                     // 渲染普通链接
                     return (
                         <a aria-label={l.name} href={l.external ? l.url : url(l.url)} target={l.external ? "_blank" : null}
-                           class="btn-plain scale-animation rounded-lg h-9 font-semibold px-3.5 active:scale-95 text-sm"
+                           class="btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95"
                         >
                             <div class="flex items-center">
-                                {l.icon && <Icon name={l.icon} class="text-[1rem] mr-1.5" />}
+                                {l.icon && <Icon name={l.icon} class="text-[1.1rem] mr-2" />}
                                 {l.name}
-                                {l.external && <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.8rem] transition -translate-y-[1px] ml-1 text-black/[0.2] dark:text-white/[0.2]"></Icon>}
+                                {l.external && <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.875rem] transition -translate-y-[1px] ml-1 text-black/[0.2] dark:text-white/[0.2]"></Icon>}
                             </div>
                         </a>
                     );
                 }
             })}
         </div>
-        <div class="flex items-center space-x-1">
+        <div class="flex">
             <!--<SearchPanel client:load>-->
             <Search client:only="svelte"></Search>
             {!siteConfig.themeColor.fixed && (
-                    <button aria-label="Display Settings" class="btn-plain scale-animation rounded-lg h-9 w-9 active:scale-90 flex items-center justify-center" id="display-settings-switch">
-                        <Icon name="material-symbols:palette-outline" class="text-[1.15rem]"></Icon>
+                    <button aria-label="Display Settings" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="display-settings-switch">
+                        <Icon name="material-symbols:palette-outline" class="text-[1.25rem]"></Icon>
                     </button>
             )}
 
-            <button aria-label="Menu" name="Nav Menu" class="btn-plain scale-animation rounded-lg w-9 h-9 active:scale-90 md:!hidden flex items-center justify-center" id="nav-menu-switch">
-                <Icon name="material-symbols:menu-rounded" class="text-[1.15rem]"></Icon>
+            <button aria-label="Menu" name="Nav Menu" class="btn-plain scale-animation rounded-lg w-11 h-11 active:scale-90 md:!hidden" id="nav-menu-switch">
+                <Icon name="material-symbols:menu-rounded" class="text-[1.25rem]"></Icon>
             </button>
         </div>
         <NavMenuPanel links={links}></NavMenuPanel>
@@ -164,4 +164,38 @@ function loadButtonScript() {
 
 loadButtonScript();
 </script>
+
+<style>
+/* =============================================
+   主页专属 - 水平居中紧凑胶囊 Floating Pill Navbar
+   仅当 body 含有 .is-home 时生效，其他页面保持原样
+   ============================================= */
+:global(body.is-home) #navbar {
+    padding-top: 0.75rem;
+}
+
+:global(body.is-home) #navbar > div:first-child {
+    display: none;
+}
+
+:global(body.is-home) #navbar > .card-base {
+    width: fit-content;
+    max-width: 95vw;
+    height: 3.5rem;
+    border-radius: 9999px !important;
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    gap: 0.35rem;
+}
+
+:global(body.is-home) #navbar .btn-plain {
+    height: 2.35rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    border-radius: 9999px;
+}
+</style>
 
