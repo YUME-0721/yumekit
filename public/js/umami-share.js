@@ -6,6 +6,11 @@
 	const cacheKey = "umami-share-cache";
 	const cacheTTL = 3600_000; // 1 小时缓存
 
+	// 默认保底配置（自建 Umami 服务参数）
+	const defaultBaseUrl = "https://umami.yumekai.top";
+	const defaultWebsiteId = "967adb81-bb8b-429d-855d-2ac915a6af96";
+	const defaultShareId = "46vKiUC2hTE5PytG";
+
 	// 初始化全局缓存 Map
 	if (!global.__umamiDataCache) {
 		global.__umamiDataCache = new Map();
@@ -51,8 +56,11 @@
 	 * 获取 Umami Share Token（免 API Key 获取公开统计）
 	 */
 	async function getShareToken(baseUrl, shareId) {
-		if (!shareId) return null;
-		const cacheKeyStr = `share-token-${shareId}`;
+		const targetShareId = shareId || global.__umamiShareId || defaultShareId;
+		const targetBaseUrl = baseUrl || global.__umamiBaseUrl || defaultBaseUrl;
+
+		if (!targetShareId) return null;
+		const cacheKeyStr = `share-token-${targetShareId}`;
 		if (global.__umamiShareTokenCache.has(cacheKeyStr)) {
 			return global.__umamiShareTokenCache.get(cacheKeyStr);
 		}
@@ -63,7 +71,7 @@
 		}
 
 		try {
-			const res = await fetch(`${baseUrl}/api/share/${shareId}`);
+			const res = await fetch(`${targetBaseUrl}/api/share/${targetShareId}`);
 			if (!res.ok) return null;
 			const data = await res.json();
 			if (data && data.token) {
@@ -71,8 +79,8 @@
 				saveToCache(cacheKeyStr, data.token);
 				return data.token;
 			}
-		} catch {
-			// 忽略请求错误
+		} catch (e) {
+			console.error("获取 Umami Share Token 失败:", e);
 		}
 		return null;
 	}
@@ -94,37 +102,48 @@
 	global.clearUmamiCache = global.clearUmamiShareCache;
 
 	/**
-	 * 统一解析不同版本的调用参数
+	 * 智能解析全场景调用参数
 	 */
 	function parseArgs(args) {
-		let baseUrl = args[0];
+		let baseUrl = null;
 		let websiteId = null;
 		let urlPath = null;
 		let shareId = null;
 
-		if (typeof args[1] === "string" && (args[1].length === 36 || (args.length <= 4 && !args[1].startsWith("http")))) {
-			// 新签名: (baseUrl, websiteId, urlPath, shareId)
-			websiteId = args[1];
-			urlPath = args[2] || null;
-			shareId = args[3] || null;
-		} else {
-			// 旧签名: (baseUrl, apiKey/ignored, websiteId, urlPath, shareId)
-			websiteId = args[2];
-			urlPath = args[3] || null;
-			shareId = args[4] || null;
+		const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
+		for (let i = 0; i < args.length; i++) {
+			const arg = args[i];
+			if (typeof arg !== "string" || !arg.trim()) continue;
+			const trimmed = arg.trim();
+
+			if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+				baseUrl = trimmed;
+			} else if (uuidRegex.test(trimmed)) {
+				websiteId = trimmed;
+			} else if (trimmed.startsWith("/")) {
+				urlPath = trimmed;
+			} else if (!shareId && trimmed.length >= 6 && !trimmed.includes("/")) {
+				shareId = trimmed;
+			}
 		}
-		return { baseUrl, websiteId, urlPath, shareId };
+
+		return {
+			baseUrl: baseUrl || global.__umamiBaseUrl || defaultBaseUrl,
+			websiteId: websiteId || global.__umamiWebsiteId || defaultWebsiteId,
+			urlPath: urlPath,
+			shareId: shareId || global.__umamiShareId || defaultShareId,
+		};
 	}
 
 	/**
 	 * 获取 Umami 统计核心函数
 	 */
 	async function fetchStats(baseUrl, websiteId, urlPath = null, shareId = null) {
-		if (!websiteId) {
-			return { pageviews: 0, visitors: 0, visits: 0, _fromCache: false };
-		}
+		const targetWebsiteId = websiteId || defaultWebsiteId;
+		const targetBaseUrl = (baseUrl || defaultBaseUrl).replace(/\/+$/, "");
 
-		const cacheKeyStr = urlPath ? `page-stats-${websiteId}-${urlPath}` : `site-stats-${websiteId}`;
+		const cacheKeyStr = urlPath ? `page-stats-${targetWebsiteId}-${urlPath}` : `site-stats-${targetWebsiteId}`;
 
 		// 检查内存缓存
 		if (global.__umamiDataCache.has(cacheKeyStr)) {
@@ -140,24 +159,25 @@
 
 		try {
 			const currentTimestamp = Date.now();
-			let statsUrl = `${baseUrl}/api/websites/${websiteId}/stats?startAt=0&endAt=${currentTimestamp}`;
+			let statsUrl = `${targetBaseUrl}/api/websites/${targetWebsiteId}/stats?startAt=0&endAt=${currentTimestamp}`;
 			if (urlPath) {
 				statsUrl += `&path=${encodeURIComponent(urlPath)}`;
 			}
 
 			const headers = {};
-			if (shareId) {
-				const shareToken = await getShareToken(baseUrl, shareId);
+			const targetShareId = shareId || defaultShareId;
+			if (targetShareId) {
+				const shareToken = await getShareToken(targetBaseUrl, targetShareId);
 				if (shareToken) {
 					headers["x-umami-share-token"] = shareToken;
-					headers["x-umami-share-context"] = shareId;
+					headers["x-umami-share-context"] = targetShareId;
 				}
 			}
 
 			let res = await fetch(statsUrl, { headers });
 
 			if (res.status === 404 && !urlPath) {
-				const fallbackUrl = `${baseUrl}/v1/websites/${websiteId}/stats?startAt=0&endAt=${currentTimestamp}`;
+				const fallbackUrl = `${targetBaseUrl}/v1/websites/${targetWebsiteId}/stats?startAt=0&endAt=${currentTimestamp}`;
 				res = await fetch(fallbackUrl, { headers });
 			}
 
