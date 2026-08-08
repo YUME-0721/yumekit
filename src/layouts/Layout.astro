@@ -173,7 +173,7 @@ const bannerOffset =
 
 			// Load the bg-blur from local storage
 			const storedBgBlur = localStorage.getItem('bg-blur');
-			const bgBlurVal = storedBgBlur !== null ? parseInt(storedBgBlur) : 4;
+			const bgBlurVal = storedBgBlur !== null ? parseInt(storedBgBlur) : 3;
 			document.documentElement.style.setProperty('--bg-blur', `${bgBlurVal}px`);
 
 			// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
