@@ -50,6 +50,7 @@ export function getBgBlur(): number {
 
 export function setBgBlur(blur: number): void {
 	localStorage.setItem("bg-blur", String(blur));
+	document.documentElement.style.setProperty("--bg-blur", `${blur}px`);
 	const bgBox = document.getElementById("bg-box");
 	if (bgBox) {
 		// Retrieve existing hue-rotate value if any, or 0
