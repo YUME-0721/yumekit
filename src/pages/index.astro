@@ -43,9 +43,6 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
 
 <MainGridLayout title="首页" hideSidebar={true} isHeroHome={true}>
     <div class="flex flex-col w-full relative overflow-x-hidden" id="home-root">
-        <!-- 贯穿全页的唯一统一遮罩蒙版：消灭任何两层遮罩重叠造成的色差横条 -->
-        <div class="absolute inset-0 pointer-events-none z-0" id="home-unified-overlay"></div>
-        
         <!-- ====================================================
              LAYER 2: Hero 内容层
              ==================================================== -->
@@ -275,33 +272,7 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
     </div>
 </MainGridLayout>
 
-<style>
-/* =============================================
-   液态玻璃滚动系统 - 全局样式
-   ============================================= */
 
-/* 内容面板 - 亮色模式（白色半透明遮罩） */
-/* 贯穿全页的唯一背景遮罩蒙版 - 亮色模式（固定死锁全视口，与全屏背景图 #bg-box 完全对齐无侧露缝隙） */
-#home-unified-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(10px) saturate(135%);
-    -webkit-backdrop-filter: blur(10px) saturate(135%);
-    transition: background 0.4s ease, backdrop-filter 0.4s ease;
-    z-index: 0;
-}
-
-/* 贯穿全页的唯一背景遮罩蒙版 - 暗色模式 */
-:global(.dark) #home-unified-overlay {
-    background: rgba(12, 12, 18, 0.58);
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
-}
-</style>
 
 <script define:vars={{ umamiConfig }}>
 (function() {
