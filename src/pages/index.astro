@@ -52,16 +52,9 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
              class="relative w-full min-h-screen flex flex-col justify-between pt-28 md:pt-36 pb-12 px-6 md:px-16 overflow-hidden"
              style="z-index: 10;">
 
-            <!-- 背景图：绝对定位 + 额外高度，JS 反向平移使其视觉上完全静止 -->
-            <!-- top center：元素超高时图片从顶部开始，不被上方裁切 -->
-            <div id="hero-bg-el"
-                 class="absolute left-0 right-0 pointer-events-none will-change-transform"
-                 style={`top: 0; height: calc(100% + 100vh); background: url('${heroBg}') center top / cover no-repeat; z-index: 0;`}>
-            </div>
-
             <!-- Hero 渐变遮罩 -->
             <div class="absolute inset-0 pointer-events-none" id="hero-overlay"
-                 style="background: linear-gradient(to top, rgba(10,10,10,0.88) 0%, rgba(10,10,10,0.30) 55%, rgba(0,0,0,0.45) 100%); z-index: 1;"></div>
+                 style="background: linear-gradient(to top, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.25) 55%, rgba(0,0,0,0.40) 100%); z-index: 1;"></div>
 
             <!-- 顶部小标签 -->
             <div class="relative z-10 onload-animation" style="animation-delay: calc(var(--content-delay) + 0ms);">
@@ -252,17 +245,12 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
    液态玻璃滚动系统 - 全局样式
    ============================================= */
 
-/* 内容面板 - 始终使用不透明背景隔断全局 bg-box */
+/* 内容面板 - 半透明毛玻璃质感，能自然透出 Layout 底层的全屏固定壁纸 */
 #content-glass-panel {
-    /* 亮色模式：站点标准浅灰白背景 */
-    background: oklch(0.97 0 0);
     border-radius: 2rem 2rem 0 0;
     transition: border-radius 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* 暗色模式 */
-:global(.dark) #content-glass-panel {
-    background: oklch(0.15 0.015 var(--hue, 270));
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
 }
 
 /* 滚动后拉平圆角 */
@@ -312,10 +300,9 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
 <script define:vars={{ umamiConfig }}>
 (function() {
     // ============================================
-    // 1. 液态玻璃滚动 + 背景反向位移（视觉固定）
+    // 1. 液态玻璃滚动效果
     // ============================================
     const heroContent = document.getElementById('hero-content');
-    const heroBgEl = document.getElementById('hero-bg-el');
 
     let ticking = false;
 
@@ -323,13 +310,6 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
         const scrollY = window.scrollY;
         const heroHeight = heroContent ? heroContent.offsetHeight : window.innerHeight;
         
-        // ── 背景反向位移：translateY(+scrollY) 完全抵消页面上移 ──
-        // 背景绝对定位在 hero 内，hero 随页面上滚 scrollY px，
-        // 背景向下平移 scrollY px，视觉上背景完全静止
-        if (heroBgEl) {
-            heroBgEl.style.transform = `translateY(${scrollY}px)`;
-        }
-
         // ── 内容区域毛玻璃切换 ──
         const transitionStart = heroHeight * 0.70;
         const transitionEnd = heroHeight * 1.05;
