@@ -227,82 +227,40 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
    ============================================= */
 
 /* 内容面板 - 亮色模式（白色半透明遮罩） */
+/* 内容面板 - 亮色模式（与 Hero 底部精准无缝连成一体） */
 #content-glass-panel {
-    border-radius: 2rem 2rem 0 0;
-    transition: border-radius 0.45s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s ease;
-    background: rgba(245, 245, 250, 0.72);
+    border-radius: 0;
+    transition: background 0.4s ease;
+    background: rgba(248, 248, 252, 0.85);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
 }
 
-/* 内容面板 - 暗色模式（深色半透明遮罩） */
+/* 内容面板 - 暗色模式（与 Hero 底部精准无缝连成一体） */
 :global(.dark) #content-glass-panel {
-    background: rgba(14, 14, 20, 0.78);
+    background: rgba(10, 10, 12, 0.88);
     backdrop-filter: blur(24px) saturate(160%);
     -webkit-backdrop-filter: blur(24px) saturate(160%);
 }
 
-/* 滚动后拉平圆角 */
-.is-scrolled #content-glass-panel {
-    border-radius: 0;
-}
-
-/* Hero 渐变遮罩 - 亮色模式（白色半透明） */
+/* Hero 渐变遮罩 - 亮色模式（白色半透明，底部精准衔接 rgba(248, 248, 252, 0.85)） */
 #hero-overlay {
     background: linear-gradient(
         to top,
-        rgba(255, 255, 255, 0.82) 0%,
+        rgba(248, 248, 252, 0.85) 0%,
         rgba(255, 255, 255, 0.30) 55%,
         rgba(240, 240, 248, 0.45) 100%
     );
     transition: background 0.4s ease;
 }
 
-/* Hero 渐变遮罩 - 暗色模式（黑色半透明） */
+/* Hero 渐变遮罩 - 暗色模式（黑色半透明，底部精准衔接 rgba(10, 10, 12, 0.88)） */
 :global(.dark) #hero-overlay {
     background: linear-gradient(
         to top,
-        rgba(10, 10, 10, 0.88) 0%,
+        rgba(10, 10, 12, 0.88) 0%,
         rgba(10, 10, 10, 0.30) 55%,
         rgba(0, 0, 0, 0.45) 100%
-    );
-}
-
-/* 顶部光晕线（伪元素实现，无 sticky 横条）*/
-#content-glass-panel::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 10%;
-    right: 10%;
-    height: 1px;
-    opacity: 0;
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255,255,255,0.7) 30%,
-        rgba(255,255,255,1) 50%,
-        rgba(255,255,255,0.7) 70%,
-        transparent 100%
-    );
-    transition: opacity 0.5s ease, left 0.5s ease, right 0.5s ease;
-    pointer-events: none;
-}
-
-.is-scrolled #content-glass-panel::before {
-    opacity: 1;
-    left: 0;
-    right: 0;
-}
-
-:global(.dark) #content-glass-panel::before {
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(150, 150, 200, 0.5) 30%,
-        rgba(200, 200, 255, 0.8) 50%,
-        rgba(150, 150, 200, 0.5) 70%,
-        transparent 100%
     );
 }
 </style>
