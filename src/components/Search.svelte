@@ -171,76 +171,71 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 $: search(keywordDesktop, true);
-$: search(keywordMobile, false);
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
 
-<!-- search bar for desktop view -->
-{#if isHeroHome && !isExpanded}
-    <!-- 主页默认模式：极致紧凑圆形放大镜搜索按钮 -->
-    <button on:click={expandSearch} aria-label="Search Bar" 
-            class="hidden lg:flex btn-plain scale-animation rounded-full w-10 h-10 items-center justify-center active:scale-90 transition-all">
-        <Icon icon="material-symbols:search" class="text-[1.25rem]"></Icon>
-    </button>
-{:else}
-    <!-- 展开状态或非主页默认模式：平滑延伸拉长的输入框 -->
-    <div id="search-bar" 
-         class="hidden lg:flex transition-all duration-300 items-center h-10 mr-1 rounded-full relative overflow-hidden
-          bg-black/[0.05] hover:bg-black/[0.08] focus-within:bg-black/[0.08]
-          dark:bg-white/10 dark:hover:bg-white/15 dark:focus-within:bg-white/15
-          {isHeroHome ? 'w-48 sm:w-60 animate-in fade-in zoom-in-95' : 'w-40 focus-within:w-60'}
-    ">
-        <Icon icon="material-symbols:search" class="absolute text-[1.25rem] pointer-events-none ml-3 my-auto text-black/40 dark:text-white/40 z-10"></Icon>
-        <input bind:this={inputEl} placeholder="搜索文章..." bind:value={keywordDesktop} 
-               on:focus={() => search(keywordDesktop, true)}
-               on:blur={handleBlur}
-               class="pl-9 pr-3 text-sm bg-transparent outline-0 h-full w-full text-black/80 dark:text-white/80"
-        >
-        {#if keywordDesktop}
-            <button on:click={() => { keywordDesktop = ''; isExpanded = false; }} class="mr-2 text-xs text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white">✕</button>
-        {/if}
-    </div>
-{/if}
+<div class="relative flex items-center">
+    {#if !isExpanded}
+        <!-- 唯一响应式搜索按钮：主页为精美纯图标，非主页显示搜索栏 -->
+        <button on:click={expandSearch} aria-label="Search" 
+                class:list={[
+                    "btn-plain scale-animation active:scale-90 flex items-center justify-center transition-all",
+                    isHeroHome 
+                        ? "w-10 h-10 rounded-full" 
+                        : "h-11 w-10 md:w-36 rounded-lg md:justify-start md:px-3 bg-black/[0.04] dark:bg-white/5"
+                ]}>
+            {#if !isHeroHome}
+                <div class="hidden md:flex items-center text-sm text-black/50 dark:text-white/50 w-full pointer-events-none">
+                    <Icon icon="material-symbols:search" class="text-[1.25rem] mr-2"></Icon>
+                    <span>搜索</span>
+                </div>
+                <div class="flex md:hidden items-center justify-center">
+                    <Icon icon="material-symbols:search" class="text-[1.25rem]"></Icon>
+                </div>
+            {:else}
+                <Icon icon="material-symbols:search" class="text-[1.25rem]"></Icon>
+            {/if}
+        </button>
+    {:else}
+        <!-- 点击后伸缩展开的输入框 -->
+        <div id="search-bar" 
+             class="flex transition-all duration-300 items-center h-10 rounded-full relative overflow-hidden
+              bg-black/[0.06] hover:bg-black/[0.08] focus-within:bg-black/[0.08]
+              dark:bg-white/10 dark:hover:bg-white/15 dark:focus-within:bg-white/15
+              w-44 sm:w-60 shadow-md border border-black/10 dark:border-white/15
+        ">
+            <Icon icon="material-symbols:search" class="absolute text-[1.25rem] pointer-events-none ml-3 my-auto text-black/40 dark:text-white/40 z-10"></Icon>
+            <input bind:this={inputEl} placeholder="搜索文章..." bind:value={keywordDesktop} 
+                   on:focus={() => search(keywordDesktop, true)}
+                   on:blur={handleBlur}
+                   class="pl-9 pr-6 text-sm bg-transparent outline-0 h-full w-full text-black/80 dark:text-white/80"
+            >
+            {#if keywordDesktop}
+                <button on:click={() => { keywordDesktop = ''; isExpanded = false; }} class="absolute right-2 text-xs text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white p-1">✕</button>
+            {/if}
+        </div>
+    {/if}
 
-<!-- toggle btn for phone/tablet view -->
-<button on:click={togglePanel} aria-label="Search Panel" id="search-switch"
-        class:list={["btn-plain scale-animation lg:!hidden active:scale-90 flex items-center justify-center", isHeroHome ? "rounded-full w-10 h-10" : "rounded-lg w-11 h-11"]}>
-    <Icon icon="material-symbols:search" class="text-[1.25rem]"></Icon>
-</button>
-
-<!-- search panel -->
-<div id="search-panel" class="float-panel float-panel-closed search-panel absolute md:w-[30rem]
-top-20 left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-2">
-
-    <!-- search bar inside panel for phone/tablet -->
-    <div id="search-bar-inside" class="flex relative lg:hidden transition-all items-center h-11 rounded-xl
-      bg-black/[0.04] hover:bg-black/[0.06] focus-within:bg-black/[0.06]
-      dark:bg-white/5 dark:hover:bg-white/10 dark:focus-within:bg-white/10
-  ">
-        <Icon icon="material-symbols:search" class="absolute text-[1.25rem] pointer-events-none ml-3 transition my-auto text-black/30 dark:text-white/30"></Icon>
-        <input placeholder="Search" bind:value={keywordMobile}
-               class="pl-10 absolute inset-0 text-sm bg-transparent outline-0
-               focus:w-60 text-black/50 dark:text-white/50"
-        >
-    </div>
-
-    <!-- search results -->
-    {#each result as item}
-        <a href={item.url}
-           class="transition first-of-type:mt-2 lg:first-of-type:mt-0 group block
-       rounded-xl text-lg px-3 py-2 hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]">
-            <div class="transition text-90 inline-flex font-bold group-hover:text-[var(--primary)]">
-                {item.meta.title}<Icon icon="fa6-solid:chevron-right" class="transition text-[0.75rem] translate-x-1 my-auto text-[var(--primary)]"></Icon>
-            </div>
-            <div class="transition text-xs text-white mb-1 font-mono">
-                {item.urlPath}
-            </div>
-            <div class="transition text-sm text-50">
-                {@html item.excerpt}
-            </div>
-        </a>
-    {/each}
+    <!-- 仅在有搜索结果时浮现结果面板 -->
+    {#if result && result.length > 0 && isExpanded}
+        <div id="search-panel" class="search-panel absolute top-12 right-0 w-[85vw] max-w-[28rem] shadow-2xl rounded-2xl p-2 z-50 bg-[var(--card-bg)] border border-black/10 dark:border-white/15 backdrop-blur-2xl">
+            {#each result as item}
+                <a href={item.url}
+                   class="transition group block rounded-xl text-sm px-3 py-2 hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]">
+                    <div class="transition text-black dark:text-white font-bold group-hover:text-[var(--primary)] flex items-center justify-between">
+                        <span>{item.meta.title}</span>
+                        <Icon icon="fa6-solid:chevron-right" class="text-[0.75rem] text-[var(--primary)] ml-2"></Icon>
+                    </div>
+                    {#if item.excerpt}
+                        <div class="transition text-xs text-black/60 dark:text-white/60 line-clamp-2 mt-1">
+                            {@html item.excerpt}
+                        </div>
+                    {/if}
+                </a>
+            {/each}
+        </div>
+    {/if}
 </div>
 
 <style>
