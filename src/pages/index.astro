@@ -61,68 +61,71 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                 </div>
             </div>
 
-            <!-- 上段：中央超大艺术字标题与座右铭（Eliminate padding offset for true vertical centering） -->
-            <div class="relative z-10 w-full max-w-[85rem] mx-auto px-4 sm:px-8 md:px-12 flex-1 flex flex-col justify-center items-center md:items-start text-center md:text-left py-2 sm:py-4 onload-animation" style="animation-delay: calc(var(--content-delay) + 50ms);">
-                <h1 class="text-4xl min-[360px]:text-5xl min-[410px]:text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-neutral-800 dark:text-white font-sans drop-shadow-xl dark:drop-shadow-2xl mb-3 sm:mb-4 leading-[1.1] sm:leading-none select-none transition-colors duration-300">
-                    <span class="block md:inline">放课后の</span>
-                    <span class="bg-gradient-to-r from-[var(--primary)] via-pink-600 to-rose-600 dark:from-[var(--primary)] dark:via-pink-400 dark:to-rose-400 bg-clip-text text-transparent font-black ml-0 md:ml-2 drop-shadow-[0_4px_16px_rgba(255,100,150,0.4)] dark:drop-shadow-[0_4px_16px_rgba(255,100,150,0.6)]">技术部</span>
-                </h1>
-                
-                <!-- 链接胶囊组 -->
-                <div class="flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 my-3 sm:my-4 md:my-5">
-                    {profileConfig.links.map(link => (
-                        <a href={link.url} target="_blank" rel="noopener" class="px-3.5 py-2 sm:px-4 sm:py-2 bg-white/85 dark:bg-black/60 hover:bg-[var(--primary)] dark:hover:bg-[var(--primary)] active:scale-95 backdrop-blur-md rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 border border-black/10 dark:border-white/20 transition-all text-neutral-800 dark:text-white hover:text-white dark:hover:text-white shadow-md">
-                            {link.icon && <Icon name={link.icon} class="text-base sm:text-lg text-[var(--primary)]" />}
-                            <span>{link.name}: {profileConfig.name}</span>
-                        </a>
-                    ))}
-                </div>
-
-                <!-- 座右铭 -->
-                <p class="text-sm sm:text-base md:text-2xl text-neutral-800/95 dark:text-white/95 font-semibold tracking-wider max-w-3xl leading-relaxed mt-2 sm:mt-3 md:mt-4 drop-shadow-sm dark:drop-shadow-md border-l-0 md:border-l-3 border-[var(--primary)] pl-0 md:pl-4 transition-colors duration-300">
-                    出发！去互联网世界里捡星星✨
-                </p>
-            </div>
-
-            <!-- 中段：饱满高质感展示大卡片（基于全屏中轴 max-w-[85rem] 靠左展放） -->
-            <div class="relative z-10 w-full max-w-[85rem] mx-auto px-4 sm:px-8 md:px-12 my-auto py-3 sm:py-4 onload-animation" style="animation-delay: calc(var(--content-delay) + 120ms);">
-                <div class="card-base p-4 sm:p-6 rounded-2xl border border-black/15 dark:border-white/20 bg-white/40 dark:bg-black/40 backdrop-blur-md shadow-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4 hover:border-[var(--primary)]/50 transition duration-300 max-w-4xl mr-auto">
-                    <!-- 左侧：快捷导航与探索指南 -->
-                    <div class="flex flex-col gap-1.5 sm:gap-2">
-                        <div class="text-[10px] sm:text-xs font-mono font-bold tracking-widest text-[var(--primary)] uppercase flex items-center gap-1.5">
-                            <span class="inline-block w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse"></span>
-                            <span>EXPLORE / 探秘全站</span>
-                        </div>
-                        <h3 class="text-sm sm:text-lg font-bold text-black/90 dark:text-white/90">进入技术与灵感的拾星之旅</h3>
-                        <div class="flex flex-wrap items-center gap-2 mt-1">
-                            <a href={url("/archive/")} class="btn-regular px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
-                                <Icon name="material-symbols:library-books-outline-rounded" class="text-base text-[var(--primary)]" />
-                                <span>文章归档</span>
+            <!-- Hero 核心主体群组：标题与 Explore 卡片紧密组合 (gap-3)，整体在首屏垂直居中 -->
+            <div class="my-auto w-full flex flex-col gap-3 sm:gap-6 md:gap-8">
+                <!-- 上段：中央超大艺术字标题与座右铭 -->
+                <div class="relative z-10 w-full max-w-[85rem] mx-auto px-4 sm:px-8 md:px-12 flex flex-col items-center md:items-start text-center md:text-left py-1 sm:py-2 onload-animation" style="animation-delay: calc(var(--content-delay) + 50ms);">
+                    <h1 class="text-4xl min-[360px]:text-5xl min-[410px]:text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-neutral-800 dark:text-white font-sans drop-shadow-xl dark:drop-shadow-2xl mb-2 sm:mb-4 leading-[1.1] sm:leading-none select-none transition-colors duration-300">
+                        <span class="block md:inline">放课后の</span>
+                        <span class="bg-gradient-to-r from-[var(--primary)] via-pink-600 to-rose-600 dark:from-[var(--primary)] dark:via-pink-400 dark:to-rose-400 bg-clip-text text-transparent font-black ml-0 md:ml-2 drop-shadow-[0_4px_16px_rgba(255,100,150,0.4)] dark:drop-shadow-[0_4px_16px_rgba(255,100,150,0.6)]">技术部</span>
+                    </h1>
+                    
+                    <!-- 链接胶囊组 -->
+                    <div class="flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 my-2 sm:my-3 md:my-4">
+                        {profileConfig.links.map(link => (
+                            <a href={link.url} target="_blank" rel="noopener" class="px-3.5 py-2 sm:px-4 sm:py-2 bg-white/85 dark:bg-black/60 hover:bg-[var(--primary)] dark:hover:bg-[var(--primary)] active:scale-95 backdrop-blur-md rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 border border-black/10 dark:border-white/20 transition-all text-neutral-800 dark:text-white hover:text-white dark:hover:text-white shadow-md">
+                                {link.icon && <Icon name={link.icon} class="text-base sm:text-lg text-[var(--primary)]" />}
+                                <span>{link.name}: {profileConfig.name}</span>
                             </a>
-                            <a href="https://pic.yumekai.top" target="_blank" rel="noopener" class="btn-regular px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
-                                <Icon name="material-symbols:photo-library-outline-rounded" class="text-base text-[var(--primary)]" />
-                                <span>绮想絵廊</span>
-                            </a>
-                            <a href={url("/rss.xml")} target="_blank" class="btn-regular px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
-                                <Icon name="material-symbols:rss-feed-rounded" class="text-base text-[var(--primary)]" />
-                                <span>RSS 订阅</span>
-                            </a>
-                        </div>
+                        ))}
                     </div>
 
-                    <!-- 右侧：快看三元指标 -->
-                    <div class="flex items-center justify-around md:justify-end gap-3 sm:gap-6 pt-3 md:pt-0 border-t md:border-t-0 border-l-0 md:border-l border-black/10 dark:border-white/10 pl-0 md:pl-6">
-                        <div class="flex flex-col items-center md:items-start">
-                            <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono font-semibold uppercase">ARTICLES</span>
-                            <span class="text-base sm:text-xl font-black text-[var(--primary)]">{allPosts.length} <span class="text-xs font-normal text-neutral-600 dark:text-neutral-400">篇</span></span>
+                    <!-- 座右铭 -->
+                    <p class="text-sm sm:text-base md:text-2xl text-neutral-800/95 dark:text-white/95 font-semibold tracking-wider max-w-3xl leading-relaxed mt-1 sm:mt-3 md:mt-4 drop-shadow-sm dark:drop-shadow-md border-l-0 md:border-l-3 border-[var(--primary)] pl-0 md:pl-4 transition-colors duration-300">
+                        出发！去互联网世界里捡星星✨
+                    </p>
+                </div>
+
+                <!-- 中段：饱满高质感展示大卡片 -->
+                <div class="relative z-10 w-full max-w-[85rem] mx-auto px-4 sm:px-8 md:px-12 py-1 sm:py-2 onload-animation" style="animation-delay: calc(var(--content-delay) + 120ms);">
+                    <div class="card-base p-4 sm:p-6 rounded-2xl border border-black/15 dark:border-white/20 bg-white/40 dark:bg-black/40 backdrop-blur-md shadow-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4 hover:border-[var(--primary)]/50 transition duration-300 max-w-4xl mr-auto">
+                        <!-- 左侧：快捷导航与探索指南 -->
+                        <div class="flex flex-col gap-1.5 sm:gap-2">
+                            <div class="text-[10px] sm:text-xs font-mono font-bold tracking-widest text-[var(--primary)] uppercase flex items-center gap-1.5">
+                                <span class="inline-block w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse"></span>
+                                <span>EXPLORE / 探秘全站</span>
+                            </div>
+                            <h3 class="text-sm sm:text-lg font-bold text-black/90 dark:text-white/90">进入技术与灵感的拾星之旅</h3>
+                            <div class="flex flex-wrap items-center gap-2 mt-1">
+                                <a href={url("/archive/")} class="btn-regular px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
+                                    <Icon name="material-symbols:library-books-outline-rounded" class="text-base text-[var(--primary)]" />
+                                    <span>文章归档</span>
+                                </a>
+                                <a href="https://pic.yumekai.top" target="_blank" rel="noopener" class="btn-regular px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
+                                    <Icon name="material-symbols:photo-library-outline-rounded" class="text-base text-[var(--primary)]" />
+                                    <span>绮想絵廊</span>
+                                </a>
+                                <a href={url("/rss.xml")} target="_blank" class="btn-regular px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-black/10 dark:border-white/15 hover:border-[var(--primary)]/60 text-neutral-800 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
+                                    <Icon name="material-symbols:rss-feed-rounded" class="text-base text-[var(--primary)]" />
+                                    <span>RSS 订阅</span>
+                                </a>
+                            </div>
                         </div>
-                        <div class="flex flex-col items-center md:items-start">
-                            <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono font-semibold uppercase">CATEGORIES</span>
-                            <span class="text-base sm:text-xl font-black text-[var(--primary)]">{categories.length} <span class="text-xs font-normal text-neutral-600 dark:text-neutral-400">类</span></span>
-                        </div>
-                        <div class="flex flex-col items-center md:items-start">
-                            <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono font-semibold uppercase">TAGS</span>
-                            <span class="text-base sm:text-xl font-black text-[var(--primary)]">{tags.length} <span class="text-xs font-normal text-neutral-600 dark:text-neutral-400">个</span></span>
+
+                        <!-- 右侧：快看三元指标 -->
+                        <div class="flex items-center justify-around md:justify-end gap-3 sm:gap-6 pt-3 md:pt-0 border-t md:border-t-0 border-l-0 md:border-l border-black/10 dark:border-white/10 pl-0 md:pl-6">
+                            <div class="flex flex-col items-center md:items-start">
+                                <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono font-semibold uppercase">ARTICLES</span>
+                                <span class="text-base sm:text-xl font-black text-[var(--primary)]">{allPosts.length} <span class="text-xs font-normal text-neutral-600 dark:text-neutral-400">篇</span></span>
+                            </div>
+                            <div class="flex flex-col items-center md:items-start">
+                                <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono font-semibold uppercase">CATEGORIES</span>
+                                <span class="text-base sm:text-xl font-black text-[var(--primary)]">{categories.length} <span class="text-xs font-normal text-neutral-600 dark:text-neutral-400">类</span></span>
+                            </div>
+                            <div class="flex flex-col items-center md:items-start">
+                                <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono font-semibold uppercase">TAGS</span>
+                                <span class="text-base sm:text-xl font-black text-[var(--primary)]">{tags.length} <span class="text-xs font-normal text-neutral-600 dark:text-neutral-400">个</span></span>
+                            </div>
                         </div>
                     </div>
                 </div>
