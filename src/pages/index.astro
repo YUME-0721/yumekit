@@ -301,8 +301,10 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
         if (contentPanel) {
             if (progress > 0.05) {
                 contentPanel.classList.add('is-scrolled');
+                document.body.classList.add('has-scrolled-hero');
             } else {
                 contentPanel.classList.remove('is-scrolled');
+                document.body.classList.remove('has-scrolled-hero');
             }
         }
 

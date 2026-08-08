@@ -338,7 +338,7 @@ const bannerOffset =
 <NewPostNotification />
 
 		<!-- Webpage Pet -->
-		<div class="sakana-widget fixed z-[9999] bottom-0 -left-10 md:bottom-2 md:-left-2"></div>
+		<div class="sakana-widget fixed z-[9999] bottom-2 left-2 md:bottom-4 md:left-4"></div>
 		<script is:inline>
 			document.addEventListener('DOMContentLoaded', function() {
 				// 使用类型断言处理 WebpagePet
@@ -353,17 +353,25 @@ const bannerOffset =
 
 				// 主页滚动显示/隐藏 Sakana 小组件
 				function handleSakanaScroll() {
-					if (!document.body.classList.contains('is-home')) return;
-					const threshold = window.innerHeight * 0.4;
+					// 兼容检查是不是主页
+					const isHome = document.body.classList.contains('is-home') || window.location.pathname === '/';
+					if (!isHome) {
+						document.body.classList.add('has-scrolled-hero');
+						return;
+					}
+					const threshold = 150;
 					if (window.scrollY > threshold) {
 						document.body.classList.add('has-scrolled-hero');
 					} else {
 						document.body.classList.remove('has-scrolled-hero');
 					}
 				}
+
 				window.addEventListener('scroll', handleSakanaScroll, { passive: true });
+				window.addEventListener('resize', handleSakanaScroll, { passive: true });
 				handleSakanaScroll();
 				document.addEventListener('astro:page-load', handleSakanaScroll);
+				document.addEventListener('content:replace', handleSakanaScroll);
 			});
 		</script>
 	</body>
