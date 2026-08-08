@@ -278,16 +278,18 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
    ============================================= */
 
 /* 内容面板 - 亮色模式（白色半透明遮罩） */
-/* 贯穿全页的唯一背景遮罩蒙版 - 亮色模式（左右负边距扩展覆盖，彻底消灭右侧无遮罩白线缝隙） */
+/* 贯穿全页的唯一背景遮罩蒙版 - 亮色模式（固定死锁全视口，与全屏背景图 #bg-box 完全对齐无侧露缝隙） */
 #home-unified-overlay {
+    position: fixed;
     top: 0;
-    left: -100px;
-    right: -100px;
-    bottom: -300px;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     background: rgba(255, 255, 255, 0.18);
     backdrop-filter: blur(10px) saturate(135%);
     -webkit-backdrop-filter: blur(10px) saturate(135%);
     transition: background 0.4s ease, backdrop-filter 0.4s ease;
+    z-index: 0;
 }
 
 /* 贯穿全页的唯一背景遮罩蒙版 - 暗色模式 */
