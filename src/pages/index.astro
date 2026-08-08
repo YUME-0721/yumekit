@@ -53,9 +53,10 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
              style="z-index: 10;">
 
             <!-- 背景图：绝对定位 + 额外高度，JS 反向平移使其视觉上完全静止 -->
+            <!-- top center：元素超高时图片从顶部开始，不被上方裁切 -->
             <div id="hero-bg-el"
                  class="absolute left-0 right-0 pointer-events-none will-change-transform"
-                 style={`top: 0; height: calc(100% + 100vh); background: url('${heroBg}') center/cover no-repeat; z-index: 0;`}>
+                 style={`top: 0; height: calc(100% + 100vh); background: url('${heroBg}') center top / cover no-repeat; z-index: 0;`}>
             </div>
 
             <!-- Hero 渐变遮罩 -->
@@ -122,8 +123,7 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
             <!-- 主内容面板：液态毛玻璃背景，亮暗双模式 -->
             <!-- 顶部圆角 + 过渡光晕通过 ::before 伪元素实现，无 sticky 横条 -->
             <div id="content-glass-panel"
-                 class="w-full transition-all duration-500"
-                 style="background: transparent;">
+                 class="w-full">
 
                 <!-- 内容居中布局区 -->
                 <div class="max-w-[var(--page-width)] w-full mx-auto px-4 py-12 flex flex-col gap-8">
@@ -252,14 +252,17 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
    液态玻璃滚动系统 - 全局样式
    ============================================= */
 
-/* 内容面板基础过渡 */
+/* 内容面板 - 始终使用不透明背景隔断全局 bg-box */
 #content-glass-panel {
-    transition:
-        border-radius 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-    /* 顶部初始圆角，随滚动进入拉平 */
+    /* 亮色模式：站点标准浅灰白背景 */
+    background: oklch(0.97 0 0);
     border-radius: 2rem 2rem 0 0;
-    /* 始终使用页面背景色，不透出全局 bg-box */
-    background: var(--page-bg);
+    transition: border-radius 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 暗色模式 */
+:global(.dark) #content-glass-panel {
+    background: oklch(0.15 0.015 var(--hue, 270));
 }
 
 /* 滚动后拉平圆角 */
