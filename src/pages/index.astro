@@ -52,20 +52,30 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
 
             <!-- Hero 核心主体群组：标题与 Explore 卡片紧密组合 (gap-3)，在移动端适度下沉 (mt-auto mb-8) -->
             <div class="mt-auto mb-8 sm:mb-14 md:my-auto w-full flex flex-col gap-3 sm:gap-6 md:gap-8 relative">
-                <!-- 呼应左侧标题与探秘卡片的右翼大字号双纵列打字机标语（向左偏移，附带左侧粉色渐变发光艺术装饰线） -->
-                <div class="hidden xl:flex items-center gap-3.5 absolute right-12 xl:right-24 2xl:right-32 top-1 sm:top-2 z-20 select-none pointer-events-none opacity-95 transition">
-                    <!-- 左侧艺术发光装饰竖线 -->
-                    <div class="h-48 sm:h-64 w-[2px] bg-gradient-to-b from-transparent via-[var(--primary)] to-transparent rounded-full shadow-[0_0_12px_var(--primary)]"></div>
+                <!-- 呼应左侧标题与探秘卡片的右翼大字号双纵列打字机标语（带有左侧赛博霓虹艺术装饰线） -->
+                <div class="hidden xl:block absolute right-4 xl:right-10 top-2 z-20 select-none pointer-events-none opacity-95 transition">
+                    <div class="flex items-center gap-3">
+                        <!-- 标语左侧的精致纵向艺术装饰线条组 -->
+                        <div class="flex flex-col items-center gap-2 py-2 opacity-75">
+                            <div class="w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse shadow-[0_0_10px_var(--primary)]"></div>
+                            <div class="w-[2px] h-16 bg-gradient-to-b from-[var(--primary)] via-pink-500/60 to-transparent"></div>
+                            <div class="w-1.5 h-1.5 rotate-45 border border-[var(--primary)] bg-white/20"></div>
+                            <div class="w-[1.5px] h-24 border-l-2 border-dashed border-[var(--primary)]/40"></div>
+                            <div class="w-1.5 h-1.5 rotate-45 border border-[var(--primary)] bg-white/20"></div>
+                            <div class="w-[2px] h-16 bg-gradient-to-t from-[var(--primary)] via-rose-500/60 to-transparent"></div>
+                            <div class="w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse shadow-[0_0_10px_var(--primary)]"></div>
+                        </div>
 
-                    <!-- 纵向双列打字文本 -->
-                    <div class="flex items-center text-lg lg:text-xl xl:text-2xl 2xl:text-3xl text-neutral-800 dark:text-white font-mono tracking-[0.22em] uppercase font-black drop-shadow-lg dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]" style="writing-mode: vertical-rl; white-space: pre-line;">
-                        <span id="hero-typewriter"></span>
-                        <span class="inline-block w-4.5 sm:w-5.5 h-2.5 sm:h-3 mt-1 bg-[var(--primary)] animate-pulse shadow-[0_0_14px_var(--primary)]" id="typewriter-cursor"></span>
+                        <!-- 纵向打字标语 -->
+                        <div class="flex items-center text-lg lg:text-xl xl:text-2xl 2xl:text-3xl text-neutral-800 dark:text-white font-mono tracking-[0.22em] uppercase font-black drop-shadow-lg dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]" style="writing-mode: vertical-rl; white-space: pre-line;">
+                            <span id="hero-typewriter"></span>
+                            <span class="inline-block w-4.5 sm:w-5.5 h-2.5 sm:h-3 mt-1 bg-[var(--primary)] animate-pulse shadow-[0_0_14px_var(--primary)]" id="typewriter-cursor"></span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 上段：中央超大艺术字标题与座右铭 -->
-                <div class="relative z-10 w-full max-w-[85rem] mx-auto px-4 sm:px-8 md:px-12 flex flex-col items-center md:items-start text-center md:text-left py-1 sm:py-2 onload-animation" style="animation-delay: calc(var(--content-delay) + 50ms);">
+                <!-- 上段：中央超大艺术字标题与座右铭（向中心适度偏聚 px-6 md:px-20 lg:px-28 xl:px-36） -->
+                <div class="relative z-10 w-full max-w-[82rem] mx-auto px-6 sm:px-12 md:px-20 lg:px-28 xl:px-36 flex flex-col items-center md:items-start text-center md:text-left py-1 sm:py-2 onload-animation" style="animation-delay: calc(var(--content-delay) + 50ms);">
                     <h1 class="text-4xl min-[360px]:text-5xl min-[410px]:text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-neutral-800 dark:text-white font-sans drop-shadow-xl dark:drop-shadow-2xl mb-2 sm:mb-4 leading-[1.1] sm:leading-none select-none transition-colors duration-300">
                         <span class="block md:inline">放课后の</span>
                         <span class="bg-gradient-to-r from-[var(--primary)] via-pink-600 to-rose-600 dark:from-[var(--primary)] dark:via-pink-400 dark:to-rose-400 bg-clip-text text-transparent font-black ml-0 md:ml-2 drop-shadow-[0_4px_16px_rgba(255,100,150,0.4)] dark:drop-shadow-[0_4px_16px_rgba(255,100,150,0.6)]">技术部</span>
@@ -87,8 +97,8 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                     </p>
                 </div>
 
-                <!-- 中段：饱满高质感展示大卡片 -->
-                <div class="relative z-10 w-full max-w-[85rem] mx-auto px-4 sm:px-8 md:px-12 py-1 sm:py-2 onload-animation" style="animation-delay: calc(var(--content-delay) + 120ms);">
+                <!-- 中段：饱满高质感展示大卡片（向中心适度偏聚 px-6 md:px-20 lg:px-28 xl:px-36） -->
+                <div class="relative z-10 w-full max-w-[82rem] mx-auto px-6 sm:px-12 md:px-20 lg:px-28 xl:px-36 py-1 sm:py-2 onload-animation" style="animation-delay: calc(var(--content-delay) + 120ms);">
                     <div class="card-base p-4 sm:p-6 rounded-2xl border border-black/15 dark:border-white/20 bg-white/40 dark:bg-black/40 backdrop-blur-md shadow-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4 hover:border-[var(--primary)]/50 transition duration-300 max-w-4xl mr-auto">
                         <!-- 左侧：快捷导航与探索指南 -->
                         <div class="flex flex-col gap-1.5 sm:gap-2">
