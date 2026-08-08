@@ -57,7 +57,7 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                  style="background: linear-gradient(to top, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.25) 55%, rgba(0,0,0,0.40) 100%); z-index: 1;"></div>
 
             <!-- 中央超大艺术字标题与座右铭 -->
-            <div class="relative z-10 my-auto mt-12 md:mt-20 py-4 ml-4 sm:ml-8 md:ml-16 onload-animation" style="animation-delay: calc(var(--content-delay) + 50ms);">
+            <div class="relative z-10 my-auto mt-8 md:mt-16 py-4 ml-4 sm:ml-8 md:ml-16 onload-animation" style="animation-delay: calc(var(--content-delay) + 50ms);">
                 <h1 class="text-6xl sm:text-8xl md:text-9xl font-black tracking-tight text-white font-sans drop-shadow-2xl mb-4 leading-none select-none">
                     放课后の <span class="bg-gradient-to-r from-[var(--primary)] via-pink-400 to-rose-400 bg-clip-text text-transparent font-black ml-1 drop-shadow-[0_4px_12px_rgba(255,100,150,0.4)]">技术部</span>
                 </h1>
@@ -73,28 +73,15 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                 </div>
 
                 <!-- 座右铭 -->
-                <p class="text-base md:text-2xl text-white/90 font-medium tracking-wider max-w-3xl leading-relaxed mt-4 drop-shadow-md border-l-2 border-[var(--primary)] pl-4">
+                <p class="text-base md:text-2xl text-white/90 font-medium tracking-wider max-w-3xl leading-relaxed mt-4 drop-shadow-md border-l-2 border-[var(--primary)] pl-4 mb-8">
                     出发！去互联网世界里捡星星✨
                 </p>
-            </div>
 
-            <!-- 底部毛玻璃悬浮状态栏 -->
-            <div class="relative z-10 max-w-[var(--page-width)] w-full mx-auto backdrop-blur-md bg-black/50 border border-white/15 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-4 text-white shadow-2xl onload-animation" style="animation-delay: calc(var(--content-delay) + 100ms);">
-                <div class="flex items-center gap-3">
-                    <div class="relative">
-                        <img src={profileConfig.avatar} alt="Author Avatar" class="w-10 h-10 rounded-full object-cover border border-white/30" />
-                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-black rounded-full animate-pulse"></span>
-                    </div>
-                    <div>
-                        <div class="font-bold text-sm md:text-base tracking-wide text-white">{profileConfig.name} 主理人？</div>
-                        <div class="text-xs text-white/60 font-mono">WELCOME TO MY BLOG, ENJOY YOUR STAY!</div>
-                    </div>
+                <!-- 底部毛玻璃悬浮状态栏（完美匹配图2尺寸与样式，紧跟上文，第一行为 YUME） -->
+                <div class="relative z-10 max-w-lg w-full mx-auto md:ml-0 backdrop-blur-md bg-black/45 border border-white/20 rounded-2xl py-4 px-8 text-center text-white shadow-2xl mt-6 onload-animation" style="animation-delay: calc(var(--content-delay) + 100ms);">
+                    <div class="font-bold text-lg md:text-xl tracking-wider text-white mb-1">YUME</div>
+                    <div class="text-xs md:text-sm text-white/75 font-mono tracking-wider uppercase">WELCOME TO MY BLOG, ENJOY YOUR STAY!</div>
                 </div>
-
-                <a href={url("/posts/")} class="btn-regular px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold text-[var(--primary)] bg-white/10 hover:bg-[var(--primary)] hover:text-white transition flex items-center gap-2 border border-white/20 active:scale-95 shadow-md">
-                    <span>浏览全站文章</span>
-                    <Icon name="material-symbols:arrow-forward-rounded" class="text-lg" />
-                </a>
             </div>
         </div>
 
