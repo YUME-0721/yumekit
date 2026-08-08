@@ -3,12 +3,14 @@ import { Icon } from "astro-icon/components";
 
 import { umamiConfig } from "../config";
 import { formatDateToYYYYMMDD } from "../utils/date-utils";
-import { url, getDir } from "../utils/url-utils";
+import { url, getCategoryUrl, getTagUrl } from "../utils/url-utils";
 
 interface Props {
-	class: string;
+	class?: string;
 	published: Date;
 	updated?: Date;
+	category?: string | null;
+	tags?: string[];
 	hideUpdateDate?: boolean;
 	hidePublishedDate?: boolean;
 	slug?: string;
@@ -16,51 +18,86 @@ interface Props {
 const {
 	published,
 	updated,
+	category = "",
+	tags = [],
 	hideUpdateDate = false,
 	hidePublishedDate = false,
 	slug,
 } = Astro.props;
 const className = Astro.props.class;
+
+const formattedCategory = category ? category.trim() : "";
+const formattedTags = (tags || []).map((t: string) => t.trim()).filter(Boolean);
 ---
 
-<div class:list={["flex flex-wrap text-neutral-500 dark:text-neutral-400 items-center gap-4 gap-x-4 gap-y-2", className]}>
+<div class:list={["flex flex-wrap text-neutral-500 dark:text-neutral-400 items-center gap-x-5 gap-y-2.5 text-sm font-medium", className]}>
     <!-- publish date -->
     {!hidePublishedDate && (
-        <div class="flex items-center">
+        <div class="flex items-center gap-1.5">
             <div class="meta-icon">
-                <Icon name="material-symbols:calendar-today-outline-rounded" class="text-xl"></Icon>
+                <Icon name="material-symbols:calendar-today-outline-rounded" class="text-xl text-[var(--primary)]"></Icon>
             </div>
-            <span class="text-50 text-sm font-medium">{formatDateToYYYYMMDD(published)}</span>
+            <span class="text-50 font-medium">{formatDateToYYYYMMDD(published)}</span>
         </div>
     )}
 
     <!-- update date -->
     {!hideUpdateDate && updated && updated.getTime() !== published.getTime() && (
-        <div class="flex items-center">
-            <div class="meta-icon"
-            >
-                <Icon name="material-symbols:edit-calendar-outline-rounded" class="text-xl"></Icon>
+        <div class="flex items-center gap-1.5">
+            <div class="meta-icon">
+                <Icon name="material-symbols:edit-calendar-outline-rounded" class="text-xl text-[var(--primary)]"></Icon>
             </div>
-            <span class="text-50 text-sm font-medium">{formatDateToYYYYMMDD(updated)}</span>
+            <span class="text-50 font-medium">{formatDateToYYYYMMDD(updated)}</span>
+        </div>
+    )}
+
+    <!-- category / series -->
+    {formattedCategory && (
+        <div class="flex items-center gap-1.5">
+            <div class="meta-icon">
+                <Icon name="material-symbols:book-outline-rounded" class="text-xl text-[var(--primary)]"></Icon>
+            </div>
+            <a href={getCategoryUrl(formattedCategory)} class="text-50 font-medium hover:text-[var(--primary)] hover:underline transition">
+                {formattedCategory}
+            </a>
+        </div>
+    )}
+
+    <!-- tags list -->
+    {formattedTags.length > 0 && (
+        <div class="flex items-center gap-1.5">
+            <div class="meta-icon">
+                <Icon name="material-symbols:tag-rounded" class="text-xl text-[var(--primary)]"></Icon>
+            </div>
+            <div class="flex flex-wrap items-center gap-1">
+                {formattedTags.map((tag, idx) => (
+                    <>
+                        <a href={getTagUrl(tag)} class="text-50 font-medium hover:text-[var(--primary)] hover:underline transition">
+                            {tag}
+                        </a>
+                        {idx < formattedTags.length - 1 && <span class="text-neutral-300 dark:text-neutral-600 font-normal">/</span>}
+                    </>
+                ))}
+            </div>
         </div>
     )}
 
     <!-- page views & visitors -->
     {slug && (
-        <>
-            <div class="flex items-center">
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-1.5">
                 <div class="meta-icon">
-                    <Icon name="material-symbols:visibility-outline-rounded" class="text-xl"></Icon>
+                    <Icon name="material-symbols:visibility-outline-rounded" class="text-xl text-[var(--primary)]"></Icon>
                 </div>
-                <span class="text-50 text-sm font-medium" id={`page-views-${slug}`}>0 次</span>
+                <span class="text-50 font-medium" id={`page-views-${slug}`}>0 次</span>
             </div>
-            <div class="flex items-center">
+            <div class="flex items-center gap-1.5">
                 <div class="meta-icon">
-                    <Icon name="material-symbols:person" class="text-xl"></Icon>
+                    <Icon name="material-symbols:person" class="text-xl text-[var(--primary)]"></Icon>
                 </div>
-                <span class="text-50 text-sm font-medium" id={`page-visitors-${slug}`}>0 人</span>
+                <span class="text-50 font-medium" id={`page-visitors-${slug}`}>0 人</span>
             </div>
-        </>
+        </div>
     )}
 </div>
 

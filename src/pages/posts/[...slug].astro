@@ -101,6 +101,8 @@ const jsonLd = {
                         class="mb-5"
                         published={entry.data.published}
                         updated={entry.data.updated}
+                        category={entry.data.category}
+                        tags={entry.data.tags}
                         slug={entry.slug}
                 ></PostMetadata>
                 {(!entry.data.image || (entry.data.image && !siteConfig.showCoverInContent)) && (
