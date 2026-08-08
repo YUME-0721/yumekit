@@ -37,19 +37,32 @@ const contactLinks = [
 	{ name: "Umami 统计", icon: "material-symbols:analytics-outline-rounded", url: "https://umami.yumekai.top/share/46vKiUC2hTE5PytG", external: true },
 	{ name: "画廊", icon: "material-symbols:photo-library-outline-rounded", url: "https://img.072199.xyz/browse/wallpaper", external: true },
 ];
+
+const heroBg = "https://pic.yumekai.top/pic?img=ua";
 ---
 
 <MainGridLayout title="首页" hideSidebar={true} isHeroHome={true}>
-    <div class="flex flex-col w-full relative min-h-screen">
+    <div class="flex flex-col w-full" id="home-root">
         
-        <!-- 统一静止壁纸背景 (固定不动，解决壁纸分离/重复模糊问题) -->
-        <div class="fixed inset-0 z-0 bg-cover bg-center pointer-events-none" style="background-image: url('https://pic.yumekai.top/pic?img=ua');">
-            <!-- 沉浸式暗黑渐变氛围遮罩 -->
-            <div class="absolute inset-0 bg-gradient-to-b from-neutral-950/75 via-neutral-950/45 to-neutral-950/85"></div>
+        <!-- ====================================================
+             LAYER 1: 固定背景图（fixed 不随页面滚动）
+             ==================================================== -->
+        <div id="hero-bg-fixed" 
+             class="fixed inset-0 w-full h-screen pointer-events-none" 
+             style={`z-index: 0; background: url('${heroBg}') center/cover no-repeat;`}>
         </div>
 
-        <!-- SECTION 1: 全屏 Hero 落地开屏展示区 -->
-        <div class="relative z-10 w-full min-h-screen flex flex-col justify-between pt-28 md:pt-36 pb-16 px-6 md:px-16">
+        <!-- ====================================================
+             LAYER 2: Hero 内容层（覆盖在固定背景之上）
+             ==================================================== -->
+        <div id="hero-content"
+             class="relative w-full min-h-screen flex flex-col justify-between pt-28 md:pt-36 pb-12 px-6 md:px-16"
+             style="z-index: 10;">
+
+            <!-- Hero 渐变遮罩 -->
+            <div class="absolute inset-0 pointer-events-none" id="hero-overlay"
+                 style="background: linear-gradient(to top, rgba(10,10,10,0.88) 0%, rgba(10,10,10,0.30) 55%, rgba(0,0,0,0.45) 100%); transition: opacity 0.4s;"></div>
+
             <!-- 顶部小标签 -->
             <div class="relative z-10 onload-animation" style="animation-delay: calc(var(--content-delay) + 0ms);">
                 <span class="inline-block px-3.5 py-1 bg-white/10 backdrop-blur-md rounded-lg text-xs md:text-sm font-mono tracking-wider border border-white/20 text-white/90 shadow-md">
@@ -57,7 +70,7 @@ const contactLinks = [
                 </span>
             </div>
 
-            <!-- 中央超大无框艺术字标题与座右铭 -->
+            <!-- 中央超大艺术字标题与座右铭 -->
             <div class="relative z-10 my-auto py-6 onload-animation" style="animation-delay: calc(var(--content-delay) + 50ms);">
                 <h1 class="text-6xl sm:text-8xl md:text-9xl font-black tracking-tight text-white font-sans drop-shadow-2xl mb-4 leading-none select-none">
                     {profileConfig.name} <span class="text-[var(--primary)] font-serif italic font-light drop-shadow-lg">の 博客</span>
@@ -67,13 +80,13 @@ const contactLinks = [
                 <div class="flex flex-wrap items-center gap-3 my-4">
                     {profileConfig.links.map(link => (
                         <a href={link.url} target="_blank" rel="noopener" class="px-4 py-2 bg-black/40 hover:bg-[var(--primary)] active:scale-95 backdrop-blur-md rounded-xl text-xs md:text-sm font-semibold flex items-center gap-2 border border-white/20 transition-all text-white shadow-lg">
-                            {link.icon && <Icon name={link.icon} class="text-base text-[var(--primary)] group-hover:text-white transition" />}
+                            {link.icon && <Icon name={link.icon} class="text-base text-[var(--primary)]" />}
                             <span>{link.name}: {profileConfig.name}</span>
                         </a>
                     ))}
                 </div>
 
-                <!-- 经典座右铭 -->
+                <!-- 座右铭 -->
                 <p class="text-base md:text-2xl text-white/90 font-medium tracking-wider max-w-3xl leading-relaxed mt-4 drop-shadow-md border-l-2 border-[var(--primary)] pl-4">
                     躬身入局，心为主理，行有尺度，自持本心。
                 </p>
@@ -99,109 +112,127 @@ const contactLinks = [
             </div>
         </div>
 
-        <!-- SECTION 2 & 3: 液态玻璃高光滑动抽屉 (Liquid Glass Slide-Up Sheet) -->
-        <div class="relative z-20 w-full rounded-t-[2.5rem] md:rounded-t-[3.5rem] border-t-2 border-white/25 dark:border-white/15 bg-neutral-950/80 dark:bg-neutral-950/90 backdrop-blur-2xl shadow-[0_-20px_60px_rgba(0,0,0,0.8)] transition duration-500">
-            
-            <!-- 液态玻璃滑动指示手柄 -->
-            <div class="w-full flex justify-center pt-4 pb-2">
-                <div class="w-16 h-1.5 bg-white/30 rounded-full animate-pulse"></div>
+        <!-- ====================================================
+             LAYER 3: 内容区域 — 液态玻璃上滑面板
+             滑动时此区域覆盖背景图，产生"解锁"拉幕效果
+             ==================================================== -->
+        <div id="content-panel"
+             class="relative w-full"
+             style="z-index: 20;">
+
+            <!-- 液态玻璃过渡条 -->
+            <div id="liquid-divider" 
+                 class="sticky top-0 w-full h-24 pointer-events-none overflow-hidden"
+                 style="z-index: 21;">
+                <!-- 磨砂玻璃渐变过渡区 -->
+                <div id="liquid-blur-band" 
+                     class="absolute inset-0 transition-all duration-300"
+                     style="backdrop-filter: blur(0px) saturate(100%); -webkit-backdrop-filter: blur(0px) saturate(100%);"></div>
+                <!-- 顶部光晕条 -->
+                <div id="liquid-shine" 
+                     class="absolute top-0 left-0 right-0 h-px opacity-0 transition-opacity duration-500"
+                     style="background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 30%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.5) 70%, transparent 100%);"></div>
             </div>
 
-            <!-- 内部收窄版面内容 (能力矩阵与最新文章) -->
-            <div class="max-w-[var(--page-width)] w-full mx-auto px-4 pb-12 pt-4 flex flex-col gap-8">
-                
-                <!-- 站点数据 & 能力矩阵 -->
-                <div class="flex flex-col gap-4">
-                    <!-- Section Sub-header -->
-                    <div class="onload-animation" style="animation-delay: calc(var(--content-delay) + 150ms);">
-                        <div class="text-xs font-mono font-bold tracking-widest text-[var(--primary)] uppercase mb-1">CONTEXT</div>
-                        <h2 class="text-2xl md:text-3xl font-black text-white/95">站点数据 & 能力矩阵</h2>
-                    </div>
+            <!-- 主内容面板：液态毛玻璃背景，亮暗双模式 -->
+            <div id="content-glass-panel"
+                 class="w-full -mt-24 transition-all duration-300"
+                 style="background: transparent;">
 
-                    <!-- Grid Matrix Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Card A: 站点访问 -->
-                        <div class="card-base relative overflow-hidden rounded-[var(--radius-large)] border border-white/10 p-6 flex flex-col justify-between min-h-[9.5rem] group onload-animation" style="animation-delay: calc(var(--content-delay) + 200ms);">
-                            <div class="absolute inset-0 bg-cover bg-center opacity-20 group-hover:scale-105 transition-transform duration-700 pointer-events-none" style="background-image: url('https://pic.yumekai.top/pic?img=ua');"></div>
-                            <div class="relative z-10">
-                                <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 uppercase mb-1">VISITS</div>
-                                <h3 class="text-xl md:text-2xl font-bold text-white/95">站点访问</h3>
-                            </div>
-                            <div class="relative z-10 mt-3 pt-3 border-t border-white/10 text-sm md:text-base font-semibold text-neutral-300">
-                                <span>访客 <strong id="matrix-site-visitors" class="text-[var(--primary)] font-bold text-lg">0</strong></span>
-                                <span class="mx-1 text-neutral-600">/</span>
-                                <span>浏览 <strong id="matrix-site-views" class="text-[var(--primary)] font-bold text-lg">0</strong></span>
-                            </div>
+                <!-- 内容居中布局区 -->
+                <div class="max-w-[var(--page-width)] w-full mx-auto px-4 py-12 flex flex-col gap-8">
+                    
+                    <!-- SECTION 2: 站点数据 & 能力矩阵 -->
+                    <div class="flex flex-col gap-4">
+                        <!-- Section Sub-header -->
+                        <div class="onload-animation" style="animation-delay: calc(var(--content-delay) + 150ms);">
+                            <div class="text-xs font-mono font-bold tracking-widest text-[var(--primary)] uppercase mb-1">CONTEXT</div>
+                            <h2 class="text-2xl md:text-3xl font-black text-black/90 dark:text-white/90">站点数据 & 能力矩阵</h2>
                         </div>
 
-                        <!-- Card B: 文章档案 -->
-                        <a href={url("/archive/")} class="card-base relative overflow-hidden rounded-[var(--radius-large)] border border-white/10 p-6 flex flex-col justify-between hover:border-[var(--primary)]/50 transition duration-300 group onload-animation" style="animation-delay: calc(var(--content-delay) + 250ms);">
-                            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-[var(--primary)]/10 rounded-full blur-2xl group-hover:scale-125 transition duration-500"></div>
-                            <div>
-                                <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 uppercase mb-1">ARCHIVE</div>
-                                <h3 class="text-xl md:text-2xl font-bold text-white/95 group-hover:text-[var(--primary)] transition">文章档案</h3>
-                            </div>
-                            <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
-                                <div class="text-sm md:text-base font-semibold text-neutral-300">
-                                    <span class="text-[var(--primary)] font-bold text-lg">{allPosts.length}</span> 篇文章 / <span class="text-[var(--primary)] font-bold text-lg">{categories.length}</span> 个分类 / <span class="text-[var(--primary)] font-bold text-lg">{tags.length}</span> 个标签
+                        <!-- Grid Matrix Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Card A: 站点访问 -->
+                            <div class="card-base relative overflow-hidden rounded-[var(--radius-large)] border border-black/10 dark:border-white/10 p-6 flex flex-col justify-between min-h-[9.5rem] group onload-animation" style="animation-delay: calc(var(--content-delay) + 200ms);">
+                                <div class="absolute inset-0 bg-cover bg-center opacity-30 dark:opacity-20 group-hover:scale-105 transition-transform duration-700 pointer-events-none" style={`background-image: url('${heroBg}');`}></div>
+                                <div class="relative z-10">
+                                    <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 dark:text-neutral-500 uppercase mb-1">VISITS</div>
+                                    <h3 class="text-xl md:text-2xl font-bold text-black/90 dark:text-white/90">站点访问</h3>
                                 </div>
-                                <Icon name="material-symbols:chevron-right-rounded" class="text-2xl text-[var(--primary)] group-hover:translate-x-1 transition" />
-                            </div>
-                        </a>
-                    </div>
-
-                    <!-- Card C: 社交联系 (横向轨道) -->
-                    <div class="card-base rounded-[var(--radius-large)] border border-white/10 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 overflow-hidden onload-animation" style="animation-delay: calc(var(--content-delay) + 300ms);">
-                        <div class="flex-shrink-0">
-                            <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 uppercase mb-1">CONTACT</div>
-                            <h3 class="text-xl font-bold text-white/95 mb-1">社交联系</h3>
-                            <p class="text-xs text-neutral-400">把散落的入口收束在一条缓慢移动的轨道里。</p>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-2 max-w-full overflow-x-auto py-1">
-                            {contactLinks.map(item => (
-                                <a href={item.url} target={item.external ? "_blank" : undefined} rel={item.external ? "noopener" : undefined} class="btn-regular px-3.5 py-2 rounded-full text-xs font-semibold flex items-center gap-2 border border-white/10 text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
-                                    <Icon name={item.icon} class="text-base text-[var(--primary)]" />
-                                    <span>{item.name}</span>
-                                </a>
-                            ))}
-                        </div>
-                    </div>
-
-                    <!-- Card D: 技能图标 (栈工具列表) -->
-                    <div class="card-base rounded-[var(--radius-large)] border border-white/10 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 overflow-hidden onload-animation" style="animation-delay: calc(var(--content-delay) + 350ms);">
-                        <div class="flex-shrink-0">
-                            <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 uppercase mb-1">SKILLS</div>
-                            <h3 class="text-xl font-bold text-white/95 mb-1">技能图标</h3>
-                            <p class="text-xs text-neutral-400">工程、内容和部署工具在同一条轨道上循环。</p>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-3 max-w-full overflow-x-auto py-1">
-                            {skillsList.map(skill => (
-                                <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/5 text-neutral-200 text-xs font-medium hover:scale-105 transition" title={skill.name}>
-                                    <Icon name={skill.icon} class="text-lg text-[var(--primary)]" />
-                                    <span>{skill.name}</span>
+                                <div class="relative z-10 mt-3 pt-3 border-t border-black/5 dark:border-white/10 text-sm md:text-base font-semibold text-neutral-600 dark:text-neutral-300">
+                                    <span>访客 <strong id="matrix-site-visitors" class="text-[var(--primary)] font-bold text-lg">—</strong></span>
+                                    <span class="mx-1 text-neutral-300 dark:text-neutral-600">/</span>
+                                    <span>浏览 <strong id="matrix-site-views" class="text-[var(--primary)] font-bold text-lg">—</strong></span>
                                 </div>
-                            ))}
+                            </div>
+
+                            <!-- Card B: 文章档案 -->
+                            <a href={url("/archive/")} class="card-base relative overflow-hidden rounded-[var(--radius-large)] border border-black/10 dark:border-white/10 p-6 flex flex-col justify-between hover:border-[var(--primary)]/50 transition duration-300 group onload-animation" style="animation-delay: calc(var(--content-delay) + 250ms);">
+                                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-[var(--primary)]/10 rounded-full blur-2xl group-hover:scale-125 transition duration-500"></div>
+                                <div>
+                                    <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 dark:text-neutral-500 uppercase mb-1">ARCHIVE</div>
+                                    <h3 class="text-xl md:text-2xl font-bold text-black/90 dark:text-white/90 group-hover:text-[var(--primary)] transition">文章档案</h3>
+                                </div>
+                                <div class="mt-4 pt-4 border-t border-black/5 dark:border-white/10 flex items-center justify-between">
+                                    <div class="text-sm md:text-base font-semibold text-neutral-600 dark:text-neutral-300">
+                                        <span class="text-[var(--primary)] font-bold text-lg">{allPosts.length}</span> 篇文章 / <span class="text-[var(--primary)] font-bold text-lg">{categories.length}</span> 个分类 / <span class="text-[var(--primary)] font-bold text-lg">{tags.length}</span> 个标签
+                                    </div>
+                                    <Icon name="material-symbols:chevron-right-rounded" class="text-2xl text-[var(--primary)] group-hover:translate-x-1 transition" />
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Card C: 社交联系 -->
+                        <div class="card-base rounded-[var(--radius-large)] border border-black/10 dark:border-white/10 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 overflow-hidden onload-animation" style="animation-delay: calc(var(--content-delay) + 300ms);">
+                            <div class="flex-shrink-0">
+                                <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 dark:text-neutral-500 uppercase mb-1">CONTACT</div>
+                                <h3 class="text-xl font-bold text-black/90 dark:text-white/90 mb-1">社交联系</h3>
+                                <p class="text-xs text-neutral-500 dark:text-neutral-400">把散落的入口收束在一条缓慢移动的轨道里。</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2 max-w-full py-1">
+                                {contactLinks.map(item => (
+                                    <a href={item.url} target={item.external ? "_blank" : undefined} rel={item.external ? "noopener" : undefined} class="btn-regular px-3.5 py-2 rounded-full text-xs font-semibold flex items-center gap-2 border border-black/5 dark:border-white/10 text-neutral-700 dark:text-neutral-200 hover:text-[var(--primary)] active:scale-95 transition">
+                                        <Icon name={item.icon} class="text-base text-[var(--primary)]" />
+                                        <span>{item.name}</span>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+
+                        <!-- Card D: 技能图标 -->
+                        <div class="card-base rounded-[var(--radius-large)] border border-black/10 dark:border-white/10 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 overflow-hidden onload-animation" style="animation-delay: calc(var(--content-delay) + 350ms);">
+                            <div class="flex-shrink-0">
+                                <div class="text-xs font-mono font-bold tracking-widest text-neutral-400 dark:text-neutral-500 uppercase mb-1">SKILLS</div>
+                                <h3 class="text-xl font-bold text-black/90 dark:text-white/90 mb-1">技能图标</h3>
+                                <p class="text-xs text-neutral-500 dark:text-neutral-400">工程、内容和部署工具在同一条轨道上循环。</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3 max-w-full py-1">
+                                {skillsList.map(skill => (
+                                    <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 text-neutral-700 dark:text-neutral-200 text-xs font-medium hover:scale-105 transition" title={skill.name}>
+                                        <Icon name={skill.icon} class="text-lg text-[var(--primary)]" />
+                                        <span>{skill.name}</span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- SECTION 3: 最新发布文章列表 -->
-                <div class="flex flex-col gap-4 pt-2">
-                    <div class="flex items-center justify-between px-2 pt-2 pb-1 onload-animation" style="animation-delay: calc(var(--content-delay) + 400ms);">
-                        <div class="flex items-center gap-2 font-bold text-lg md:text-xl text-white/95">
-                            <Icon name="material-symbols:auto-awesome-outline-rounded" class="text-2xl text-[var(--primary)]" />
-                            <span>最新发布</span>
+                    <!-- SECTION 3: 最新发布文章 -->
+                    <div class="flex flex-col gap-4 pt-2">
+                        <div class="flex items-center justify-between px-2 pt-2 pb-1 onload-animation" style="animation-delay: calc(var(--content-delay) + 400ms);">
+                            <div class="flex items-center gap-2 font-bold text-lg md:text-xl text-black/90 dark:text-white/90">
+                                <Icon name="material-symbols:auto-awesome-outline-rounded" class="text-2xl text-[var(--primary)]" />
+                                <span>最新发布</span>
+                            </div>
+                            <a href={url("/posts/")} class="btn-regular px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-medium text-[var(--primary)] flex items-center gap-1 hover:underline active:scale-95 transition">
+                                <span>查看全部文章</span>
+                                <Icon name="material-symbols:arrow-forward-rounded" class="text-base" />
+                            </a>
                         </div>
-                        <a href={url("/posts/")} class="btn-regular px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-medium text-[var(--primary)] flex items-center gap-1 hover:underline active:scale-95 transition">
-                            <span>查看全部文章</span>
-                            <Icon name="material-symbols:arrow-forward-rounded" class="text-base" />
-                        </a>
-                    </div>
 
-                    <!-- Post Cards List -->
-                    {recentPosts.map((entry: CollectionEntry<"posts">) => (
-                        <div class="onload-animation" style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval + 450}ms);`}>
-                            <PostCard
+                        {recentPosts.map((entry: CollectionEntry<"posts">) => (
+                            <div class="onload-animation" style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval + 450}ms);`}>
+                                <PostCard
                                     entry={entry}
                                     title={entry.data.title}
                                     published={entry.data.published}
@@ -210,27 +241,182 @@ const contactLinks = [
                                     image={entry.data.image}
                                     description={entry.data.description}
                                     draft={entry.data.draft}
-                            ></PostCard>
+                                ></PostCard>
+                            </div>
+                        ))}
+
+                        <div class="onload-animation text-center pt-2 pb-4" style={`animation-delay: calc(var(--content-delay) + ${delay * interval + 500}ms);`}>
+                            <a href={url("/posts/")} class="btn-card inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-[var(--primary)] hover:bg-[var(--btn-card-bg-hover)] active:scale-95 transition shadow-sm border border-black/5 dark:border-white/10">
+                                <Icon name="material-symbols:library-books-outline-rounded" class="text-xl" />
+                                <span>浏览全站更多文章与分类 ({allPosts.length} 篇)</span>
+                                <Icon name="material-symbols:chevron-right-rounded" class="text-xl" />
+                            </a>
                         </div>
-                    ))}
-
-                    <!-- Bottom CTA Button -->
-                    <div class="onload-animation text-center pt-2 pb-4" style={`animation-delay: calc(var(--content-delay) + ${delay * interval + 500}ms);`}>
-                        <a href={url("/posts/")} class="btn-card inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-[var(--primary)] hover:bg-[var(--btn-card-bg-hover)] active:scale-95 transition shadow-sm border border-white/10">
-                            <Icon name="material-symbols:library-books-outline-rounded" class="text-xl" />
-                            <span>浏览全站更多文章与分类 ({allPosts.length} 篇)</span>
-                            <Icon name="material-symbols:chevron-right-rounded" class="text-xl" />
-                        </a>
                     </div>
-                </div>
 
+                </div>
             </div>
         </div>
 
     </div>
 </MainGridLayout>
 
+<style>
+/* =============================================
+   液态玻璃滚动系统 - 全局样式
+   ============================================= */
+
+/* 固定背景图层 */
+#hero-bg-fixed {
+    will-change: transform;
+}
+
+/* 内容玻璃面板背景（亮色模式） */
+.is-scrolled #content-glass-panel {
+    background: rgba(250, 250, 252, 0.82);
+    backdrop-filter: blur(24px) saturate(180%) brightness(1.05);
+    -webkit-backdrop-filter: blur(24px) saturate(180%) brightness(1.05);
+}
+
+/* 内容玻璃面板背景（暗色模式） */
+:global(.dark) .is-scrolled #content-glass-panel {
+    background: rgba(15, 15, 20, 0.82);
+    backdrop-filter: blur(24px) saturate(160%) brightness(0.95);
+    -webkit-backdrop-filter: blur(24px) saturate(160%) brightness(0.95);
+}
+
+/* 液态分割条 - 亮色 */
+.is-scrolled #liquid-blur-band {
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(250, 250, 252, 0.65) 70%,
+        rgba(250, 250, 252, 0.82) 100%
+    );
+}
+
+/* 液态分割条 - 暗色 */
+:global(.dark) .is-scrolled #liquid-blur-band {
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(15, 15, 20, 0.65) 70%,
+        rgba(15, 15, 20, 0.82) 100%
+    );
+}
+
+/* 光晕条亮起 */
+.is-scrolled #liquid-shine {
+    opacity: 1;
+}
+
+/* 亮色模式下光晕 */
+.is-scrolled #liquid-shine {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(200, 200, 220, 0.6) 30%,
+        rgba(255, 255, 255, 0.9) 50%,
+        rgba(200, 200, 220, 0.6) 70%,
+        transparent 100%
+    );
+}
+
+/* 暗色模式下光晕 */
+:global(.dark) .is-scrolled #liquid-shine {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(100, 100, 130, 0.4) 30%,
+        rgba(180, 180, 220, 0.7) 50%,
+        rgba(100, 100, 130, 0.4) 70%,
+        transparent 100%
+    );
+}
+
+/* 内容面板 transition */
+#content-glass-panel {
+    transition: background 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                backdrop-filter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-transition: background 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                        -webkit-backdrop-filter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#liquid-blur-band {
+    transition: backdrop-filter 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                background 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#liquid-shine {
+    transition: opacity 0.4s ease;
+}
+</style>
+
 <script define:vars={{ umamiConfig }}>
+(function() {
+    // ============================================
+    // 1. 液态玻璃滚动效果
+    // ============================================
+    const heroContent = document.getElementById('hero-content');
+    const contentPanel = document.getElementById('content-panel');
+    const liquidBlurBand = document.getElementById('liquid-blur-band');
+    const liquidShine = document.getElementById('liquid-shine');
+    const contentGlassPanel = document.getElementById('content-glass-panel');
+
+    let ticking = false;
+    let lastScrollY = 0;
+
+    function updateScrollEffect() {
+        const scrollY = window.scrollY;
+        const heroHeight = heroContent ? heroContent.offsetHeight : window.innerHeight;
+        
+        // 进入内容区域的百分比 (0 ~ 1)，让过渡在 Hero 最后 20% 到越过 Hero 的一小段内完成
+        const transitionStart = heroHeight * 0.70;
+        const transitionEnd = heroHeight * 1.05;
+        const progress = Math.max(0, Math.min(1, (scrollY - transitionStart) / (transitionEnd - transitionStart)));
+
+        // 根据 progress 决定是否为已滚动状态
+        if (progress > 0.05) {
+            document.getElementById('content-panel').classList.add('is-scrolled');
+        } else {
+            document.getElementById('content-panel').classList.remove('is-scrolled');
+        }
+
+        // 动态调整液态分割条模糊强度（0px ~ 20px）
+        if (liquidBlurBand) {
+            const blurAmount = Math.round(progress * 20);
+            const saturation = 100 + Math.round(progress * 80);
+            liquidBlurBand.style.backdropFilter = `blur(${blurAmount}px) saturate(${saturation}%)`;
+            liquidBlurBand.style.webkitBackdropFilter = `blur(${blurAmount}px) saturate(${saturation}%)`;
+        }
+
+        // 光晕条淡入
+        if (liquidShine) {
+            liquidShine.style.opacity = progress > 0.3 ? String(Math.min(1, (progress - 0.3) * 2.5)) : '0';
+        }
+
+        // Hero 内容随滚动微微向上淡出（视差）
+        if (heroContent) {
+            const fadeProgress = Math.min(1, scrollY / (heroHeight * 0.6));
+            heroContent.style.opacity = String(1 - fadeProgress * 0.35);
+        }
+
+        ticking = false;
+    }
+
+    window.addEventListener('scroll', function() {
+        if (!ticking) {
+            requestAnimationFrame(updateScrollEffect);
+            ticking = true;
+        }
+    }, { passive: true });
+
+    // 初始执行一次
+    updateScrollEffect();
+
+    // ============================================
+    // 2. Umami 站点统计数据
+    // ============================================
     function formatCount(num) {
         if (num >= 1000) {
             return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
@@ -240,7 +426,6 @@ const contactLinks = [
 
     async function loadMatrixSiteStats() {
         if (!umamiConfig.enabled || typeof window.getUmamiPageStats !== 'function') return;
-        
         try {
             const statsData = await window.getUmamiPageStats(
                 umamiConfig.baseUrl,
@@ -248,13 +433,10 @@ const contactLinks = [
                 null,
                 umamiConfig.shareId
             );
-            
             const pageviews = statsData.pageviews || 0;
             const visitors = statsData.visitors || 0;
-            
             const viewsEl = document.getElementById('matrix-site-views');
             const visitorsEl = document.getElementById('matrix-site-visitors');
-
             if (viewsEl) viewsEl.textContent = formatCount(pageviews);
             if (visitorsEl) visitorsEl.textContent = formatCount(visitors);
         } catch (e) {
@@ -268,4 +450,5 @@ const contactLinks = [
         loadMatrixSiteStats();
     }
     document.addEventListener('content:replace', loadMatrixSiteStats);
+})();
 </script>
