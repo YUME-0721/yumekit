@@ -46,6 +46,16 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
         <!-- 贯穿全页的唯一统一遮罩蒙版：消灭任何两层遮罩重叠造成的色差横条 -->
         <div class="absolute inset-0 pointer-events-none z-0" id="home-unified-overlay"></div>
         
+        <!-- 右侧贯穿全页的垂直打字机印花列（z-30 浮在面板上方，第一条与首屏 Hero 垂直方向绝对对称） -->
+        <div class="absolute right-3 sm:right-6 md:right-8 top-0 bottom-0 z-30 select-none pointer-events-none flex flex-col justify-around items-center py-28 sm:py-36 md:py-44 opacity-85">
+            {Array.from({ length: 4 }).map((_, idx) => (
+                <div class="flex items-center text-[10px] sm:text-xs md:text-sm text-neutral-800 dark:text-white/90 font-mono tracking-[0.18em] uppercase font-bold drop-shadow-sm dark:drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] my-8 sm:my-12" style="writing-mode: vertical-rl;">
+                    <span class="hero-typewriter-text"></span>
+                    <span class="inline-block w-3 sm:w-3.5 h-1.5 sm:h-2 mt-1 bg-[var(--primary)] animate-pulse shadow-[0_0_8px_var(--primary)]"></span>
+                </div>
+            ))}
+        </div>
+        
         <!-- ====================================================
              LAYER 2: Hero 内容层
              ==================================================== -->
@@ -120,21 +130,11 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
                 </div>
             </div>
 
-            <!-- 下段：移动端居中弹跳下滑提示 & 打字机英文标语 -->
+            <!-- 下段：移动端居中弹跳下滑提示 -->
             <div class="relative z-10 mt-auto pt-2 pb-2">
                 <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition md:hidden animate-bounce select-none pointer-events-none">
                     <span class="text-[10px] font-mono tracking-widest uppercase text-neutral-600 dark:text-neutral-300">SCROLL</span>
                     <Icon name="material-symbols:keyboard-double-arrow-down-rounded" class="text-xl text-[var(--primary)]" />
-                </div>
-
-                <!-- 右侧贯穿全页的垂直打字机印花列（从上到下按平滑间距分布，第一条与首屏 Hero 大标题垂直居中线绝对对称） -->
-                <div class="absolute right-3 sm:right-6 md:right-8 top-0 bottom-0 z-10 select-none pointer-events-none flex flex-col justify-around items-center py-28 sm:py-36 md:py-44 opacity-80 transition">
-                    {Array.from({ length: 4 }).map((_, idx) => (
-                        <div class="flex items-center text-[10px] sm:text-xs md:text-sm text-neutral-800 dark:text-white/90 font-mono tracking-[0.18em] uppercase font-bold drop-shadow-sm dark:drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] my-8 sm:my-12" style="writing-mode: vertical-rl;">
-                            <span class="hero-typewriter-text"></span>
-                            <span class="inline-block w-3 sm:w-3.5 h-1.5 sm:h-2 mt-1 bg-[var(--primary)] animate-pulse shadow-[0_0_8px_var(--primary)]"></span>
-                        </div>
-                    ))}
                 </div>
             </div>
         </div>
