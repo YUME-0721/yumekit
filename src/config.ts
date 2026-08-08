@@ -106,7 +106,7 @@ export const navBarConfig: NavBarConfig = {
 		},
 		{
 			name: "统计",
-			url: "https://cloud.umami.is/share/Euu7elNJGcNr6rUR",
+			url: "https://umami.yumekai.top/share/46vKiUC2hTE5PytG",
 			external: true,
 		},
 		{
@@ -149,12 +149,11 @@ export const imageFallbackConfig: ImageFallbackConfig = {
 
 export const umamiConfig: UmamiConfig = {
 	enabled: true, // 是否显示 Umami 统计
-	apiKey:
-		import.meta.env.UMAMI_API_KEY || "", // API 密钥优先从环境变量读取，由于 Umami Cloud 免费版取消了 API Key，未填则不发起查询
-	baseUrl: "https://api.umami.is", // Umami Cloud API 地址
-	websiteId: "5f9ad5b6-7834-44f3-a341-35ae12b273e3", // Umami 网站 ID
+	baseUrl: "https://umami.yumekai.top", // 自建 Umami 服务地址
+	websiteId: "967adb81-bb8b-429d-855d-2ac915a6af96", // Umami 网站 ID
+	shareId: "46vKiUC2hTE5PytG", // Umami 分享 ID
 	scripts: `
-<script defer src="https://cloud.umami.is/script.js" data-website-id="5f9ad5b6-7834-44f3-a341-35ae12b273e3"></script>
+<script defer src="https://umami.yumekai.top/script.js" data-website-id="967adb81-bb8b-429d-855d-2ac915a6af96"></script>
   `.trim(), // 上面填你要插入的 Script，不用再去 Layout 中插入
 };
 

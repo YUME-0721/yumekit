@@ -95,9 +95,9 @@ const className = Astro.props.class;
         try {
             const statsData = await window.getUmamiPageStats(
                 umamiConfig.baseUrl,
-                umamiConfig.apiKey,
                 umamiConfig.websiteId,
-                `/posts/${slug}/`
+                `/posts/${slug}/`,
+                umamiConfig.shareId
             );
             
             const pageViews = statsData.pageviews || 0;

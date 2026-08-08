@@ -130,17 +130,17 @@ const { remarkPluginFrontmatter } = await entry.render();
             el.classList.add('processed');
             const url = el.dataset.url;
             const baseUrl = el.dataset.umamiBaseUrl;
-            const apiKey = el.dataset.umamiApiKey;
             const websiteId = el.dataset.umamiWebsiteId;
+            const shareId = el.dataset.umamiShareId;
             
-            if (!baseUrl || !apiKey || !websiteId) return;
+            if (!baseUrl || !websiteId) return;
             
             try {
                 const statsData = await window.getUmamiPageStats(
                     baseUrl,
-                    apiKey,
                     websiteId,
-                    url
+                    url,
+                    shareId
                 );
                 
                 const pageviews = statsData.pageviews || 0;

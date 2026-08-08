@@ -394,9 +394,9 @@ const jsonLd = {
         try {
             const statsData = await window.getUmamiPageStats(
                 umamiConfig.baseUrl,
-                umamiConfig.apiKey,
                 umamiConfig.websiteId,
-                postUrl
+                postUrl,
+                umamiConfig.shareId
             );
             
             const pageviews = statsData.pageviews || 0;

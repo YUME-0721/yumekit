@@ -97,8 +97,9 @@ const config = profileConfig;
         try {
             const statsData = await window.getUmamiPageStats(
                 umamiConfig.baseUrl,
-                umamiConfig.apiKey,
-                umamiConfig.websiteId
+                umamiConfig.websiteId,
+                null,
+                umamiConfig.shareId
             );
             
             const pageviews = statsData.pageviews || 0;

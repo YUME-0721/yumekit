@@ -1,10 +1,6 @@
 /**
- * Umami Cloud API 统计脚本
- * 使用 API Key 认证方式调用 Umami Cloud API
- * 
- * 优化说明：
- * - 全站统计使用 /stats 端点
- * - 单页统计使用 /stats 端点 + path 参数（可获取 pageviews 和 visitors）
+ * Umami 统计服务前端数据抓取脚本
+ * 支持免 API Key（通过 Share Token）及 API Key 方式拉取统计数据
  */
 ((global) => {
 	const cacheKey = "umami-share-cache";
@@ -14,11 +10,12 @@
 	if (!global.__umamiDataCache) {
 		global.__umamiDataCache = new Map();
 	}
+	if (!global.__umamiShareTokenCache) {
+		global.__umamiShareTokenCache = new Map();
+	}
 
 	/**
 	 * 从 localStorage 获取缓存数据
-	 * @param {string} key - 缓存键
-	 * @returns {object|null} 缓存数据或 null
 	 */
 	function getFromCache(key) {
 		try {
@@ -38,8 +35,6 @@
 
 	/**
 	 * 保存数据到缓存
-	 * @param {string} key - 缓存键
-	 * @param {object} value - 要缓存的数据
 	 */
 	function saveToCache(key, value) {
 		try {
@@ -53,6 +48,36 @@
 	}
 
 	/**
+	 * 获取 Umami Share Token（免 API Key 获取公开统计）
+	 */
+	async function getShareToken(baseUrl, shareId) {
+		if (!shareId) return null;
+		const cacheKeyStr = `share-token-${shareId}`;
+		if (global.__umamiShareTokenCache.has(cacheKeyStr)) {
+			return global.__umamiShareTokenCache.get(cacheKeyStr);
+		}
+		const cachedToken = getFromCache(cacheKeyStr);
+		if (cachedToken) {
+			global.__umamiShareTokenCache.set(cacheKeyStr, cachedToken);
+			return cachedToken;
+		}
+
+		try {
+			const res = await fetch(`${baseUrl}/api/share/${shareId}`);
+			if (!res.ok) return null;
+			const data = await res.json();
+			if (data && data.token) {
+				global.__umamiShareTokenCache.set(cacheKeyStr, data.token);
+				saveToCache(cacheKeyStr, data.token);
+				return data.token;
+			}
+		} catch {
+			// 忽略请求错误
+		}
+		return null;
+	}
+
+	/**
 	 * 清除 Umami 缓存
 	 */
 	global.clearUmamiShareCache = () => {
@@ -63,95 +88,43 @@
 			}
 		}
 		global.__umamiDataCache.clear();
+		global.__umamiShareTokenCache.clear();
 	};
 
-	// 兼容旧函数名
 	global.clearUmamiCache = global.clearUmamiShareCache;
 
 	/**
-	 * 获取全站统计数据（使用 /stats 端点）
-	 * @param {string} baseUrl - Umami Cloud API 基础 URL
-	 * @param {string} apiKey - API 密钥
-	 * @param {string} websiteId - 网站 ID
-	 * @returns {Promise<object>} 统计数据
+	 * 统一解析不同版本的调用参数
 	 */
-	async function fetchWebsiteStats(baseUrl, apiKey, websiteId) {
-		const cacheKeyStr = `site-stats-${websiteId}`;
+	function parseArgs(args) {
+		let baseUrl = args[0];
+		let websiteId = null;
+		let urlPath = null;
+		let shareId = null;
 
-		// 检查内存缓存
-		if (global.__umamiDataCache.has(cacheKeyStr)) {
-			return { ...global.__umamiDataCache.get(cacheKeyStr), _fromCache: true };
+		if (typeof args[1] === "string" && (args[1].length === 36 || (args.length <= 4 && !args[1].startsWith("http")))) {
+			// 新签名: (baseUrl, websiteId, urlPath, shareId)
+			websiteId = args[1];
+			urlPath = args[2] || null;
+			shareId = args[3] || null;
+		} else {
+			// 旧签名: (baseUrl, apiKey/ignored, websiteId, urlPath, shareId)
+			websiteId = args[2];
+			urlPath = args[3] || null;
+			shareId = args[4] || null;
 		}
-
-		// 检查 localStorage 缓存
-		const cachedData = getFromCache(cacheKeyStr);
-		if (cachedData) {
-			global.__umamiDataCache.set(cacheKeyStr, cachedData);
-			return { ...cachedData, _fromCache: true };
-		}
-
-		if (!apiKey || global.__umamiApiUnauthorized) {
-			return { pageviews: 0, visitors: 0, visits: 0, _fromCache: false };
-		}
-
-		try {
-			const currentTimestamp = Date.now();
-			const statsUrl = `${baseUrl}/api/websites/${websiteId}/stats?startAt=0&endAt=${currentTimestamp}`;
-
-			let res = await fetch(statsUrl, {
-				headers: {
-					"Authorization": `Bearer ${apiKey}`,
-					"x-umami-api-key": apiKey
-				},
-			});
-
-			if (res.status === 404) {
-				// Fallback to /v1/ endpoint if /api/ fails with 404
-				const fallbackUrl = `${baseUrl}/v1/websites/${websiteId}/stats?startAt=0&endAt=${currentTimestamp}`;
-				res = await fetch(fallbackUrl, {
-					headers: {
-						"Authorization": `Bearer ${apiKey}`,
-						"x-umami-api-key": apiKey
-					},
-				});
-			}
-
-			if (res.status === 401 || res.status === 403) {
-				if (!global.__umamiApiUnauthorized) {
-					console.info("Umami API Key 未设置或无权限（Umami Cloud 免费版已取消 API 接入功能），静默跳过 API 统计渲染。");
-					global.__umamiApiUnauthorized = true;
-				}
-				return { pageviews: 0, visitors: 0, visits: 0, _fromCache: false };
-			}
-
-			if (!res.ok) throw new Error(`API 错误: ${res.status}`);
-
-			const data = await res.json();
-			global.__umamiDataCache.set(cacheKeyStr, data);
-			saveToCache(cacheKeyStr, data);
-
-			return {
-				pageviews: data.pageviews ?? 0,
-				visitors: data.visitors ?? 0,
-				visits: data.visits ?? 0,
-				_fromCache: false,
-			};
-		} catch (error) {
-			console.error("获取全站统计失败:", error);
-			return { pageviews: 0, visitors: 0, visits: 0, _fromCache: false };
-		}
+		return { baseUrl, websiteId, urlPath, shareId };
 	}
 
 	/**
-	 * 获取特定页面的统计数据（使用 /stats 端点 + path 参数）
-	 * @param {string} baseUrl - Umami Cloud API 基础 URL
-	 * @param {string} apiKey - API 密钥
-	 * @param {string} websiteId - 网站 ID
-	 * @param {string} urlPath - 页面路径（如 /posts/xxx/）
-	 * @returns {Promise<object>} 页面统计数据
+	 * 获取 Umami 统计核心函数
 	 */
-	async function fetchPageStats(baseUrl, apiKey, websiteId, urlPath) {
-		const cacheKeyStr = `page-stats-${websiteId}-${urlPath}`;
+	async function fetchStats(baseUrl, websiteId, urlPath = null, shareId = null) {
+		if (!websiteId) {
+			return { pageviews: 0, visitors: 0, visits: 0, _fromCache: false };
+		}
+
+		const cacheKeyStr = urlPath ? `page-stats-${websiteId}-${urlPath}` : `site-stats-${websiteId}`;
 
 		// 检查内存缓存
 		if (global.__umamiDataCache.has(cacheKeyStr)) {
@@ -165,35 +138,32 @@
 			return { ...cachedData, _fromCache: true };
 		}
 
-		if (!apiKey || global.__umamiApiUnauthorized) {
-			return { pageviews: 0, visitors: 0, visits: 0, _fromCache: false };
-		}
-
 		try {
 			const currentTimestamp = Date.now();
-			// 使用 /stats 端点 + path 参数获取单页统计
-			const statsUrl = `${baseUrl}/api/websites/${websiteId}/stats?startAt=0&endAt=${currentTimestamp}&path=${encodeURIComponent(urlPath)}`;
+			let statsUrl = `${baseUrl}/api/websites/${websiteId}/stats?startAt=0&endAt=${currentTimestamp}`;
+			if (urlPath) {
+				statsUrl += `&path=${encodeURIComponent(urlPath)}`;
+			}
 
-			let res = await fetch(statsUrl, {
-				headers: {
-					"Authorization": `Bearer ${apiKey}`,
-					"x-umami-api-key": apiKey
-				},
-			});
+			const headers = {};
+			if (shareId) {
+				const shareToken = await getShareToken(baseUrl, shareId);
+				if (shareToken) {
+					headers["x-umami-share-token"] = shareToken;
+					headers["x-umami-share-context"] = shareId;
+				}
+			}
 
-			if (res.status === 404) {
-				const fallbackUrl = `${baseUrl}/v1/websites/${websiteId}/stats?startAt=0&endAt=${currentTimestamp}&path=${encodeURIComponent(urlPath)}`;
-				res = await fetch(fallbackUrl, {
-					headers: {
-						"Authorization": `Bearer ${apiKey}`,
-						"x-umami-api-key": apiKey
-					},
-				});
+			let res = await fetch(statsUrl, { headers });
+
+			if (res.status === 404 && !urlPath) {
+				const fallbackUrl = `${baseUrl}/v1/websites/${websiteId}/stats?startAt=0&endAt=${currentTimestamp}`;
+				res = await fetch(fallbackUrl, { headers });
 			}
 
 			if (res.status === 401 || res.status === 403) {
 				if (!global.__umamiApiUnauthorized) {
-					console.info("Umami API Key 未设置或无权限（Umami Cloud 免费版已取消 API 接入功能），静默跳过 API 统计渲染。");
+					console.info("Umami 统计 API 未获得授权，静默跳过数据展示。");
 					global.__umamiApiUnauthorized = true;
 				}
 				return { pageviews: 0, visitors: 0, visits: 0, _fromCache: false };
@@ -202,7 +172,6 @@
 			if (!res.ok) throw new Error(`API 错误: ${res.status}`);
 
 			const data = await res.json();
-
 			const result = {
 				pageviews: data.pageviews ?? 0,
 				visitors: data.visitors ?? 0,
@@ -214,38 +183,26 @@
 
 			return { ...result, _fromCache: false };
 		} catch (error) {
-			console.error("获取页面统计失败:", error);
+			console.error("获取 Umami 统计失败:", error);
 			return { pageviews: 0, visitors: 0, visits: 0, _fromCache: false };
 		}
 	}
 
 	/**
-	 * 获取 Umami 网站统计数据（全站）
-	 * @param {string} baseUrl - Umami Cloud API 基础 URL
-	 * @param {string} apiKey - API 密钥
-	 * @param {string} websiteId - 网站 ID
-	 * @returns {Promise<object>} 网站统计数据
+	 * 获取全站统计数据
 	 */
-	global.getUmamiWebsiteStats = async (baseUrl, apiKey, websiteId) => {
-		return fetchWebsiteStats(baseUrl, apiKey, websiteId);
+	global.getUmamiWebsiteStats = async (...args) => {
+		const { baseUrl, websiteId, shareId } = parseArgs(args);
+		return fetchStats(baseUrl, websiteId, null, shareId);
 	};
 
-	// 兼容旧函数名
 	global.getUmamiSiteStats = global.getUmamiWebsiteStats;
 
 	/**
-	 * 获取特定页面的 Umami 统计数据
-	 * @param {string} baseUrl - Umami Cloud API 基础 URL
-	 * @param {string} apiKey - API 密钥
-	 * @param {string} websiteId - 网站 ID
-	 * @param {string} urlPath - 页面路径（可选，不传则返回全站统计）
-	 * @returns {Promise<object>} 统计数据
+	 * 获取特定页面的统计数据
 	 */
-	global.getUmamiPageStats = async (baseUrl, apiKey, websiteId, urlPath = null) => {
-		// 如果没有指定路径，返回全站统计
-		if (!urlPath) {
-			return fetchWebsiteStats(baseUrl, apiKey, websiteId);
-		}
-		return fetchPageStats(baseUrl, apiKey, websiteId, urlPath);
+	global.getUmamiPageStats = async (...args) => {
+		const { baseUrl, websiteId, urlPath, shareId } = parseArgs(args);
+		return fetchStats(baseUrl, websiteId, urlPath, shareId);
 	};
 })(window);

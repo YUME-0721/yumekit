@@ -118,9 +118,9 @@ export type ImageFallbackConfig = {
 
 export type UmamiConfig = {
 	enabled: boolean;
-	apiKey: string;
 	baseUrl: string;
 	websiteId: string;
+	shareId?: string;
 	scripts: string;
 };
 
