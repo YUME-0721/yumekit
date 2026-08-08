@@ -11,8 +11,8 @@ import type {
 import { LinkPreset } from "./types/config";
 
 export const siteConfig: SiteConfig = {
-	title: "YUME",
-	subtitle: "技术分享与实践",
+	title: "放课后の技术部",
+	subtitle: "",
 	description:
 		"分享网络技术、服务器部署、内网穿透、静态网站搭建、CDN优化、容器化部署等技术教程与实践经验的个人技术博客，专注于云原生、无服务器架构和前后端开发，作者为YUME",
 
