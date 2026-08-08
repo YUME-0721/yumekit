@@ -120,23 +120,10 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
              class="relative w-full"
              style="z-index: 20;">
 
-            <!-- 液态玻璃过渡条 -->
-            <div id="liquid-divider" 
-                 class="sticky top-0 w-full h-24 pointer-events-none overflow-hidden"
-                 style="z-index: 21;">
-                <!-- 磨砂玻璃渐变过渡区 -->
-                <div id="liquid-blur-band" 
-                     class="absolute inset-0 transition-all duration-300"
-                     style="backdrop-filter: blur(0px) saturate(100%); -webkit-backdrop-filter: blur(0px) saturate(100%);"></div>
-                <!-- 顶部光晕条 -->
-                <div id="liquid-shine" 
-                     class="absolute top-0 left-0 right-0 h-px opacity-0 transition-opacity duration-500"
-                     style="background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 30%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.5) 70%, transparent 100%);"></div>
-            </div>
-
             <!-- 主内容面板：液态毛玻璃背景，亮暗双模式 -->
+            <!-- 顶部圆角 + 过渡光晕通过 ::before 伪元素实现，无 sticky 横条 -->
             <div id="content-glass-panel"
-                 class="w-full -mt-24 transition-all duration-300"
+                 class="w-full transition-all duration-500"
                  style="background: transparent;">
 
                 <!-- 内容居中布局区 -->
@@ -271,84 +258,72 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
     will-change: transform;
 }
 
+/* 内容面板基础过渡 */
+#content-glass-panel {
+    transition:
+        background 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+        backdrop-filter 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+        border-radius 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-transition:
+        background 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+        -webkit-backdrop-filter 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+        border-radius 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    /* 顶部初始圆角，随滚动进入拉平 */
+    border-radius: 2rem 2rem 0 0;
+}
+
 /* 内容玻璃面板背景（亮色模式） */
 .is-scrolled #content-glass-panel {
-    background: rgba(250, 250, 252, 0.82);
-    backdrop-filter: blur(24px) saturate(180%) brightness(1.05);
-    -webkit-backdrop-filter: blur(24px) saturate(180%) brightness(1.05);
+    background: rgba(242, 242, 247, 0.88);
+    backdrop-filter: blur(28px) saturate(180%) brightness(1.04);
+    -webkit-backdrop-filter: blur(28px) saturate(180%) brightness(1.04);
+    border-radius: 0;
 }
 
 /* 内容玻璃面板背景（暗色模式） */
 :global(.dark) .is-scrolled #content-glass-panel {
-    background: rgba(15, 15, 20, 0.82);
-    backdrop-filter: blur(24px) saturate(160%) brightness(0.95);
-    -webkit-backdrop-filter: blur(24px) saturate(160%) brightness(0.95);
+    background: rgba(12, 12, 18, 0.88);
+    backdrop-filter: blur(28px) saturate(160%) brightness(0.95);
+    -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(0.95);
+    border-radius: 0;
 }
 
-/* 液态分割条 - 亮色 */
-.is-scrolled #liquid-blur-band {
-    backdrop-filter: blur(16px) saturate(160%);
-    -webkit-backdrop-filter: blur(16px) saturate(160%);
+/* 顶部光晕线（伪元素实现，无 sticky 横条）*/
+#content-glass-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    opacity: 0;
     background: linear-gradient(
-        to bottom,
+        90deg,
         transparent 0%,
-        rgba(250, 250, 252, 0.65) 70%,
-        rgba(250, 250, 252, 0.82) 100%
+        rgba(255,255,255,0.7) 30%,
+        rgba(255,255,255,1) 50%,
+        rgba(255,255,255,0.7) 70%,
+        transparent 100%
     );
+    transition: opacity 0.5s ease, left 0.5s ease, right 0.5s ease;
+    pointer-events: none;
 }
 
-/* 液态分割条 - 暗色 */
-:global(.dark) .is-scrolled #liquid-blur-band {
-    background: linear-gradient(
-        to bottom,
-        transparent 0%,
-        rgba(15, 15, 20, 0.65) 70%,
-        rgba(15, 15, 20, 0.82) 100%
-    );
-}
-
-/* 光晕条亮起 */
-.is-scrolled #liquid-shine {
+.is-scrolled #content-glass-panel::before {
     opacity: 1;
+    left: 0;
+    right: 0;
 }
 
-/* 亮色模式下光晕 */
-.is-scrolled #liquid-shine {
+:global(.dark) #content-glass-panel::before {
     background: linear-gradient(
         90deg,
         transparent 0%,
-        rgba(200, 200, 220, 0.6) 30%,
-        rgba(255, 255, 255, 0.9) 50%,
-        rgba(200, 200, 220, 0.6) 70%,
+        rgba(150, 150, 200, 0.5) 30%,
+        rgba(200, 200, 255, 0.8) 50%,
+        rgba(150, 150, 200, 0.5) 70%,
         transparent 100%
     );
-}
-
-/* 暗色模式下光晕 */
-:global(.dark) .is-scrolled #liquid-shine {
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(100, 100, 130, 0.4) 30%,
-        rgba(180, 180, 220, 0.7) 50%,
-        rgba(100, 100, 130, 0.4) 70%,
-        transparent 100%
-    );
-}
-
-/* 内容面板 transition */
-#content-glass-panel {
-    transition: background 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-                backdrop-filter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    -webkit-transition: background 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-                        -webkit-backdrop-filter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-#liquid-blur-band {
-    transition: backdrop-filter 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-                background 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-#liquid-shine {
-    transition: opacity 0.4s ease;
 }
 </style>
 
@@ -358,41 +333,26 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
     // 1. 液态玻璃滚动效果
     // ============================================
     const heroContent = document.getElementById('hero-content');
-    const contentPanel = document.getElementById('content-panel');
-    const liquidBlurBand = document.getElementById('liquid-blur-band');
-    const liquidShine = document.getElementById('liquid-shine');
-    const contentGlassPanel = document.getElementById('content-glass-panel');
 
     let ticking = false;
-    let lastScrollY = 0;
 
     function updateScrollEffect() {
         const scrollY = window.scrollY;
         const heroHeight = heroContent ? heroContent.offsetHeight : window.innerHeight;
         
-        // 进入内容区域的百分比 (0 ~ 1)，让过渡在 Hero 最后 20% 到越过 Hero 的一小段内完成
+        // 进入内容区域的百分比 (0 ~ 1)
         const transitionStart = heroHeight * 0.70;
         const transitionEnd = heroHeight * 1.05;
         const progress = Math.max(0, Math.min(1, (scrollY - transitionStart) / (transitionEnd - transitionStart)));
 
-        // 根据 progress 决定是否为已滚动状态
-        if (progress > 0.05) {
-            document.getElementById('content-panel').classList.add('is-scrolled');
-        } else {
-            document.getElementById('content-panel').classList.remove('is-scrolled');
-        }
-
-        // 动态调整液态分割条模糊强度（0px ~ 20px）
-        if (liquidBlurBand) {
-            const blurAmount = Math.round(progress * 20);
-            const saturation = 100 + Math.round(progress * 80);
-            liquidBlurBand.style.backdropFilter = `blur(${blurAmount}px) saturate(${saturation}%)`;
-            liquidBlurBand.style.webkitBackdropFilter = `blur(${blurAmount}px) saturate(${saturation}%)`;
-        }
-
-        // 光晕条淡入
-        if (liquidShine) {
-            liquidShine.style.opacity = progress > 0.3 ? String(Math.min(1, (progress - 0.3) * 2.5)) : '0';
+        // 根据 progress 决定是否为已滚动状态（触发 CSS 毛玻璃切换）
+        const contentPanel = document.getElementById('content-panel');
+        if (contentPanel) {
+            if (progress > 0.05) {
+                contentPanel.classList.add('is-scrolled');
+            } else {
+                contentPanel.classList.remove('is-scrolled');
+            }
         }
 
         // Hero 内容随滚动微微向上淡出（视差）
