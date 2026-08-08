@@ -225,8 +225,9 @@ const heroBg = "https://pic.yumekai.top/pic?img=ua";
    ============================================= */
 
 /* 内容面板 - 亮色模式（白色半透明遮罩） */
-/* 贯穿全页的唯一背景遮罩蒙版 - 亮色模式（全页唯一统一透明度与颜色，零重叠零色差） */
+/* 贯穿全页的唯一背景遮罩蒙版 - 亮色模式（全页唯一统一透明度与颜色，包覆 Footer 绝无白色硬块） */
 #home-unified-overlay {
+    bottom: -300px;
     background: rgba(245, 245, 250, 0.52);
     backdrop-filter: blur(20px) saturate(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%);

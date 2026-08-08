@@ -93,8 +93,7 @@ const mainPanelTop = isHeroHome
                 "transition-swup-fade overflow-visible min-w-0",
                 hideSidebar ? "col-span-1" : "col-span-2 lg:col-span-1"
             ]}>
-                <div id="content-wrapper" class="onload-animation">
-                    <!-- the overflow-hidden here prevent long text break the layout-->
+                <div id="content-wrapper" class="onload-animation relative">
                     <!-- make id different from windows.swup global property -->
                     <slot></slot>
                     <div class="footer col-span-2 onload-animation hidden lg:block">
