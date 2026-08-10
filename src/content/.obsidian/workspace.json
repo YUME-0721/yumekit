@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "posts/2026/_07-blog.md",
-                "mode": "source",
-                "source": false
+                "file": "posts/2026/08-resource-station.md",
+                "mode": "preview",
+                "source": true
               },
               "icon": "lucide-file",
-              "title": "_07-blog"
+              "title": "08-resource-station"
             }
           }
         ]
@@ -212,15 +212,24 @@
   },
   "active": "bc7f83a247de48f4",
   "lastOpenFiles": [
+    "posts/2026/07-blog.md",
+    "posts/series/markdown/index.md",
+    "posts/2026/08-resource-station.md",
     "posts/2026/Untitled.md",
-    "posts/2026/_07-blog.md",
-    "未命名.md",
     "posts/2026/YuNest.md",
     "posts/2026/Pixel-Google-AI-Pro.md",
-    "posts/2026/Lucky STUN穿透 + Cloudflare实现无公网IPv4访问与智能分流配置指南.md",
     "posts/2026/PicAPI-Gallery.md",
-    "posts/2026/07-title.md",
+    "posts/2026/Lucky STUN穿透 + Cloudflare实现无公网IPv4访问与智能分流配置指南.md",
+    "posts/2026/_1.md",
+    "posts/2026/_08-shared.md",
+    "posts/2026/_08-share.md",
+    "posts/2026/未命名.md",
     "posts/2026/black&white-film-developing.md",
+    "posts/2026/D76.md",
+    "posts/2026/_07-blog.md",
+    "posts/series/markdown/01-editor/Markdown-01.md",
+    "未命名.md",
+    "posts/2026/07-title.md",
     "posts/2026/_07-test.md",
     "_test01.md",
     "Untitled.md",
@@ -228,19 +237,9 @@
     "未命名 4.md",
     "未命名 3.md",
     "未命名 2.md",
-    "未命名 1.md",
     "posts/single",
-    "posts/news/Untitled.md",
     "posts/news",
-    "posts/2026/D76.md",
-    "_test-bolg.md",
-    "_test-blog.md",
-    "test-title.md",
-    "posts/series/markdown/01-editor/Markdown-01.md",
-    "post/Untitled.md",
     "post",
-    "post/_test-content.md",
-    "posts/series/Software-Test/03_Test_Case.md",
     "未命名.canvas",
     "assets/images/03_Test_Case.png",
     "assets/images/02_functional-test-5.png",
