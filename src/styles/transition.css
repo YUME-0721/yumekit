@@ -1,3 +1,7 @@
+:root {
+    --content-delay: 0ms;
+}
+
 /* Page transition animations with Swup */
 html.is-changing .transition-swup-fade {
     @apply transition-all duration-200
@@ -25,19 +29,19 @@ html.is-animating .transition-swup-fade {
     animation-fill-mode: forwards;
 }
 #navbar {
-    animation-delay: 0ms
+    animation-delay: calc(var(--content-delay, 0ms) + 0ms);
 }
 #sidebar {
-    animation-delay: 100ms
+    animation-delay: calc(var(--content-delay, 0ms) + 100ms);
 }
 #swup-container {
     outline: none;
 }
 #content-wrapper {
-    animation-delay: var(--content-delay);
+    animation-delay: var(--content-delay, 0ms);
 }
 .footer {
-    animation-delay: 250ms;
+    animation-delay: calc(var(--content-delay, 0ms) + 250ms);
 }
 #banner-credit {
     animation-delay: 400ms;

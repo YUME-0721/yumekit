@@ -31,7 +31,7 @@ links = links.map((link) => {
 	if (link.children) {
 		return {
 			...link,
-			children: link.children.map(processLink),
+			children: link.children.map(processLink) as NavBarLink[],
 		};
 	}
 	return link;
@@ -69,19 +69,19 @@ function isCurrentLink(targetUrl: string): boolean {
                                 <Icon name="material-symbols:keyboard-arrow-down-rounded" class="text-[1.25rem] transition-transform duration-200 dropdown-arrow ml-1" />
                             </button>
                             <div class="dropdown-menu absolute top-full left-0 pt-2 opacity-0 invisible pointer-events-none transition-all duration-200 ease-out transform translate-y-[-8px] z-50">
-                                <div class="dropdown-content bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-xl border border-black/5 dark:border-white/10 py-2 min-w-[10rem]">
-                                    {l.children?.map((child) => (
+                                <div class="dropdown-content bg-[var(--card-bg)] rounded-2xl shadow-xl border border-black/5 dark:border-white/10 py-1.5 min-w-[7.5rem] w-max">
+                                    {l.children?.map((child: any) => (
                                         <a 
                                             href={child.external ? child.url : url(child.url)} 
                                             target={child.external ? "_blank" : null}
-                                            class="dropdown-item flex items-center justify-between px-4 py-2.5 text-black/75 dark:text-white/75 hover:text-[var(--primary)] hover:bg-[var(--btn-plain-bg-hover)] transition-colors duration-150 font-medium"
+                                            class="dropdown-item flex items-center justify-between gap-3 px-3 py-2 text-black/75 dark:text-white/75 hover:text-[var(--primary)] hover:bg-[var(--btn-plain-bg-hover)] transition-colors duration-150 font-medium whitespace-nowrap"
                                         >
-                                            <div class="flex items-center">
-                                                {child.icon && <Icon name={child.icon} class="text-[1rem] mr-2" />}
-                                                <span>{child.name}</span>
+                                            <div class="flex items-center gap-1.5">
+                                                {child.icon && <Icon name={child.icon} class="text-[0.95rem] opacity-80" />}
+                                                <span class="text-xs font-bold">{child.name}</span>
                                             </div>
                                             {child.external && (
-                                                <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.75rem] text-black/25 dark:text-white/25" />
+                                                <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.65rem] text-black/30 dark:text-white/30 shrink-0" />
                                             )}
                                         </a>
                                     ))}

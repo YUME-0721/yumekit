@@ -1,234 +1,482 @@
 ---
+import { Icon } from "astro-icon/components";
 import { getSortedPosts } from "../utils/content-utils";
 import { getPostUrlBySlug } from "../utils/url-utils";
 
 let posts = await getSortedPosts();
 
-// 归档页面显示时，按发布时间排序（不受置顶影响）
+// 归档页面按发布时间排序（最新在前）
 posts = posts.slice().sort((a, b) => 
 	b.data.published.getTime() - a.data.published.getTime()
 );
 
-const groups: { year: number; posts: typeof posts }[] = (() => {
-	const groupedPosts = posts.reduce(
-		(grouped: { [year: number]: typeof posts }, post) => {
-			const year = post.data.published.getFullYear();
-			if (!grouped[year]) {
-				grouped[year] = [];
-			}
-			grouped[year].push(post);
-			return grouped;
-		},
-		{},
-	);
+// 统计所有的文章日期数据（Map<YYYY-MM-DD, count>）
+const postDateMap: Record<string, number> = {};
+posts.forEach(post => {
+	const date = post.data.published;
+	const y = date.getFullYear();
+	const m = (date.getMonth() + 1).toString().padStart(2, "0");
+	const d = date.getDate().toString().padStart(2, "0");
+	const key = `${y}-${m}-${d}`;
+	postDateMap[key] = (postDateMap[key] || 0) + 1;
+});
 
-	// convert the object to an array
-	const groupedPostsArray = Object.keys(groupedPosts).map((key) => ({
-		year: Number.parseInt(key),
-		posts: groupedPosts[Number.parseInt(key)],
-	}));
+// 构建层级结构：Year -> Month -> Posts
+interface MonthGroup {
+	month: number;
+	monthStr: string;
+	posts: typeof posts;
+}
 
-	// sort years by latest first
-	groupedPostsArray.sort((a, b) => b.year - a.year);
-	return groupedPostsArray;
+interface YearGroup {
+	year: number;
+	totalCount: number;
+	months: MonthGroup[];
+}
+
+const yearGroups: YearGroup[] = (() => {
+	const yearMap: Record<number, Record<number, typeof posts>> = {};
+
+	posts.forEach(post => {
+		const year = post.data.published.getFullYear();
+		const month = post.data.published.getMonth() + 1;
+		if (!yearMap[year]) yearMap[year] = {};
+		if (!yearMap[year][month]) yearMap[year][month] = [];
+		yearMap[year][month].push(post);
+	});
+
+	const years = Object.keys(yearMap).map(Number).sort((a, b) => b - a);
+
+	return years.map(year => {
+		const monthMap = yearMap[year];
+		const months = Object.keys(monthMap).map(Number).sort((a, b) => b - a).map(month => ({
+			month,
+			monthStr: month.toString().padStart(2, "0"),
+			posts: monthMap[month],
+		}));
+
+		const totalCount = months.reduce((acc, m) => acc + m.posts.length, 0);
+
+		return {
+			year,
+			totalCount,
+			months,
+		};
+	});
 })();
+
+const allYears = yearGroups.map(g => g.year);
+const defaultYear = allYears[0] || new Date().getFullYear();
 
 function formatDate(date: Date) {
 	const month = (date.getMonth() + 1).toString().padStart(2, "0");
 	const day = date.getDate().toString().padStart(2, "0");
 	return `${month}-${day}`;
 }
-
-function formatTag(tagList: string[]) {
-	return tagList.map((t) => `#${t}`).join(" ");
-}
 ---
 
-<div id="archive-panel" class="card-base px-8 py-6">
-    <!-- 筛选头部，默认隐藏，由 JS 控制显示 -->
-    <div id="filter-header" class="mb-4 flex items-center justify-between hidden">
-        <div class="text-lg font-bold text-75">
-            <span id="filter-text"></span>
-            <span id="filter-count" class="text-sm font-normal text-50 ml-2"></span>
+<div id="archive-panel" class="card-base px-4 sm:px-8 py-6 flex flex-col gap-6">
+    <!-- 1. 顶部 Header -->
+    <div class="flex items-center justify-between pb-2 border-b border-black/10 dark:border-white/10">
+        <div>
+            <div class="text-xs font-mono font-bold tracking-widest text-[var(--primary)] uppercase">ARCHIVE</div>
+            <h1 class="text-2xl sm:text-3xl font-black text-black/90 dark:text-white/90 tracking-tight">文章归档</h1>
         </div>
-        <a href="/archive/" class="btn-regular text-sm px-3 py-1 rounded-lg" data-no-swup>
+    </div>
+
+    <!-- 筛选清除提示组件 (如 URL query 带有 filter) -->
+    <div id="filter-header" class="mb-2 flex items-center justify-between hidden px-3 py-2 bg-[var(--primary)]/10 rounded-xl border border-[var(--primary)]/20">
+        <div class="text-sm font-bold text-neutral-800 dark:text-neutral-100 flex items-center gap-2">
+            <Icon name="material-symbols:filter-alt" class="text-base text-[var(--primary)]" />
+            <span id="filter-text"></span>
+            <span id="filter-count" class="text-xs font-semibold text-[var(--primary)]"></span>
+        </div>
+        <a href="/archive/" class="btn-regular text-xs px-2.5 py-1 rounded-lg border border-black/10 dark:border-white/15" data-no-swup>
             清除筛选
         </a>
     </div>
-    
-    <!-- 无结果提示，默认隐藏 -->
-    <div id="no-results" class="text-center text-50 py-8 hidden">
-        没有找到符合条件的文章
-    </div>
-    
-    {
-        groups.map(group => (
-            <div class="year-group" data-year={group.year}>
-                <div class="flex flex-row w-full items-center h-[3.75rem]">
-                    <div class="w-[15%] md:w-[10%] transition text-2xl font-bold text-right text-75">{group.year}</div>
-                    <div class="w-[15%] md:w-[10%]">
-                        <div class="h-3 w-3 bg-none rounded-full outline outline-[var(--primary)] mx-auto -outline-offset-[2px] z-50 outline-3"></div>
+
+    <!-- 2. 文章发布贡献热力图 (Heatmap) -->
+    <div class="w-full card-base p-4 sm:p-5 border border-black/10 dark:border-white/15 bg-white/30 dark:bg-black/30 backdrop-blur-sm flex flex-col gap-3 relative overflow-hidden shadow-inner">
+        <!-- 头部：标题与右上角年份选择胶囊 -->
+        <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 text-xs font-mono font-bold tracking-wider text-neutral-600 dark:text-neutral-400 uppercase">
+                <Icon name="material-symbols:calendar-month-outline-rounded" class="text-sm text-[var(--primary)]" />
+                <span id="heatmap-title">贡献热力图</span>
+            </div>
+            
+            {allYears.length > 0 && (
+                <div class="flex items-center gap-2 shrink-0">
+                    {allYears.map((year, idx) => (
+                        <button
+                            class:list={[
+                                "year-filter-btn px-3 py-1 rounded-xl text-xs font-bold font-mono transition-all border",
+                                idx === 0 ? "active bg-[var(--primary)] text-white border-transparent shadow-sm" : "border-black/10 dark:border-white/15 text-neutral-700 dark:text-neutral-200 hover:border-[var(--primary)] hover:text-[var(--primary)]"
+                            ]}
+                            data-year={year.toString()}
+                        >
+                            {year}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+
+        <!-- 热力图日历 Grid 容器（左右 100% 完整铺满整年） -->
+        <div class="w-full overflow-x-auto pb-1 pt-1 hide-scrollbar" id="heatmap-scroll-container">
+            <div class="w-full min-w-[650px] flex flex-col gap-1.5 select-none" id="heatmap-grid-root">
+                <!-- 顶部 1月 ~ 12月 对应月份刻度线 (53列对齐) -->
+                <div id="heatmap-months" class="grid grid-cols-[repeat(53,minmax(0,1fr))] text-[10px] font-mono text-neutral-400 dark:text-neutral-500 pl-6 pr-0">
+                </div>
+
+                <!-- 矩阵区域：左侧 7 行纵轴 + 53 周 100% 宽 Grid 方格 -->
+                <div class="flex items-stretch gap-2 w-full">
+                    <!-- 左侧 纵轴刻度 (7 行对齐，第2、4、6行为一、三、五) -->
+                    <div class="grid grid-rows-7 gap-[3px] text-[10px] font-mono text-neutral-400 dark:text-neutral-500 shrink-0 w-4 text-center select-none py-0.5">
+                        <div class="flex items-center justify-center leading-none"></div>
+                        <div class="flex items-center justify-center leading-none">一</div>
+                        <div class="flex items-center justify-center leading-none"></div>
+                        <div class="flex items-center justify-center leading-none">三</div>
+                        <div class="flex items-center justify-center leading-none"></div>
+                        <div class="flex items-center justify-center leading-none">五</div>
+                        <div class="flex items-center justify-center leading-none"></div>
                     </div>
-                    <div class="w-[70%] md:w-[80%] transition text-left text-50">
-                        <span class="year-post-count">{group.posts.length}</span> 篇文章
+                    <!-- 53周 x 7天 自适应铺满方格矩阵 (grid-auto-flow: column) -->
+                    <div id="heatmap-cells" class="grid grid-flow-col grid-rows-7 grid-cols-[repeat(53,minmax(0,1fr))] gap-[3px] w-full flex-1">
+                        <!-- 动态由客户端 JS 渲染 371 个天数方格 (完整铺满) -->
                     </div>
                 </div>
-                {group.posts.map(post => (
-                    <a href={getPostUrlBySlug(post.slug)}
-                       aria-label={post.data.title}
-                       class="post-item group btn-plain !block h-10 w-full rounded-lg hover:text-[initial]"
-                       data-tags={JSON.stringify(post.data.tags)}
-                       data-category={post.data.category || ""}
-                    >
-                        <div class="flex flex-row justify-start items-center h-full">
-                            <!-- date -->
-                            <div class="w-[15%] md:w-[10%] transition text-sm text-right text-50">
-                                {formatDate(post.data.published)}
-                            </div>
-                            <!-- dot and line -->
-                            <div class="w-[15%] md:w-[10%] relative dash-line h-full flex items-center">
-                                <div class="transition-all mx-auto w-1 h-1 rounded group-hover:h-5
-                                bg-[oklch(0.5_0.05_var(--hue))] group-hover:bg-[var(--primary)]
-                                outline outline-4 z-50
-                                outline-[var(--card-bg)]
-                                group-hover:outline-[var(--btn-plain-bg-hover)]
-                                group-active:outline-[var(--btn-plain-bg-active)]
-                                "
-                                ></div>
-                            </div>
-                            <!-- post title -->
-                            <div class="w-[70%] md:max-w-[65%] md:w-[65%] text-left font-bold
-                                group-hover:translate-x-1 transition-all group-hover:text-[var(--primary)]
-                                text-75 pr-8 whitespace-nowrap overflow-ellipsis overflow-hidden"
-                            >
-                                    {post.data.title}
-                            </div>
-                            <!-- tag list -->
-                            <div class="hidden md:block md:w-[15%] text-left text-sm transition
-                            whitespace-nowrap overflow-ellipsis overflow-hidden
-                            text-30"
-                            >{formatTag(post.data.tags)}</div>
-                        </div>
-                    </a>
-                ))}
+
+                <!-- 底部右下角图例 (GitHub 经典 5 档绿色主题) -->
+                <div class="flex items-center justify-end gap-1.5 text-[11px] font-mono text-neutral-500 dark:text-neutral-400 pt-1">
+                    <span>少</span>
+                    <span class="w-3.5 h-3.5 rounded-[3.5px] bg-[#ebedf0] dark:bg-[#161b22] border border-black/5 dark:border-white/5 inline-block" title="0 篇"></span>
+                    <span class="w-3.5 h-3.5 rounded-[3.5px] bg-[#9be9a8] dark:bg-[#0e4429] inline-block" title="1 篇"></span>
+                    <span class="w-3.5 h-3.5 rounded-[3.5px] bg-[#40c463] dark:bg-[#006d32] inline-block" title="2 篇"></span>
+                    <span class="w-3.5 h-3.5 rounded-[3.5px] bg-[#30a14e] dark:bg-[#26a641] inline-block" title="3 篇"></span>
+                    <span class="w-3.5 h-3.5 rounded-[3.5px] bg-[#216e39] dark:bg-[#39d353] inline-block shadow-[0_0_6px_rgba(57,211,83,0.4)]" title="4+ 篇"></span>
+                    <span>多</span>
+                </div>
             </div>
-        ))
-    }
+        </div>
+    </div>
+
+    <!-- 3. 时间线列表 (Timeline List) -->
+    <div id="timeline-container" class="flex flex-col gap-6 pt-2 relative">
+        <!-- 无结果提示 -->
+        <div id="no-results" class="text-center text-neutral-500 dark:text-neutral-400 py-12 hidden font-semibold">
+            没有找到符合条件的文章
+        </div>
+
+        {yearGroups.map(yearGroup => (
+            <div class="year-block flex flex-col gap-4 relative" data-year={yearGroup.year}>
+                <!-- 年份头部节点 -->
+                <div class="flex items-center gap-3 relative z-10">
+                    <div class="w-10 h-10 rounded-2xl bg-[var(--primary)] text-white font-black text-lg flex items-center justify-center shadow-lg shadow-[var(--primary)]/30 border border-white/20 shrink-0">
+                        {yearGroup.year.toString().slice(-2)}
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <h2 class="text-xl sm:text-2xl font-black text-black/90 dark:text-white/90 font-mono tracking-tight">{yearGroup.year}年</h2>
+                        <span class="text-xs font-mono font-bold text-neutral-400 dark:text-neutral-500 uppercase">
+                            / 共 <strong class="text-[var(--primary)] font-bold year-post-count">{yearGroup.totalCount}</strong> 篇文章
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 月份组列表 -->
+                <div class="month-list pl-4 sm:pl-5 flex flex-col gap-5 border-l-2 border-dashed border-black/15 dark:border-white/15 ml-5">
+                    {yearGroup.months.map(monthGroup => (
+                        <div class="month-group flex flex-col gap-2 relative transition-all duration-300" data-month={`${yearGroup.year}-${monthGroup.monthStr}`}>
+                            <!-- 月份分支节点 -->
+                            <div class="flex items-center gap-2.5 relative -left-[21px] z-10 py-1">
+                                <!-- 月份分支节点圆点（支持 hover 高亮放大） -->
+                                <div class="month-dot w-3.5 h-3.5 rounded-full bg-[var(--card-bg)] border-2 border-[var(--primary)] shadow-sm transition-all duration-300"></div>
+                                <h3 class="text-sm sm:text-base font-bold text-black/85 dark:text-white/85 font-mono">
+                                    {monthGroup.month}月
+                                    <span class="text-xs font-normal text-neutral-500 dark:text-neutral-400 ml-1">({monthGroup.posts.length} 篇)</span>
+                                </h3>
+                            </div>
+
+                            <!-- 该月份下的文章项目列表 -->
+                            <div class="post-list flex flex-col gap-1 pl-2 sm:pl-4">
+                                {monthGroup.posts.map(post => (
+                                    <a
+                                        href={getPostUrlBySlug(post.slug)}
+                                        class="post-item group relative flex items-center justify-between gap-3 p-2 sm:px-3 sm:py-2.5 rounded-xl transition-all duration-200 border border-transparent hover:border-[var(--primary)]/30 hover:bg-[var(--primary)]/15 hover:shadow-sm"
+                                        data-tags={JSON.stringify(post.data.tags || [])}
+                                        data-category={post.data.category || ""}
+                                        data-date={`${post.data.published.getFullYear()}-${(post.data.published.getMonth()+1).toString().padStart(2,"0")}-${post.data.published.getDate().toString().padStart(2,"0")}`}
+                                    >
+                                        <!-- 左侧：日期与标题 -->
+                                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                                            <span class="text-xs sm:text-sm font-mono font-bold text-neutral-400 group-hover:text-[var(--primary)] transition-colors shrink-0">
+                                                {formatDate(post.data.published)}
+                                            </span>
+                                            <span class="text-sm sm:text-base font-bold text-neutral-800 dark:text-neutral-100 group-hover:text-[var(--primary)] transition-all truncate pr-2">
+                                                {post.data.title}
+                                            </span>
+                                        </div>
+
+                                        <!-- 右侧：分类胶囊 + 标签组 -->
+                                        <div class="flex items-center gap-2 shrink-0 text-xs">
+                                            {post.data.category && (
+                                                <span class="px-2 py-0.5 rounded-md bg-[var(--primary)]/15 text-[var(--primary)] font-bold text-[11px] sm:text-xs shrink-0 border border-[var(--primary)]/20">
+                                                    #{post.data.category}
+                                                </span>
+                                            )}
+                                            {post.data.tags && post.data.tags.length > 0 && (
+                                                <span class="hidden md:inline-block text-[11px] font-medium text-neutral-400 dark:text-neutral-500 truncate max-w-[180px]">
+                                                    {post.data.tags.slice(0, 3).join(" / ")}
+                                                    {post.data.tags.length > 3 && ` +${post.data.tags.length - 3}`}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        ))}
+    </div>
 </div>
 
-<script is:inline>
-// 客户端筛选逻辑
-function filterArchive() {
-    const params = new URLSearchParams(window.location.search);
-    const tag = params.get('tag');
-    const category = params.get('category');
-    const uncategorized = params.get('uncategorized') === 'true';
-    
-    const filterHeader = document.getElementById('filter-header');
-    const filterText = document.getElementById('filter-text');
-    const filterCount = document.getElementById('filter-count');
-    const noResults = document.getElementById('no-results');
-    const postItems = document.querySelectorAll('.post-item');
-    const yearGroups = document.querySelectorAll('.year-group');
-    
-    if (!filterHeader || !filterText || !filterCount || !noResults) return;
-    
-    // 如果没有筛选条件，显示所有文章
-    if (!tag && !category && !uncategorized) {
-        filterHeader.classList.add('hidden');
-        postItems.forEach(item => {
-            item.classList.remove('filtered-hidden');
-        });
-        yearGroups.forEach(function(group) {
-            group.classList.remove('filtered-hidden');
-            updateYearCount(group);
-        });
-        noResults.classList.add('hidden');
-        return;
-    }
-    
-    // 显示筛选头部
-    filterHeader.classList.remove('hidden');
-    
-    // 构建筛选文本
-    if (tag) {
-        filterText.textContent = `标签: ${tag}`;
-    } else if (category) {
-        filterText.textContent = `分类: ${category}`;
-    } else if (uncategorized) {
-        filterText.textContent = '未分类';
-    }
-    
-    // 筛选文章
-    let visibleCount = 0;
-    postItems.forEach(item => {
-        const itemTags = JSON.parse(item.getAttribute('data-tags') || '[]');
-        const itemCategory = item.getAttribute('data-category') || '';
-        
-        let show = false;
-        
-        if (tag) {
-            show = itemTags.includes(tag);
-        } else if (category) {
-            show = itemCategory === category;
-        } else if (uncategorized) {
-            show = !itemCategory || itemCategory === '';
-        }
-        
-        if (show) {
-            item.classList.remove('filtered-hidden');
-            visibleCount++;
-        } else {
-            item.classList.add('filtered-hidden');
-        }
-    });
-    
-    // 更新筛选计数
-    filterCount.textContent = `(${visibleCount} 篇文章)`;
-    
-    // 更新年份组显示
-    yearGroups.forEach(function(group) {
-        var visiblePosts = group.querySelectorAll('.post-item:not(.filtered-hidden)');
-        if (visiblePosts.length === 0) {
-            group.classList.add('filtered-hidden');
-        } else {
-            group.classList.remove('filtered-hidden');
-            updateYearCount(group, visiblePosts.length);
-        }
-    });
-    
-    // 显示或隐藏无结果提示
-    if (visibleCount === 0) {
-        noResults.classList.remove('hidden');
-    } else {
-        noResults.classList.add('hidden');
-    }
-}
-
-function updateYearCount(group, count) {
-    const countSpan = group.querySelector('.year-post-count');
-    if (countSpan) {
-        if (count !== undefined) {
-            countSpan.textContent = String(count);
-        } else {
-            const allPosts = group.querySelectorAll('.post-item');
-            countSpan.textContent = String(allPosts.length);
-        }
-    }
-}
-
-// 立即执行筛选（脚本在 DOM 之后，可以直接执行）
-filterArchive();
-
-// 支持 Swup 页面切换
-document.addEventListener('swup:contentReplaced', filterArchive);
-
-// 监听 URL 变化（popstate）
-window.addEventListener('popstate', filterArchive);
-</script>
-
 <style>
+    .year-filter-btn.active {
+        background-color: var(--primary);
+        color: white !important;
+        border-color: var(--primary);
+        box-shadow: 0 2px 8px rgba(var(--primary-rgb, 255, 100, 150), 0.3);
+    }
+    
+    /* 鼠标 Hover 文章行时，联动高亮其所属月份节点圆点 */
+    .month-group:has(.post-item:hover) .month-dot {
+        transform: scale(1.4);
+        background-color: var(--primary) !important;
+        box-shadow: 0 0 12px var(--primary) !important;
+        border-color: white !important;
+    }
+    .month-group:has(.post-item:hover) {
+        border-left-color: var(--primary) !important;
+    }
+
     .filtered-hidden {
         display: none !important;
     }
 </style>
+
+<script is:inline define:vars={{ postDateMap, defaultYear }}>
+(function() {
+    // ============================================
+    // 1. 渲染热力图 (Heatmap) 矩阵 - 53列 100% 自适应铺满
+    // ============================================
+    function renderHeatmap(targetYear) {
+        const heatmapCells = document.getElementById('heatmap-cells');
+        const heatmapMonths = document.getElementById('heatmap-months');
+        const heatmapTitle = document.getElementById('heatmap-title');
+        if (!heatmapCells) return;
+
+        heatmapCells.innerHTML = '';
+        if (heatmapMonths) heatmapMonths.innerHTML = '';
+        if (heatmapTitle) {
+            heatmapTitle.textContent = '贡献热力图';
+        }
+
+        const yearNum = parseInt(targetYear, 10);
+        const startDate = new Date(yearNum, 0, 1);
+        const endDate = new Date(yearNum, 11, 31);
+        
+        // 补齐第一周的开头偏移 (0-Sun, 1-Mon...)
+        const startDayOfWeek = startDate.getDay();
+
+        const days = [];
+        const monthCols = {}; // month (1-12) -> colIndex (1-53)
+
+        // 插入前置 null 补齐第一周
+        for (let i = 0; i < startDayOfWeek; i++) {
+            days.push(null);
+        }
+
+        const curr = new Date(startDate);
+        while (curr <= endDate) {
+            const m = curr.getMonth() + 1;
+            const d = curr.getDate();
+            const y = curr.getFullYear();
+            const mStr = String(m).padStart(2, '0');
+            const dStr = String(d).padStart(2, '0');
+            const dateStr = `${y}-${mStr}-${dStr}`;
+            const count = postDateMap[dateStr] || 0;
+
+            const colIndex = Math.floor(days.length / 7) + 1;
+            if (d === 1 && !monthCols[m]) {
+                monthCols[m] = colIndex;
+            }
+
+            days.push({ dateStr, count, day: d, month: m });
+            curr.setDate(curr.getDate() + 1);
+        }
+
+        // 后置填充，补满 53 列 x 7 行 = 371 个单元格
+        while (days.length < 53 * 7) {
+            days.push(null);
+        }
+
+        // 1. 渲染月份 1月~12月 头部刻度 (与 53 列网格精确定位对齐)
+        if (heatmapMonths) {
+            const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+            const monthsFrag = document.createDocumentFragment();
+            for (let m = 1; m <= 12; m++) {
+                if (monthCols[m]) {
+                    const monthSpan = document.createElement('span');
+                    monthSpan.textContent = monthNames[m - 1];
+                    monthSpan.className = 'whitespace-nowrap';
+                    monthSpan.style.gridColumnStart = String(monthCols[m]);
+                    monthsFrag.appendChild(monthSpan);
+                }
+            }
+            heatmapMonths.appendChild(monthsFrag);
+        }
+
+        // 2. 渲染 53 周 x 7 天 日历矩阵方格 (支持 Aspect Square 与 100% 宽自适应拉伸)
+        const fragment = document.createDocumentFragment();
+        days.forEach(day => {
+            const cell = document.createElement('div');
+            cell.className = 'w-full aspect-square rounded-[3.5px] transition-all duration-200 ';
+
+            if (!day) {
+                cell.className += 'opacity-0 pointer-events-none';
+            } else {
+                cell.setAttribute('title', `${day.dateStr}: ${day.count} 篇文章`);
+                if (day.count === 0) {
+                    cell.className += 'bg-[#ebedf0] dark:bg-[#161b22] border border-black/5 dark:border-white/5 hover:border-emerald-500/50';
+                } else if (day.count === 1) {
+                    cell.className += 'bg-[#9be9a8] dark:bg-[#0e4429] border border-[#9be9a8]/50 hover:scale-125 hover:z-10 shadow-sm';
+                } else if (day.count === 2) {
+                    cell.className += 'bg-[#40c463] dark:bg-[#006d32] border border-[#40c463]/50 hover:scale-125 hover:z-10 shadow-sm';
+                } else if (day.count === 3) {
+                    cell.className += 'bg-[#30a14e] dark:bg-[#26a641] border border-[#30a14e]/50 hover:scale-125 hover:z-10 shadow-sm';
+                } else {
+                    cell.className += 'bg-[#216e39] dark:bg-[#39d353] border border-[#39d353]/50 hover:scale-125 hover:z-10 shadow-[0_0_8px_rgba(57,211,83,0.5)]';
+                }
+            }
+            fragment.appendChild(cell);
+        });
+
+        heatmapCells.appendChild(fragment);
+    }
+
+    // ============================================
+    // 2. 年份筛选胶囊交互
+    // ============================================
+    function initYearFilter() {
+        const filterBtns = document.querySelectorAll('.year-filter-btn');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const year = this.getAttribute('data-year');
+
+                filterBtns.forEach(b => {
+                    b.classList.remove('active', 'bg-[var(--primary)]', 'text-white', 'border-transparent', 'shadow-sm');
+                    b.classList.add('border-black/10', 'dark:border-white/15', 'text-neutral-700', 'dark:text-neutral-200');
+                });
+                this.classList.add('active', 'bg-[var(--primary)]', 'text-white', 'border-transparent', 'shadow-sm');
+                this.classList.remove('border-black/10', 'dark:border-white/15', 'text-neutral-700', 'dark:text-neutral-200');
+
+                renderHeatmap(year);
+
+                const targetBlock = document.querySelector(`.year-block[data-year="${year}"]`);
+                if (targetBlock) {
+                    targetBlock.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        });
+    }
+
+    // ============================================
+    // 3. URL Query 过滤 (分类 / 标签)
+    // ============================================
+    function filterArchive() {
+        const params = new URLSearchParams(window.location.search);
+        const tag = params.get('tag');
+        const category = params.get('category');
+        const uncategorized = params.get('uncategorized') === 'true';
+
+        const filterHeader = document.getElementById('filter-header');
+        const filterText = document.getElementById('filter-text');
+        const filterCount = document.getElementById('filter-count');
+        const noResults = document.getElementById('no-results');
+        const postItems = document.querySelectorAll('.post-item');
+        const monthGroups = document.querySelectorAll('.month-group');
+        const yearBlocks = document.querySelectorAll('.year-block');
+
+        if (!filterHeader || !filterText || !filterCount || !noResults) return;
+
+        if (!tag && !category && !uncategorized) {
+            filterHeader.classList.add('hidden');
+            postItems.forEach(item => item.classList.remove('filtered-hidden'));
+            monthGroups.forEach(m => m.classList.remove('filtered-hidden'));
+            yearBlocks.forEach(y => y.classList.remove('filtered-hidden'));
+            noResults.classList.add('hidden');
+            return;
+        }
+
+        filterHeader.classList.remove('hidden');
+        if (tag) filterText.textContent = `标签: ${tag}`;
+        else if (category) filterText.textContent = `分类: ${category}`;
+        else if (uncategorized) filterText.textContent = '未分类';
+
+        let visibleTotal = 0;
+        postItems.forEach(item => {
+            const itemTags = JSON.parse(item.getAttribute('data-tags') || '[]');
+            const itemCategory = item.getAttribute('data-category') || '';
+            let show = false;
+
+            if (tag) show = itemTags.includes(tag);
+            else if (category) show = itemCategory === category;
+            else if (uncategorized) show = !itemCategory || itemCategory === '';
+
+            if (show) {
+                item.classList.remove('filtered-hidden');
+                visibleTotal++;
+            } else {
+                item.classList.add('filtered-hidden');
+            }
+        });
+
+        filterCount.textContent = `(${visibleTotal} 篇)`;
+
+        monthGroups.forEach(m => {
+            const visibleInMonth = m.querySelectorAll('.post-item:not(.filtered-hidden)');
+            if (visibleInMonth.length === 0) m.classList.add('filtered-hidden');
+            else m.classList.remove('filtered-hidden');
+        });
+
+        yearBlocks.forEach(y => {
+            const visibleInYear = y.querySelectorAll('.post-item:not(.filtered-hidden)');
+            if (visibleInYear.length === 0) {
+                y.classList.add('filtered-hidden');
+            } else {
+                y.classList.remove('filtered-hidden');
+                const countSpan = y.querySelector('.year-post-count');
+                if (countSpan) countSpan.textContent = String(visibleInYear.length);
+            }
+        });
+
+        if (visibleTotal === 0) noResults.classList.remove('hidden');
+        else noResults.classList.add('hidden');
+    }
+
+    // 初始化执行
+    renderHeatmap(defaultYear);
+    initYearFilter();
+    filterArchive();
+
+    // 支持 Swup 导航
+    document.addEventListener('swup:contentReplaced', function() {
+        renderHeatmap(defaultYear);
+        initYearFilter();
+        filterArchive();
+    });
+})();
+</script>

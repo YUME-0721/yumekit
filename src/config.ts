@@ -110,14 +110,22 @@ export const navBarConfig: NavBarConfig = {
 			],
 		},
 		{
-			name: "统计",
-			url: "https://umami.yumekai.top/share/46vKiUC2hTE5PytG",
-			external: true,
-		},
-		{
-			name: "画廊",
-			url: "https://img.072199.xyz/browse/wallpaper",
-			external: true,
+			name: "网站",
+			url: "#",
+			children: [
+				{
+					name: "统计",
+					url: "https://umami.yumekai.top/share/46vKiUC2hTE5PytG",
+					icon: "material-symbols:bar-chart-rounded",
+					external: true,
+				},
+				{
+					name: "画廊",
+					url: "https://img.072199.xyz/browse/wallpaper",
+					icon: "material-symbols:photo-library-rounded",
+					external: true,
+				},
+			],
 		},
 	],
 };

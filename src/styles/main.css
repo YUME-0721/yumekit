@@ -46,34 +46,18 @@
     }
 
     .card-base {
-        @apply rounded-[var(--radius-large)] overflow-hidden bg-[var(--card-bg)] transition;
+        @apply rounded-[var(--radius-large)] overflow-hidden bg-[var(--card-bg)] transition-colors transition-shadow duration-300;
         @apply border border-black/15 dark:border-white/20 shadow-md dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)];
     }
 
     .card-hover {
-        @apply hover:scale-[1.01] hover:shadow-xl hover:border-black/25 dark:hover:border-white/35 hover:z-10;
+        @apply transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-black/25 dark:hover:border-white/35 hover:z-10;
     }
 
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    p,
-    a,
-    span,
-    li,
-    ul,
-    ol,
-    blockquote,
-    code,
-    pre,
-    table,
-    th,
-    td,
-    strong {
-        @apply transition;
+    /* GPU 加速与合成图层辅助类 */
+    .transform-gpu {
+        transform: translateZ(0);
+        will-change: transform;
     }
 
     .card-shadow {

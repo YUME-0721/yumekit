@@ -37,7 +37,7 @@ const formattedDate = formatDateToYYYYMMDD(published).replace(/-/g, "/");
 const displayTags = tags.slice(0, 4);
 const remainingTagsCount = tags.length - 4;
 ---
-<div class:list={["card-base card-hover flex flex-col w-full relative", className]} style={style}>
+<div class:list={["card-base card-hover flex flex-col w-full relative [content-visibility:auto] [contain-intrinsic-size:280px] transform-gpu", className]} style={style}>
     <div class:list={["pl-9 pr-4 pt-5 pb-5 relative flex flex-col justify-between min-h-[9.5rem]", {"w-[calc(100%_-_52px_-_12px)]": !hasCover, "w-[calc(100%_-_var(--coverWidth)_-_12px)]": hasCover}]}>
         <div>
             <!-- 文章标题 -->
