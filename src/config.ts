@@ -131,7 +131,7 @@ export const navBarConfig: NavBarConfig = {
 };
 
 export const profileConfig: ProfileConfig = {
-	avatar: "https://img.072199.xyz/file/Materials/fB38joIT.gif", // 头像的路径，相对于“/src”目录。如果以“/”开头，则相对于“/public”目录
+	avatar: "/avatar.webp", // 使用本地预压缩的动态 WebP (394KB)，秒级极速加载
 	name: "YUME",
 	bio: "Ciallo～(∠・ω< )⌒",
 	links: [

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "posts/2026/08-resource-station.md",
+                "file": "posts/2026/09-linux.md",
                 "mode": "preview",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "08-resource-station"
+              "title": "09-linux"
             }
           }
         ]
@@ -212,8 +212,8 @@
   },
   "active": "a36b15cef3e6e2a4",
   "lastOpenFiles": [
-    "posts/2026/07-blog.md",
     "posts/2026/08-resource-station.md",
+    "posts/2026/07-blog.md",
     "posts/2026/09-linux.md",
     "posts/2026/black&white-film-developing.md",
     "posts/2026/D76.md",

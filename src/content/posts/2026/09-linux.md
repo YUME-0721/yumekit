@@ -8,7 +8,7 @@ tags:
   - 运维
   - 命令行
 category: Linux运维
-images: https://img.072199.xyz/file/blog/1787583477037.png
+image: https://img.072199.xyz/file/blog/1787583477037.png
 pinned: false
 ---
 
