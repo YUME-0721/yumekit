@@ -131,7 +131,7 @@ export const navBarConfig: NavBarConfig = {
 };
 
 export const profileConfig: ProfileConfig = {
-	avatar: "/avatar.webp", // 使用本地预压缩的动态 WebP (394KB)，秒级极速加载
+	avatar: "/avatar.gif", // 使用本地预压缩的动态 WebP (394KB)，秒级极速加载
 	name: "YUME",
 	bio: "Ciallo～(∠・ω< )⌒",
 	links: [
