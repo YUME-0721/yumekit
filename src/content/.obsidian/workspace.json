@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "posts/2026/_09-linux.md",
-                "mode": "source",
-                "source": false
+                "file": "posts/2026/07-blog.md",
+                "mode": "preview",
+                "source": true
               },
               "icon": "lucide-file",
-              "title": "_09-linux"
+              "title": "07-blog"
             }
           }
         ]
@@ -213,8 +213,9 @@
   },
   "active": "bc7f83a247de48f4",
   "lastOpenFiles": [
-    "posts/2026/Untitled.md",
     "posts/2026/_09-linux.md",
+    "posts/2026/09-linux.md",
+    "posts/2026/Untitled.md",
     "posts/2026/07-blog.md",
     "posts/2026/Pixel-Google-AI-Pro.md",
     "posts/2026/YuNest.md",
@@ -238,7 +239,6 @@
     "posts/single/_test-01.md",
     "未命名 4.md",
     "未命名 3.md",
-    "未命名 2.md",
     "posts/single",
     "posts/news",
     "post",
