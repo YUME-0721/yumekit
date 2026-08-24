@@ -131,7 +131,7 @@ export const navBarConfig: NavBarConfig = {
 };
 
 export const profileConfig: ProfileConfig = {
-	avatar: "https://img.072199.xyz/file/1773310074248.webp", // 头像的路径，相对于“/src”目录。如果以“/”开头，则相对于“/public”目录
+	avatar: "https://img.072199.xyz/file/Materials/fB38joIT.gif", // 头像的路径，相对于“/src”目录。如果以“/”开头，则相对于“/public”目录
 	name: "YUME",
 	bio: "Ciallo～(∠・ω< )⌒",
 	links: [
