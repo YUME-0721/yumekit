@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "posts/2026/09-linux.md",
-                "mode": "source",
-                "source": false
+                "file": "posts/2026/08-resource-station.md",
+                "mode": "preview",
+                "source": true
               },
               "icon": "lucide-file",
-              "title": "09-linux"
+              "title": "08-resource-station"
             }
           }
         ]
@@ -80,8 +80,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 213.5,
-    "collapsed": true
+    "width": 213.5
   },
   "right": {
     "id": "d7298cce1c9aaf79",
@@ -214,16 +213,16 @@
   "active": "a36b15cef3e6e2a4",
   "lastOpenFiles": [
     "posts/2026/07-blog.md",
-    "posts/2026/_09-linux.md",
+    "posts/2026/08-resource-station.md",
     "posts/2026/09-linux.md",
+    "posts/2026/black&white-film-developing.md",
+    "posts/2026/D76.md",
+    "posts/2026/_09-linux.md",
     "posts/2026/Untitled.md",
     "posts/2026/Pixel-Google-AI-Pro.md",
     "posts/2026/YuNest.md",
     "posts/2026/PicAPI-Gallery.md",
     "posts/2026/Lucky STUN穿透 + Cloudflare实现无公网IPv4访问与智能分流配置指南.md",
-    "posts/2026/D76.md",
-    "posts/2026/black&white-film-developing.md",
-    "posts/2026/08-resource-station.md",
     "posts/series/markdown/index.md",
     "posts/2026/_1.md",
     "posts/2026/_08-shared.md",
