@@ -23,7 +23,7 @@ pinned: false
 | **用户与权限** | `useradd`, `passwd`, `chmod`, `chown`, `sudo` | 用户账号管理、文件读写执行权限与 root 提权 |
 | **进程管理** | `ps`, `top`/`htop`, `kill`, `systemctl` | 查看与终止进程、Systemd 系统服务状态管控 |
 | **网络配置** | `ip`, `ping`, `ss`/`netstat`, `firewall-cmd` | 网络接口查询、连通性测试、端口监听与防火墙规则 |
-| **文本处理** | `grep`, `awk`, `sed`, `cut`, `sort`, `uniq` | 文本正则过滤、列提取、批量替换、排序与计数去重 |
+| **文本处理** | `grep`, `awk`, `sed`, `cut`, `sort`, `uniq`, `wc` | 文本正则过滤、列提取、批量替换、排序去重与行数统计 |
 | **系统查看** | `pwd`, `hostname`, `uname -r`, `free -h`, `df -h` | 当前路径、主机名、内核版本、内存与磁盘容量查看 |
 | **日志查看** | `journalctl`, `tail -f`, `/var/log` | Systemd 日志检索、文件末尾实时追踪与常用日志目录 |
 | **包管理** | `yum`/`dnf` (CentOS/RHEL) / `apt` (Ubuntu/Debian) | 软件源更新、软件包安装/卸载与系统依赖维护 |
@@ -330,6 +330,20 @@ Linux 拥有非常强大的“三剑客”（`grep`、`sed`、`awk`）及相关�
 * **常用示例**：
   ```bash
   sort access.log | uniq -c | sort -nr | head -n 10 # 统计访问日志中出现频次最高的 Top 10 IP
+  ```
+
+### 5.7 `wc` - 统计文件的行数、单词数与字节数
+* **常用选项**：
+  * `-l`：统计行数（Lines）。
+  * `-w`：统计单词数（Words）。
+  * `-c`：统计字节数（Bytes）。
+  * `-m`：统计字符数（Characters）。
+* **常用示例**：
+  ```bash
+  wc -l access.log               # 统计日志文件的总行数
+  cat file.txt | wc -l           # 配合管道统计输出结果的总行数
+  ps aux | grep nginx | wc -l    # 统计进程过滤结果的行数
+  wc -l -w -c message.txt        # 同时统计文件的行数、单词数和字节数
   ```
 
 ---
