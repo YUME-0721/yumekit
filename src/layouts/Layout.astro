@@ -193,28 +193,49 @@ const bannerOffset =
 			offset = offset - offset % 4;
 			document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
 			
-			// Background image loading detection
-			const bgUrl = getComputedStyle(document.documentElement).getPropertyValue('--bg-url').trim();
-			const bgEnable = getComputedStyle(document.documentElement).getPropertyValue('--bg-enable').trim();
-			
-			if (bgUrl && bgUrl !== 'none' && bgEnable === '1') {
-				const img = new Image();
+			// Background image loading detection & caching
+			window.initBackground = function() {
+				const bgBox = document.getElementById('bg-box');
+				if (!bgBox) return;
+
+				const bgEnable = getComputedStyle(document.documentElement).getPropertyValue('--bg-enable').trim();
+				let bgUrl = getComputedStyle(document.documentElement).getPropertyValue('--bg-url').trim();
+
+				if (bgEnable !== '1' || !bgUrl || bgUrl === 'none') {
+					return;
+				}
+
+				// 优先检查缓存
+				const cachedBg = sessionStorage.getItem('fuwari_bg_url') || window.__GLOBAL_LOCKED_BG_URL__;
+				if (cachedBg) {
+					document.documentElement.style.setProperty('--bg-url', `url(${cachedBg})`);
+					bgBox.style.backgroundImage = `url(${cachedBg})`;
+					bgBox.classList.add('loaded');
+					return;
+				}
+
 				const urlMatch = bgUrl.match(/url\(["']?([^"')]+)["']?\)/);
 				if (urlMatch) {
+					const originalSrc = urlMatch[1];
+					const img = new Image();
 					img.onload = function() {
-						// 背景图片加载完成后，设置背景并添加 loaded 类
-						const bgBox = document.getElementById('bg-box');
-						if (bgBox) {
-							bgBox.style.backgroundImage = bgUrl;
-							bgBox.classList.add('loaded');
-						}
+						sessionStorage.setItem('fuwari_bg_url', originalSrc);
+						window.__GLOBAL_LOCKED_BG_URL__ = originalSrc;
+						bgBox.style.backgroundImage = `url(${originalSrc})`;
+						bgBox.classList.add('loaded');
 					};
 					img.onerror = function() {
-						console.warn('Background image failed to load');
+						// 异常降级直接显示
+						bgBox.style.backgroundImage = `url(${originalSrc})`;
+						bgBox.classList.add('loaded');
 					};
-					img.src = urlMatch[1];
+					img.src = originalSrc;
+				} else {
+					bgBox.classList.add('loaded');
 				}
-			}
+			};
+
+			window.initBackground();
 		</script>
 		<style define:vars={{
 			configHue,
@@ -305,6 +326,11 @@ const bannerOffset =
 		  data-overlayscrollbars-initialize
 	>
 		<div id="bg-box"></div>
+		<script is:inline>
+			if (window.initBackground) {
+				window.initBackground();
+			}
+		</script>
 		<ConfigCarrier></ConfigCarrier>
 		<slot />
 
@@ -680,7 +706,12 @@ const setup = () => {
 			navbar.classList.add('navbar-hidden')
 		}
 	})
-	window.swup.hooks.on('content:replace', initCustomScrollbar)
+	window.swup.hooks.on('content:replace', () => {
+		initCustomScrollbar();
+		if ((window as any).initBackground) {
+			(window as any).initBackground();
+		}
+	})
 	window.swup.hooks.on('visit:start', (visit: {to: {url: string}}) => {
 		// change banner height immediately when a link is clicked
 		const bodyElement = document.querySelector('body')

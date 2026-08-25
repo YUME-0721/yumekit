@@ -1,6 +1,7 @@
 <script lang="ts">
 import Icon from "@iconify/svelte";
 import { onDestroy, onMount } from "svelte";
+import type { Song, ParsedLyric, MusicManager } from "../../types/music";
 
 export let title = "音乐盒";
 export let server = "netease";
@@ -9,60 +10,16 @@ export let id = "914046086";
 export let autoPlay = false;
 export let defaultVolume = 0.7;
 
-interface Song {
-	title: string;
-	author: string;
-	url: string;
-	pic: string;
-	lrc?: string;
+function getGlobalMusicManager(): MusicManager | undefined {
+	if (typeof window !== "undefined") {
+		return (window as any).__FUWARI_MUSIC_MANAGER__;
+	}
+	return undefined;
 }
 
-interface ParsedLyric {
-	time: number;
-	text: string;
-}
-
-interface MusicManager {
-	audio: HTMLAudioElement;
-	playlist: Song[];
-	currentIndex: number;
-	isPlaying: boolean;
-	currentTime: number;
-	duration: number;
-	volume: number;
-	isMuted: boolean;
-	loopMode: "order" | "random" | "single";
-	showLyrics: boolean;
-	parsedLyrics: ParsedLyric[];
-	currentLyricText: string;
-	server: string;
-	type: string;
-	id: string;
-	consecutiveErrors: number;
-	listeners: Set<() => void>;
-	notify: () => void;
-	loadLyrics: (lrcSource?: string) => Promise<void>;
-	loadSong: (index: number, playNow?: boolean, forceReload?: boolean) => void;
-	togglePlay: () => void;
-	prevSong: () => void;
-	nextSong: () => void;
-	seek: (time: number) => void;
-	setVolume: (vol: number) => void;
-	toggleMute: () => void;
-	toggleLoopMode: () => void;
-	toggleLyrics: () => void;
-	fetchPlaylist: (
-		server: string,
-		type: string,
-		id: string,
-		autoStart: boolean,
-		cacheKey: string,
-	) => Promise<void>;
-}
-
-declare global {
-	interface Window {
-		__FUWARI_MUSIC_MANAGER__?: MusicManager;
+function setGlobalMusicManager(mgr: MusicManager) {
+	if (typeof window !== "undefined") {
+		(window as any).__FUWARI_MUSIC_MANAGER__ = mgr;
 	}
 }
 
@@ -79,7 +36,46 @@ let showPlaylist = false;
 let showLyrics = false;
 let currentLyricText = "";
 
+// 组件初始化瞬间立即同步全局单例已有状态，彻底消除组件挂载第一帧的状态闪烁
+const initialGlobalMgr = getGlobalMusicManager();
+if (initialGlobalMgr) {
+	playlist = initialGlobalMgr.playlist;
+	currentIndex = initialGlobalMgr.currentIndex;
+	isPlaying = initialGlobalMgr.isPlaying;
+	currentTime = initialGlobalMgr.currentTime;
+	duration = initialGlobalMgr.duration;
+	volume = initialGlobalMgr.volume;
+	isMuted = initialGlobalMgr.isMuted;
+	loopMode = initialGlobalMgr.loopMode;
+	showLyrics = initialGlobalMgr.showLyrics;
+	currentLyricText = initialGlobalMgr.currentLyricText;
+}
+
 const CACHE_KEY = `fuwari_music_cache_${server}_${type}_${id}`;
+const STATE_CACHE_KEY = "fuwari_music_player_state";
+
+let lastSavedTime = 0;
+function savePlayerState(mgr: MusicManager) {
+	if (typeof window === "undefined" || !mgr) return;
+	const now = Date.now();
+	// 如果在播放中且当前时间变化小于 1.5 秒，则节流跳过存储
+	if (mgr.isPlaying && Math.abs(mgr.currentTime - lastSavedTime) < 1.5) {
+		return;
+	}
+	try {
+		const state = {
+			currentIndex: mgr.currentIndex,
+			currentTime: mgr.currentTime,
+			isPlaying: mgr.isPlaying,
+			volume: mgr.volume,
+			isMuted: mgr.isMuted,
+			loopMode: mgr.loopMode,
+			timestamp: now,
+		};
+		localStorage.setItem(STATE_CACHE_KEY, JSON.stringify(state));
+		lastSavedTime = mgr.currentTime;
+	} catch (e) {}
+}
 
 $: currentSong = playlist[currentIndex] || {
 	title: "加载中...",
@@ -141,35 +137,50 @@ function parseLrc(lrcText?: string): ParsedLyric[] {
 }
 
 function getOrCreateGlobalManager(): MusicManager {
-	if (window.__FUWARI_MUSIC_MANAGER__) {
-		return window.__FUWARI_MUSIC_MANAGER__;
+	const existing = getGlobalMusicManager();
+	if (existing) {
+		return existing;
+	}
+
+	let cachedState: any = null;
+	if (typeof window !== "undefined") {
+		try {
+			const stateStr = localStorage.getItem(STATE_CACHE_KEY);
+			if (stateStr) {
+				cachedState = JSON.parse(stateStr);
+			}
+		} catch (e) {}
 	}
 
 	const audio = new Audio();
-	audio.volume = defaultVolume;
+	const initVolume = cachedState?.volume ?? defaultVolume;
+	const initMuted = cachedState?.isMuted ?? false;
+	audio.volume = initVolume;
+	audio.muted = initMuted;
 
 	const manager: MusicManager = {
 		audio,
 		playlist: [],
-		currentIndex: 0,
+		currentIndex: cachedState?.currentIndex || 0,
 		isPlaying: false,
-		currentTime: 0,
+		currentTime: cachedState?.currentTime || 0,
 		duration: 0,
-		volume: defaultVolume,
-		isMuted: false,
-		loopMode: "order",
+		volume: initVolume,
+		isMuted: initMuted,
+		loopMode: cachedState?.loopMode || "order",
 		showLyrics: false,
 		parsedLyrics: [],
 		currentLyricText: "",
 		server,
 		type,
-		id,
+		id: String(id),
 		consecutiveErrors: 0,
 		listeners: new Set(),
 		notify() {
 			for (const listener of this.listeners) {
 				listener();
 			}
+			savePlayerState(this);
 		},
 		async loadLyrics(lrcSource?: string) {
 			if (!lrcSource) {
@@ -200,13 +211,14 @@ function getOrCreateGlobalManager(): MusicManager {
 			const song = this.playlist[targetIndex];
 			if (!song || !this.audio) return;
 
-			// 如果同一首歌正在播放或音频已装载且非强制重新装载，则直接保持播放，绝不中断！
 			const songId = extractSongId(song.url);
 			const targetSrc = (this.server === "netease" && songId)
 				? `https://music.163.com/song/media/outer/url?id=${songId}.mp3`
 				: song.url;
 
-			if (!forceReload && this.currentIndex === targetIndex && this.audio.src === targetSrc) {
+			const hasValidAudio = this.audio.src && this.audio.src !== "" && this.audio.src !== window.location.href;
+			// 只要非强制重载且当前歌曲索引相同且已有有效音频，则绝对不打断已有音频流！
+			if (!forceReload && hasValidAudio && this.currentIndex === targetIndex) {
 				if (playNow && this.audio.paused) {
 					this.audio.play().then(() => {
 						this.isPlaying = true;
@@ -333,7 +345,7 @@ function getOrCreateGlobalManager(): MusicManager {
 		},
 		toggleLoopMode() {
 			if (this.loopMode === "order") this.loopMode = "single";
-			else if (this.loopMode === "single") loopMode = "random";
+			else if (this.loopMode === "single") this.loopMode = "random";
 			else this.loopMode = "order";
 			this.notify();
 		},
@@ -342,7 +354,32 @@ function getOrCreateGlobalManager(): MusicManager {
 			this.notify();
 		},
 		async fetchPlaylist(srv, typ, playlistId, autoStart, cKey) {
-			const hasValidAudio = this.audio && this.audio.src && this.audio.src !== "" && this.audio.src !== window.location.href;
+			let latestCachedState: any = null;
+			try {
+				const s = localStorage.getItem(STATE_CACHE_KEY);
+				if (s) latestCachedState = JSON.parse(s);
+			} catch (e) {}
+
+			const restorePlayback = (dataLength: number) => {
+				const hasValidAudio = this.audio && this.audio.src && this.audio.src !== "" && this.audio.src !== window.location.href;
+				// 如果音频已在播放中，绝对不要打断！
+				if (hasValidAudio && !this.audio.paused) {
+					this.isPlaying = true;
+					this.notify();
+					return;
+				}
+
+				let targetIdx = this.currentIndex;
+				if (targetIdx >= dataLength) targetIdx = 0;
+				let playNow = autoStart;
+				if (latestCachedState && latestCachedState.isPlaying && (Date.now() - latestCachedState.timestamp < 30000)) {
+					playNow = true;
+					if (latestCachedState.currentTime > 0) {
+						this.pendingSeekTime = latestCachedState.currentTime;
+					}
+				}
+				this.loadSong(targetIdx, playNow, false);
+			};
 
 			try {
 				const cached = localStorage.getItem(cKey);
@@ -350,9 +387,9 @@ function getOrCreateGlobalManager(): MusicManager {
 					const data = JSON.parse(cached);
 					if (Array.isArray(data) && data.length > 0) {
 						this.playlist = data;
+						const hasValidAudio = this.audio && this.audio.src && this.audio.src !== "" && this.audio.src !== window.location.href;
 						if (!hasValidAudio) {
-							this.currentIndex = 0;
-							this.loadSong(this.currentIndex, autoStart, true);
+							restorePlayback(data.length);
 						}
 						this.notify();
 					}
@@ -370,9 +407,9 @@ function getOrCreateGlobalManager(): MusicManager {
 						try {
 							localStorage.setItem(cKey, JSON.stringify(data));
 						} catch (e) {}
-						if (!this.audio.src || this.audio.src === "" || this.audio.src === window.location.href) {
-							this.currentIndex = 0;
-							this.loadSong(this.currentIndex, autoStart, true);
+						const hasValidAudio = this.audio && this.audio.src && this.audio.src !== "" && this.audio.src !== window.location.href;
+						if (!hasValidAudio) {
+							restorePlayback(data.length);
 						}
 						this.notify();
 					}
@@ -437,6 +474,11 @@ function getOrCreateGlobalManager(): MusicManager {
 
 	audio.addEventListener("loadedmetadata", () => {
 		manager.duration = audio.duration || 0;
+		if (manager.pendingSeekTime !== undefined && manager.pendingSeekTime > 0) {
+			audio.currentTime = manager.pendingSeekTime;
+			manager.currentTime = manager.pendingSeekTime;
+			manager.pendingSeekTime = undefined;
+		}
 		manager.notify();
 	});
 
@@ -450,7 +492,7 @@ function getOrCreateGlobalManager(): MusicManager {
 		manager.notify();
 	});
 
-	window.__FUWARI_MUSIC_MANAGER__ = manager;
+	setGlobalMusicManager(manager);
 	return manager;
 }
 
@@ -477,44 +519,45 @@ onMount(() => {
 	mgr.listeners.add(syncCallback);
 	syncState();
 
-	// 只有当全局尚未加载过歌单或歌单 ID 发生改变时才拉取，决不打断已有音频！
-	if (!mgr.playlist.length || mgr.id !== id || mgr.server !== server) {
+	// 只有当全局尚未加载过歌单时才拉取，切页过程绝不重复触发 fetchPlaylist！
+	const isPlaylistLoaded = Array.isArray(mgr.playlist) && mgr.playlist.length > 0;
+	if (!isPlaylistLoaded) {
 		mgr.server = server;
 		mgr.type = type;
-		mgr.id = id;
-		mgr.fetchPlaylist(server, type, id, autoPlay, CACHE_KEY);
+		mgr.id = String(id);
+		mgr.fetchPlaylist(server, type, String(id), autoPlay, CACHE_KEY);
 	}
 });
 
 onDestroy(() => {
-	if (typeof window !== "undefined" && window.__FUWARI_MUSIC_MANAGER__ && syncCallback) {
-		window.__FUWARI_MUSIC_MANAGER__.listeners.delete(syncCallback);
-		// 音频在全局 window 单例中常驻播放，切页不中断！
+	const mgr = getGlobalMusicManager();
+	if (mgr && syncCallback) {
+		mgr.listeners.delete(syncCallback);
 	}
 });
 
 function handlePlayToggle() {
-	window.__FUWARI_MUSIC_MANAGER__?.togglePlay();
+	getGlobalMusicManager()?.togglePlay();
 }
 
 function handlePrev() {
-	window.__FUWARI_MUSIC_MANAGER__?.prevSong();
+	getGlobalMusicManager()?.prevSong();
 }
 
 function handleNext() {
-	window.__FUWARI_MUSIC_MANAGER__?.nextSong();
+	getGlobalMusicManager()?.nextSong();
 }
 
 function handleLoopToggle() {
-	window.__FUWARI_MUSIC_MANAGER__?.toggleLoopMode();
+	getGlobalMusicManager()?.toggleLoopMode();
 }
 
 function handleLyricsToggle() {
-	window.__FUWARI_MUSIC_MANAGER__?.toggleLyrics();
+	getGlobalMusicManager()?.toggleLyrics();
 }
 
 function handleSeek(e: MouseEvent) {
-	const mgr = window.__FUWARI_MUSIC_MANAGER__;
+	const mgr = getGlobalMusicManager();
 	if (!mgr || !duration) return;
 	const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
 	const clickX = e.clientX - rect.left;
@@ -525,15 +568,15 @@ function handleSeek(e: MouseEvent) {
 function handleVolumeChange(e: Event) {
 	const target = e.target as HTMLInputElement;
 	const val = parseFloat(target.value);
-	window.__FUWARI_MUSIC_MANAGER__?.setVolume(val);
+	getGlobalMusicManager()?.setVolume(val);
 }
 
 function handleMuteToggle() {
-	window.__FUWARI_MUSIC_MANAGER__?.toggleMute();
+	getGlobalMusicManager()?.toggleMute();
 }
 
 function handleSelectSong(idx: number) {
-	const mgr = window.__FUWARI_MUSIC_MANAGER__;
+	const mgr = getGlobalMusicManager();
 	if (mgr) {
 		mgr.consecutiveErrors = 0;
 		mgr.loadSong(idx, true, true);

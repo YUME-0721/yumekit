@@ -148,7 +148,6 @@ function isCurrentLink(targetUrl: string): boolean {
 
 <script>
 function loadButtonScript() {
-
     let settingBtn = document.getElementById("display-settings-switch");
     if (settingBtn) {
         settingBtn.onclick = function () {
@@ -169,6 +168,27 @@ function loadButtonScript() {
         };
     }
 }
+
+// 全局委托：点击下拉项后立即释放焦点，避免在新标签页打开后返回页面时菜单残留展开
+document.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    const item = target?.closest(".dropdown-item");
+    if (item) {
+        (item as HTMLElement).blur();
+        const container = item.closest(".dropdown-container");
+        if (container) {
+            (container as HTMLElement).blur();
+            container.querySelector("button")?.blur();
+        }
+    }
+});
+
+// 当用户从外部新标签页切换回博客时，自动失焦关闭下拉菜单
+window.addEventListener("focus", () => {
+    if (document.activeElement && document.activeElement.closest(".dropdown-container")) {
+        (document.activeElement as HTMLElement)?.blur();
+    }
+});
 
 loadButtonScript();
 </script>

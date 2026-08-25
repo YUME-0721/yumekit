@@ -124,7 +124,7 @@ function formatDate(date: Date) {
 
         <!-- 热力图日历 Grid 容器（左右 100% 完整铺满整年） -->
         <div class="w-full overflow-x-auto pb-1 pt-1 hide-scrollbar" id="heatmap-scroll-container">
-            <div class="w-full min-w-[650px] flex flex-col gap-1.5 select-none" id="heatmap-grid-root">
+            <div class="w-full min-w-[650px] flex flex-col gap-1.5 select-none pr-2" id="heatmap-grid-root">
                 <!-- 顶部 1月 ~ 12月 对应月份刻度线 (53列对齐) -->
                 <div id="heatmap-months" class="grid grid-cols-[repeat(53,minmax(0,1fr))] text-[10px] font-mono text-neutral-400 dark:text-neutral-500 pl-6 pr-0">
                 </div>
@@ -146,18 +146,18 @@ function formatDate(date: Date) {
                         <!-- 动态由客户端 JS 渲染 371 个天数方格 (完整铺满) -->
                     </div>
                 </div>
-
-                <!-- 底部右下角图例 (GitHub 经典 5 档绿色主题) -->
-                <div class="flex items-center justify-end gap-1.5 text-[11px] font-mono text-neutral-500 dark:text-neutral-400 pt-1">
-                    <span>少</span>
-                    <span class="w-3.5 h-3.5 rounded-[3.5px] bg-[#ebedf0] dark:bg-[#161b22] border border-black/5 dark:border-white/5 inline-block" title="0 篇"></span>
-                    <span class="w-3.5 h-3.5 rounded-[3.5px] bg-[#9be9a8] dark:bg-[#0e4429] inline-block" title="1 篇"></span>
-                    <span class="w-3.5 h-3.5 rounded-[3.5px] bg-[#40c463] dark:bg-[#006d32] inline-block" title="2 篇"></span>
-                    <span class="w-3.5 h-3.5 rounded-[3.5px] bg-[#30a14e] dark:bg-[#26a641] inline-block" title="3 篇"></span>
-                    <span class="w-3.5 h-3.5 rounded-[3.5px] bg-[#216e39] dark:bg-[#39d353] inline-block shadow-[0_0_6px_rgba(57,211,83,0.4)]" title="4+ 篇"></span>
-                    <span>多</span>
-                </div>
             </div>
+        </div>
+
+        <!-- 底部右下角图例 (置于卡片固定视图中，绝不受横向滚动影响，100% 完整展现) -->
+        <div class="flex items-center justify-end gap-1.5 text-[11px] font-mono text-neutral-500 dark:text-neutral-400 pt-0.5 px-0.5 select-none">
+            <span>少</span>
+            <span class="w-3.5 h-3.5 rounded-[3.5px] bg-[#ebedf0] dark:bg-[#161b22] border border-black/5 dark:border-white/5 inline-block shrink-0" title="0 篇"></span>
+            <span class="w-3.5 h-3.5 rounded-[3.5px] bg-[#9be9a8] dark:bg-[#0e4429] inline-block shrink-0" title="1 篇"></span>
+            <span class="w-3.5 h-3.5 rounded-[3.5px] bg-[#40c463] dark:bg-[#006d32] inline-block shrink-0" title="2 篇"></span>
+            <span class="w-3.5 h-3.5 rounded-[3.5px] bg-[#30a14e] dark:bg-[#26a641] inline-block shrink-0" title="3 篇"></span>
+            <span class="w-3.5 h-3.5 rounded-[3.5px] bg-[#216e39] dark:bg-[#39d353] inline-block shadow-[0_0_6px_rgba(57,211,83,0.4)] shrink-0" title="4+ 篇"></span>
+            <span>多</span>
         </div>
     </div>
 

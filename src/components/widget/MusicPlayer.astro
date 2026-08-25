@@ -18,11 +18,11 @@ if (!music || !music.enable) {
 
 <div class={className} style={style}>
     <MusicPlayerSvelte
-        client:load
+        client:only="svelte"
         title={music.title || "音乐"}
         server={music.server || "netease"}
         type={music.type || "playlist"}
-        id={music.id || "2472911244"}
+        id={String(music.id || "914046086")}
         autoPlay={music.autoPlay ?? false}
         defaultVolume={music.volume ?? 0.7}
     />

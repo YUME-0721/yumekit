@@ -1,0 +1,258 @@
+---
+import { Icon } from "astro-icon/components";
+import { getCategoryList, getSortedPosts, getTagList } from "../../utils/content-utils";
+import { profileConfig, siteConfig } from "../../config";
+import { url } from "../../utils/url-utils";
+
+interface Props {
+	class?: string;
+}
+
+const className = Astro.props.class;
+
+const allPosts = await getSortedPosts();
+const postsCount = allPosts.length;
+const categoryList = await getCategoryList();
+const categoriesCount = categoryList.length;
+const tagList = await getTagList();
+const tagsCount = tagList.length;
+
+// 社交链接提取
+const bilibiliUrl = profileConfig.links.find(l => l.name.toLowerCase().includes("bili"))?.url || "https://space.bilibili.com/523354432";
+const githubUrl = profileConfig.links.find(l => l.name.toLowerCase().includes("git"))?.url || "https://github.com/YUME-0721";
+
+// 技能图标列表
+const skillList = [
+	{ name: "Docker", icon: "fa6-brands:docker", color: "#2496ED" },
+	{ name: "Linux", icon: "fa6-brands:linux", color: "#FCC624" },
+	{ name: "Astro", icon: "simple-icons:astro", color: "#BC52EE" },
+	{ name: "Svelte", icon: "simple-icons:svelte", color: "#FF3E00" },
+	{ name: "TypeScript", icon: "simple-icons:typescript", color: "#3178C6" },
+	{ name: "React", icon: "fa6-brands:react", color: "#61DAFB" },
+	{ name: "Tailwind CSS", icon: "simple-icons:tailwindcss", color: "#06B6D4" },
+	{ name: "Node.js", icon: "fa6-brands:node-js", color: "#5FA04E" },
+	{ name: "Python", icon: "fa6-brands:python", color: "#3776AB" },
+];
+---
+
+<section class:list={[className, "flex flex-col gap-4 w-full select-none"]}>
+    <!-- 顶部小标题栏 -->
+    <div class="flex flex-col gap-0.5 px-1">
+        <span class="text-xs font-mono font-bold tracking-[0.2em] text-[var(--primary)] uppercase drop-shadow-sm">
+            CONTEXT
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-black text-neutral-900 dark:text-neutral-100 tracking-tight flex items-center gap-2">
+            <span>站点数据 & 能力矩阵</span>
+        </h2>
+    </div>
+
+    <!-- 第一行：站点访问 & 文章档案 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- 站点访问卡片 -->
+        <div class="card-base p-5 relative overflow-hidden flex flex-col justify-between group hover:border-[var(--primary)]/30 transition-all duration-300">
+            <div class="relative z-10">
+                <span class="text-[11px] font-mono font-semibold tracking-wider text-neutral-400 dark:text-neutral-500 uppercase">
+                    VISITS
+                </span>
+                <h3 class="text-xl font-black text-neutral-900 dark:text-neutral-100 mt-0.5">
+                    站点访问
+                </h3>
+            </div>
+
+            <div class="w-full border-b border-black/5 dark:border-white/5 my-4 relative z-10"></div>
+
+            <div class="flex items-center gap-1.5 text-sm sm:text-base font-bold text-neutral-700 dark:text-neutral-300 relative z-10">
+                <span>访客</span>
+                <span class="text-[var(--primary)] font-black text-lg md:text-xl">232</span>
+                <span class="mx-1.5 text-neutral-300 dark:text-neutral-700">/</span>
+                <span>浏览</span>
+                <span class="text-[var(--primary)] font-black text-lg md:text-xl">1.8k</span>
+            </div>
+
+            <!-- 右侧萌系角色插图贴纸 -->
+            <div class="absolute -right-1 -bottom-2 w-28 h-28 sm:w-32 sm:h-32 pointer-events-none opacity-90 group-hover:opacity-100 group-hover:scale-105 group-hover:-rotate-2 transition-all duration-300 ease-out z-0">
+                <img
+                    src="https://img.072199.xyz/file/wallpaper/gVSV50Av.webp"
+                    alt="Visits Mascot"
+                    class="w-full h-full object-contain drop-shadow-md"
+                    loading="lazy"
+                />
+            </div>
+        </div>
+
+        <!-- 文章档案卡片 -->
+        <a
+            href={url("/archive/")}
+            class="card-base p-5 relative overflow-hidden flex flex-col justify-between group hover:border-[var(--primary)]/30 hover:-translate-y-0.5 transition-all duration-300"
+        >
+            <div class="relative z-10">
+                <span class="text-[11px] font-mono font-semibold tracking-wider text-neutral-400 dark:text-neutral-500 uppercase">
+                    ARCHIVE
+                </span>
+                <h3 class="text-xl font-black text-neutral-900 dark:text-neutral-100 mt-0.5 flex items-center justify-between">
+                    <span>文章档案</span>
+                </h3>
+            </div>
+
+            <div class="w-full border-b border-black/5 dark:border-white/5 my-4 relative z-10"></div>
+
+            <div class="flex items-center justify-between relative z-10">
+                <div class="flex items-center gap-1 text-sm sm:text-base font-bold text-neutral-700 dark:text-neutral-300">
+                    <span class="text-[var(--primary)] font-black text-lg md:text-xl">{postsCount}</span>
+                    <span class="text-xs text-neutral-500 dark:text-neutral-400 mr-1">篇</span>
+                    <span class="text-neutral-300 dark:text-neutral-700">/</span>
+                    <span class="text-[var(--primary)] font-black text-lg md:text-xl ml-1">{categoriesCount}</span>
+                    <span class="text-xs text-neutral-500 dark:text-neutral-400 mr-1">类</span>
+                    <span class="text-neutral-300 dark:text-neutral-700">/</span>
+                    <span class="text-[var(--primary)] font-black text-lg md:text-xl ml-1">{tagsCount}</span>
+                    <span class="text-xs text-neutral-500 dark:text-neutral-400">标签</span>
+                </div>
+
+                <div class="w-7 h-7 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-neutral-400 group-hover:text-white group-hover:bg-[var(--primary)] transition-all">
+                    <Icon name="material-symbols:chevron-right-rounded" class="text-lg group-hover:translate-x-0.5 transition-transform" />
+                </div>
+            </div>
+
+            <!-- 右侧角色插图贴纸 -->
+            <div class="absolute right-2 -bottom-2 w-28 h-28 sm:w-32 sm:h-32 pointer-events-none opacity-90 group-hover:opacity-100 group-hover:scale-105 group-hover:rotate-2 transition-all duration-300 ease-out z-0">
+                <img
+                    src="https://img.072199.xyz/file/wallpaper/n03bIBO6.webp"
+                    alt="Archive Mascot"
+                    class="w-full h-full object-contain drop-shadow-md"
+                    loading="lazy"
+                />
+            </div>
+        </a>
+    </div>
+
+    <!-- 第二行：社交联系 -->
+    <div class="card-base px-4 py-2.5 sm:px-5 sm:py-3 min-h-[5.5rem] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group hover:border-[var(--primary)]/30 transition-all duration-300 relative overflow-hidden">
+        <!-- 左侧角色插图与标题（无边框，高度自适应填满容器） -->
+        <div class="flex items-center gap-3 z-10">
+            <div class="h-16 sm:h-20 w-auto flex items-center justify-center shrink-0 -my-2.5">
+                <img
+                    src="https://img.072199.xyz/file/wallpaper/dYFlBSyQ.webp"
+                    alt="Contact Mascot"
+                    class="h-full w-auto max-w-[4.5rem] sm:max-w-[5.5rem] object-contain drop-shadow-md select-none group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                />
+            </div>
+            <div class="flex flex-col">
+                <span class="text-[10px] font-mono font-bold tracking-wider text-neutral-400 dark:text-neutral-500 uppercase">
+                    CONTACT
+                </span>
+                <span class="text-base sm:text-lg font-black text-neutral-900 dark:text-neutral-100">
+                    社交联系
+                </span>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end z-10">
+            <!-- RSS -->
+            <a
+                href={url("/rss.xml")}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="px-3.5 py-1.5 rounded-full bg-black/5 dark:bg-white/5 hover:bg-[var(--primary)] hover:text-white dark:hover:bg-[var(--primary)] dark:hover:text-white transition-all text-xs font-bold text-neutral-700 dark:text-neutral-300 flex items-center gap-1.5 border border-black/5 dark:border-white/5 shadow-sm active:scale-95"
+            >
+                <Icon name="material-symbols:rss-feed-rounded" class="text-sm text-[#FFA500]" />
+                <span>RSS</span>
+            </a>
+
+            <!-- Bilibili -->
+            <a
+                href={bilibiliUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="px-3.5 py-1.5 rounded-full bg-black/5 dark:bg-white/5 hover:bg-[var(--primary)] hover:text-white dark:hover:bg-[var(--primary)] dark:hover:text-white transition-all text-xs font-bold text-neutral-700 dark:text-neutral-300 flex items-center gap-1.5 border border-black/5 dark:border-white/5 shadow-sm active:scale-95"
+            >
+                <Icon name="fa6-brands:bilibili" class="text-sm text-[#00A1D6]" />
+                <span>Bilibili</span>
+            </a>
+
+            <!-- GitHub -->
+            <a
+                href={githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="px-3.5 py-1.5 rounded-full bg-black/5 dark:bg-white/5 hover:bg-[var(--primary)] hover:text-white dark:hover:bg-[var(--primary)] dark:hover:text-white transition-all text-xs font-bold text-neutral-700 dark:text-neutral-300 flex items-center gap-1.5 border border-black/5 dark:border-white/5 shadow-sm active:scale-95"
+            >
+                <Icon name="fa6-brands:github" class="text-sm text-neutral-900 dark:text-white" />
+                <span>GitHub</span>
+            </a>
+
+            <!-- Email -->
+            <a
+                href="mailto:contact@yumekai.top"
+                class="px-3.5 py-1.5 rounded-full bg-black/5 dark:bg-white/5 hover:bg-[var(--primary)] hover:text-white dark:hover:bg-[var(--primary)] dark:hover:text-white transition-all text-xs font-bold text-neutral-700 dark:text-neutral-300 flex items-center gap-1.5 border border-black/5 dark:border-white/5 shadow-sm active:scale-95"
+            >
+                <Icon name="material-symbols:mail-rounded" class="text-sm text-[var(--primary)]" />
+                <span>Email</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 第三行：技能图标 -->
+    <div class="card-base px-4 py-2.5 sm:px-5 sm:py-3 min-h-[5.5rem] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group hover:border-[var(--primary)]/30 transition-all duration-300 relative overflow-hidden">
+        <!-- 左侧角色插图与标题（无边框，高度自适应填满容器） -->
+        <div class="flex items-center gap-3 shrink-0 z-10">
+            <div class="h-16 sm:h-20 w-auto flex items-center justify-center shrink-0 -my-2.5">
+                <img
+                    src="https://img.072199.xyz/file/wallpaper/4DUdFdIn.webp"
+                    alt="Skills Mascot"
+                    class="h-full w-auto max-w-[4.5rem] sm:max-w-[5.5rem] object-contain drop-shadow-md select-none group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                />
+            </div>
+            <div class="flex flex-col">
+                <span class="text-[10px] font-mono font-bold tracking-wider text-neutral-400 dark:text-neutral-500 uppercase">
+                    SKILLS
+                </span>
+                <span class="text-base sm:text-lg font-black text-neutral-900 dark:text-neutral-100 whitespace-nowrap">
+                    技能图标
+                </span>
+            </div>
+        </div>
+
+        <!-- 技能图标单行滚动容器（悬浮时自动左右滑动展示全部） -->
+        <div class="w-full sm:flex-1 overflow-hidden relative mask-fade-edges z-10">
+            <div class="skills-scroll-track flex items-center gap-2 flex-nowrap w-max py-1">
+                {skillList.map((skill) => (
+                    <div class="px-3 py-1.5 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 text-xs font-bold text-neutral-800 dark:text-neutral-200 flex items-center gap-1.5 border border-black/5 dark:border-white/5 hover:scale-105 shrink-0 shadow-sm select-none">
+                        <Icon name={skill.icon} class="text-sm shrink-0" style={`color: ${skill.color}`} />
+                        <span class="whitespace-nowrap">{skill.name}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* 边缘柔和淡出渐变蒙版 */
+    .mask-fade-edges {
+        mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent 100%);
+        -webkit-mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent 100%);
+    }
+
+    /* 技能单行轨道 */
+    .skills-scroll-track {
+        transform: translateX(0);
+        will-change: transform;
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* 鼠标悬浮在卡片上方时，触发平滑左右移动动画 */
+    .group:hover .skills-scroll-track {
+        animation: autoScrollSkills 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes autoScrollSkills {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(calc(-100% + min(420px, 60vw)));
+        }
+    }
+</style>

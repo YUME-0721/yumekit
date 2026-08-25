@@ -23,11 +23,21 @@ const hasMusic = siteConfig.music?.enable ?? false;
 ---
 
 <aside id="right-sidebar" class:list={[className, "w-full"]}>
+    <!-- 站点公告：在常规文档流中，随页面自然滚动向上滑出消失 -->
+    {hasAnnouncement && (
+        <div class="flex flex-col w-full gap-4 mb-4">
+            <Announcement class="onload-animation" style="animation-delay: 100ms" />
+        </div>
+    )}
+
+    <!-- 音乐播放器与文章目录：吸附在屏幕顶部 top-4 保持固定 -->
     <div id="right-sidebar-sticky" class="transition-all duration-300 flex flex-col w-full gap-4 sticky top-4">
-        <!-- 文章目录动态插槽（Swup 容器 #toc-container，文章页展示目录，非文章页为空） -->
+        {hasMusic && <MusicPlayer class="onload-animation" style="animation-delay: 150ms" />}
+
+        <!-- 文章目录动态插槽（Swup 容器 #toc-container，置于播放器下方） -->
         <div id="toc-container" class="transition-swup-fade w-full">
             {hasTOC && (
-                <div id="toc-sidebar" class="card-base p-4 max-h-[calc(100vh-20rem)] overflow-y-auto hide-scrollbar mb-4 onload-animation">
+                <div id="toc-sidebar" class="card-base p-4 max-h-[calc(100vh-22rem)] overflow-y-auto hide-scrollbar onload-animation">
                     <div class="text-sm font-medium text-black/60 dark:text-white/60 mb-2 flex items-center justify-between">
                         <span>目录</span>
                     </div>
@@ -35,9 +45,5 @@ const hasMusic = siteConfig.music?.enable ?? false;
                 </div>
             )}
         </div>
-
-        <!-- 公告栏与音乐播放器（常驻右侧栏，滚动时自然保持在视野顶部，切页不断流） -->
-        {hasAnnouncement && <Announcement class="onload-animation" style="animation-delay: 100ms" />}
-        {hasMusic && <MusicPlayer class="onload-animation" style="animation-delay: 150ms" />}
     </div>
 </aside>
