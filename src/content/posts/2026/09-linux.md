@@ -25,7 +25,7 @@ pinned: false
 | **进程管理** | `ps`, `top`/`htop`, `kill`, `systemctl` | 查看与终止进程、Systemd 系统服务状态管控 |
 | **网络配置** | `ip`, `ping`, `ss`/`netstat`, `firewall-cmd` | 网络接口查询、连通性测试、端口监听与防火墙规则 |
 | **文本处理** | `grep`, `awk`, `sed`, `cut`, `sort`, `uniq`, `wc` | 文本正则过滤、列提取、批量替换、排序去重与行数统计 |
-| **系统查看** | `pwd`, `hostname`, `uname -r`, `free -h`, `df -h` | 当前路径、主机名、内核版本、内存与磁盘容量查看 |
+| **系统查看** | `pwd`, `hostname`, `date`, `uname -r`, `free -h`, `df -h`, `du` | 当前路径、主机名、系统时间日期、内核版本、内存与磁盘容量查看 |
 | **日志查看** | `journalctl`, `tail -f`, `/var/log` | Systemd 日志检索、文件末尾实时追踪与常用日志目录 |
 | **包管理** | `yum`/`dnf` (CentOS/RHEL) / `apt` (Ubuntu/Debian) | 软件源更新、软件包安装/卸载与系统依赖维护 |
 
@@ -278,11 +278,15 @@ Linux 拥有非常强大的“三剑客”（`grep`、`sed`、`awk`）及相关�
   * `-n`：在输出结果前显示匹配行的行号。
   * `-r`：递归搜索指定目录下的所有文件。
   * `-E`：开启扩展正则表达式匹配。
+  * `-A N`：显示匹配行及**后** N 行内容（After context）。
+  * `-B N`：显示匹配行及**前** N 行内容（Before context）。
+  * `-C N`：显示匹配行及**前后各** N 行内容（Context）。
 * **常用示例**：
   ```bash
   grep "ERROR" /var/log/syslog              # 在文件中查找包含 ERROR 的行
   grep -rn "DB_PASSWORD" /var/www/project   # 在项目目录中递归检索变量定义及行号
   grep -v "^#" config.conf                  # 过滤掉配置文件中的注释行（以 # 开头）
+  grep -A 5 "Exception" app.log             # 查找到 Exception 并且打印其后 5 行（便于排查异常堆栈）
   ```
 
 ### 5.2 `awk` - 文本列提取与模式处理
@@ -389,6 +393,35 @@ Linux 拥有非常强大的“三剑客”（`grep`、`sed`、`awk`）及相关�
   ```bash
   df -h   # 查看根分区及各个挂载点的容量与剩余空间
   df -ih  # 查看 inode 节点占用情况
+  ```
+
+### 6.6 `du` - 查看文件及目录占用的磁盘空间
+* **常用选项**：
+  * `-h`：以人类易读格式显示（K、M、G）。
+  * `-s`：仅显示总计大小（summary），不展开显示各子目录。
+  * `-a`：显示所有文件和目录的大小。
+  * `--max-depth=N`：指定统计目录的最大深度层级。
+* **常用示例**：
+  ```bash
+  du -sh *                          # 查看当前目录下各个文件及目录的总体积
+  du -h --max-depth=1 /var/log      # 查看 /var/log 下第一级子目录各自占用的空间
+  du -ah /path | sort -hr | head -n 10  # 排查并列出占用空间最大的前 10 个文件或目录
+  ```
+
+### 6.7 `date` - 显示或设置系统时间与格式化日期
+* **常用选项**：
+  * `+%Y-%m-%d %H:%M:%S`：按指定格式格式化输出日期时间（`%Y` 年、`%m` 月、`%d` 日、`%H` 时、`%M` 分、`%S` 秒）。
+  * `-d` / `--date`：显示由字符串描述的时间（如 `"yesterday"`、`"+1 day"`、`"2026-08-25"`）。
+  * `-u` / `--utc`：显示或设置协调世界时（UTC）。
+  * `-s` / `--set`：手动修改系统时间与日期（需要 root 权限）。
+* **常用示例**：
+  ```bash
+  date                              # 查看当前系统本地时间与时区
+  date "+%Y-%m-%d %H:%M:%S"         # 格式化输出当前时间（例：2026-08-25 16:58:35）
+  date -u                           # 查看 UTC 世界协调时间
+  date -d "yesterday" "+%Y-%m-%d"   # 获取昨天的日期
+  date -d "+7 days" "+%Y-%m-%d"     # 获取 7 天后的日期
+  sudo date -s "2026-08-25 12:00:00"# 手动修改系统时间（需 root 权限）
   ```
 
 ---
