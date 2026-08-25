@@ -10,6 +10,9 @@ interface Props {
 
 let { headings = [] } = Astro.props;
 
+const maxDepth = siteConfig.toc.depth || 3;
+headings = headings.filter(h => h.depth <= maxDepth);
+
 let minDepth = 10;
 for (const heading of headings) {
 	minDepth = Math.min(minDepth, heading.depth);

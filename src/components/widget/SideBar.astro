@@ -1,36 +1,23 @@
 ---
-import type { MarkdownHeading } from "astro";
-
 import Profile from "./Profile.astro";
 import Categories from "./Categories.astro";
 import Tags from "./Tags.astro";
-import TOC from "./TOC.astro";
-import { siteConfig } from "../../config";
 
 interface Props {
 	class?: string;
-	headings?: MarkdownHeading[];
 }
 
 const className = Astro.props.class;
-const { headings = [] } = Astro.props;
-const tocEnabled = siteConfig.toc.enable;
 ---
-<div id="sidebar" class:list={[className, "w-full"]}>
+<aside id="sidebar" class:list={[className, "w-full"]}>
+    <!-- 个人名片卡：在常规文档流中，随页面自然滚动向上滑出 -->
     <div class="flex flex-col w-full gap-4 mb-4">
-        <Profile></Profile>
-        <Categories class="onload-animation"></Categories>
-        <Tags class="onload-animation"></Tags>
+        <Profile class="onload-animation" style="animation-delay: 50ms"></Profile>
     </div>
-    <div id="sidebar-sticky" class="transition-all duration-700 flex flex-col w-full gap-4 sticky top-4">
-        <!-- 目录容器（Swup 会替换此元素内容） -->
-        <div id="toc-sidebar" class:list={["card-base p-4 max-h-[calc(100vh-8rem)] overflow-y-auto hide-scrollbar", {"hidden": !tocEnabled || headings.length === 0, "hidden lg:block": tocEnabled && headings.length > 0}]}>
-            {tocEnabled && headings.length > 0 && (
-                <>
-                    <div class="text-sm font-medium text-black/60 dark:text-white/60 mb-2">目录</div>
-                    <TOC headings={headings}></TOC>
-                </>
-            )}
-        </div>
+    
+    <!-- 分类与标签卡片：在个人名片向上滚动后，立即平滑吸附在屏幕顶部 top-4 保持固定不动 -->
+    <div id="sidebar-sticky" class="transition-all duration-300 flex flex-col w-full gap-4 sticky top-4">
+        <Categories class="onload-animation" style="animation-delay: 100ms"></Categories>
+        <Tags class="onload-animation" style="animation-delay: 150ms"></Tags>
     </div>
-</div>
+</aside>

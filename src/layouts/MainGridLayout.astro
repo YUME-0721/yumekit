@@ -3,10 +3,10 @@ import Footer from "@components/Footer.astro";
 import Navbar from "@components/Navbar.astro";
 import BackToTop from "@components/control/BackToTop.astro";
 import SideBar from "@components/widget/SideBar.astro";
+import RightSideBar from "@components/widget/RightSideBar.astro";
 import type { MarkdownHeading } from "astro";
 import { Icon } from "astro-icon/components";
 import ImageWrapper from "../components/misc/ImageWrapper.astro";
-import TOC from "../components/widget/TOC.astro";
 import { siteConfig } from "../config";
 import {
 	BANNER_HEIGHT,
@@ -23,7 +23,6 @@ interface Props {
 	setOGTypeArticle?: boolean;
 	headings?: MarkdownHeading[];
 	hideSidebar?: boolean;
-	isHeroHome?: boolean;
 }
 
 const {
@@ -34,17 +33,15 @@ const {
 	setOGTypeArticle,
 	headings = [],
 	hideSidebar = false,
-	isHeroHome = false,
 } = Astro.props;
-const hasBannerCredit =
-	siteConfig.banner.enable && siteConfig.banner.credit.enable;
+
+const hasBannerCredit = siteConfig.banner.enable && siteConfig.banner.credit.enable;
 const hasBannerLink = !!siteConfig.banner.credit.url;
 
-const mainPanelTop = isHeroHome
-	? "0rem"
-	: siteConfig.banner.enable
-		? `calc(${BANNER_HEIGHT}vh - ${MAIN_PANEL_OVERLAPS_BANNER_HEIGHT}rem)`
-		: "5.5rem";
+// 所有页面统一：Banner 开启时内容区下移到 Banner 底部，否则紧贴导航栏
+const mainPanelTop = siteConfig.banner.enable
+	? `calc(${BANNER_HEIGHT}vh - ${MAIN_PANEL_OVERLAPS_BANNER_HEIGHT}rem)`
+	: "5.5rem";
 ---
 
 <Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle}>
@@ -53,70 +50,88 @@ const mainPanelTop = isHeroHome
 <slot slot="head" name="head"></slot>
 <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 mx-auto w-full px-2">
     <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all">
-        <Navbar isHeroHome={isHeroHome}></Navbar>
+        <Navbar></Navbar>
     </div>
 </div>
 
-<!-- Banner -->
-{siteConfig.banner.enable && <div id="banner-wrapper" class=`absolute z-10 w-full transition duration-700 overflow-hidden` style=`top: -${BANNER_HEIGHT_EXTEND}vh`>
-    <ImageWrapper id="banner" alt="Banner image of the blog" class:list={["object-cover h-full transition duration-700 opacity-0 scale-105"]}
-                  src={siteConfig.banner.src} position={siteConfig.banner.position}
-    >
-    </ImageWrapper>
-</div>}
+<!-- Banner（全站统一大图） -->
+{siteConfig.banner.enable && (
+    <div id="banner-wrapper" class="absolute z-10 w-full transition duration-700 overflow-hidden" style={`top: -${BANNER_HEIGHT_EXTEND}vh`}>
+        <ImageWrapper
+            id="banner"
+            alt="Banner image of the blog"
+            class="object-cover h-full transition duration-700 opacity-0 scale-105"
+            src={siteConfig.banner.src}
+            position={siteConfig.banner.position}
+        />
+    </div>
+)}
 
 <!-- Main content -->
-<div class="absolute w-full z-30 pointer-events-none" style=`top: ${mainPanelTop}`>
-    <!-- The pointer-events-none here prevent blocking the click event of the TOC -->
-    <div class:list={["relative mx-auto pointer-events-auto", isHeroHome ? "w-full" : "max-w-[var(--page-width)]"]}>
+<div class="absolute w-full z-30 pointer-events-none" style={`top: ${mainPanelTop}`}>
+    <div class="relative max-w-[var(--page-width)] mx-auto pointer-events-auto px-4">
+        
+        <!-- 全宽顶部插槽（Swup 容器 #top-wrapper，覆盖全站三栏总宽度，主页展示全宽欢迎区，文章页平滑隐藏） -->
+        <div id="top-wrapper" class="transition-swup-fade w-full">
+            <slot name="top" />
+        </div>
+
+        <!-- 下方标准左中右三栏布局 -->
         <div id="main-grid" class:list={[
             "transition duration-700 w-full left-0 right-0 grid mx-auto gap-4",
-            isHeroHome ? "grid-cols-1 px-0 gap-0" : (hideSidebar ? "grid-cols-1 px-4 md:px-4" : "grid-cols-[17.5rem_auto] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto] px-4 md:px-4")
+            hideSidebar
+                ? "grid-cols-1"
+                : "grid-cols-1 lg:grid-cols-[17.5rem_1fr] xl:grid-cols-[17.5rem_1fr_17.5rem]"
         ]}>
             <!-- Banner image credit -->
-            {hasBannerCredit && <a href={siteConfig.banner.credit.url} id="banner-credit" target="_blank" rel="noopener" aria-label="Visit image source"
-                                   class:list={["group onload-animation transition-all absolute flex justify-center items-center rounded-full " +
-                                   "px-3 right-4 -top-[3.25rem] bg-black/60 hover:bg-black/70 h-9", {"hover:pr-9 active:bg-black/80": hasBannerLink}]}
-            >
-                <Icon class="text-white/75 text-[1.25rem] mr-1" name="material-symbols:copyright-outline-rounded" ></Icon>
-                <div class="text-white/75 text-xs">{siteConfig.banner.credit.text}</div>
-                <Icon class:list={["transition absolute text-[oklch(0.75_0.14_var(--hue))] right-4 text-[0.75rem] opacity-0",
-                    {"group-hover:opacity-100": hasBannerLink}]}
-                      name="fa6-solid:arrow-up-right-from-square">
-                </Icon>
-            </a>}
+            {hasBannerCredit && (
+                <a href={siteConfig.banner.credit.url} id="banner-credit" target="_blank" rel="noopener" aria-label="Visit image source"
+                   class:list={["group onload-animation transition-all absolute flex justify-center items-center rounded-full px-3 right-4 -top-[3.25rem] bg-black/60 hover:bg-black/70 h-9", {"hover:pr-9 active:bg-black/80": hasBannerLink}]}
+                >
+                    <Icon class="text-white/75 text-[1.25rem] mr-1" name="material-symbols:copyright-outline-rounded" />
+                    <div class="text-white/75 text-xs">{siteConfig.banner.credit.text}</div>
+                    <Icon class:list={["transition absolute text-[oklch(0.75_0.14_var(--hue))] right-4 text-[0.75rem] opacity-0", {"group-hover:opacity-100": hasBannerLink}]}
+                          name="fa6-solid:arrow-up-right-from-square" />
+                </a>
+            )}
 
+            <!-- Left Sidebar（常驻左侧栏：个人名片/分类/标签） -->
+            {!hideSidebar && (
+                <SideBar class="mb-4 row-start-2 row-end-3 col-span-1 lg:row-start-1 lg:row-end-2 lg:col-span-1 lg:max-w-[17.5rem] onload-animation" />
+            )}
 
-            {!hideSidebar && <SideBar class="mb-4 row-start-2 row-end-3 col-span-2 lg:row-start-1 lg:row-end-2 lg:col-span-1 lg:max-w-[17.5rem] onload-animation" headings={headings}></SideBar>}
-
+            <!-- Center Main Content（Swup 主内容流：最新文章列表 / 文章正文） -->
             <main id="swup-container" class:list={[
-                "transition-swup-fade overflow-visible min-w-0",
-                hideSidebar ? "col-span-1" : "col-span-2 lg:col-span-1"
+                "transition-swup-fade overflow-visible min-w-0 col-span-1",
+                !hideSidebar && "row-start-1 row-end-2 lg:row-start-1 lg:row-end-2"
             ]}>
                 <div id="content-wrapper" class="onload-animation relative">
-                    <!-- make id different from windows.swup global property -->
-                    <slot></slot>
-                    <div class="footer col-span-2 onload-animation hidden lg:block">
-                        <Footer></Footer>
+                    <slot />
+                    <div class="footer col-span-full onload-animation hidden lg:block">
+                        <Footer />
                     </div>
                 </div>
             </main>
 
-            <div class="footer col-span-2 onload-animation block lg:hidden">
-                <Footer></Footer>
+            <!-- Right Sidebar（常驻右侧栏：目录/公告/音乐播放器） -->
+            {!hideSidebar && (
+                <RightSideBar class="mb-4 hidden xl:block col-span-1 xl:max-w-[17.5rem] onload-animation" headings={headings} />
+            )}
+
+            <div class="footer col-span-full onload-animation block lg:hidden">
+                <Footer />
             </div>
         </div>
 
-        <BackToTop></BackToTop>
+        <BackToTop />
     </div>
 </div>
 
-<!-- The things that should be under the banner, only the TOC for now -->
-<!-- TOC 已移至左侧边栏，此处保留空的 #toc 元素供 Swup 使用 -->
-<div class="absolute w-full z-0 hidden">
-    <div class="relative max-w-[var(--page-width)] mx-auto">
-        <!-- #toc needs to exist for Swup to work normally -->
-        <div id="toc"></div>
+<!-- Swup fallback：hideSidebar 时须保证 #toc-container 存在，防止 Swup 容器缺失硬刷新 -->
+{hideSidebar && (
+    <div class="hidden" aria-hidden="true">
+        <div id="toc-container"></div>
     </div>
-</div>
+)}
+
 </Layout>

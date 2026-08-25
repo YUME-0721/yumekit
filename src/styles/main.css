@@ -59,6 +59,12 @@
         @apply border border-black/15 dark:border-white/20 shadow-md dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)];
     }
 
+    /* 侧边栏随页面自然滚动，直到最底部卡片完全露出后保持吸底常驻 */
+    .sticky-sidebar-bottom {
+        position: sticky;
+        top: min(1rem, calc(100vh - 100% - 1rem));
+    }
+
     .card-hover {
         @apply transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-black/25 dark:hover:border-white/35 hover:z-10;
     }

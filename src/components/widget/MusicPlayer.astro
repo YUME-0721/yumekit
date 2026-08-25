@@ -1,0 +1,29 @@
+---
+import MusicPlayerSvelte from "./MusicPlayer.svelte";
+import { siteConfig } from "../../config";
+
+interface Props {
+	class?: string;
+	style?: string;
+}
+
+const className = Astro.props.class;
+const style = Astro.props.style;
+
+const music = siteConfig.music;
+if (!music || !music.enable) {
+	return null;
+}
+---
+
+<div class={className} style={style}>
+    <MusicPlayerSvelte
+        client:load
+        title={music.title || "音乐"}
+        server={music.server || "netease"}
+        type={music.type || "playlist"}
+        id={music.id || "2472911244"}
+        autoPlay={music.autoPlay ?? false}
+        defaultVolume={music.volume ?? 0.7}
+    />
+</div>

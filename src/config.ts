@@ -1,4 +1,4 @@
-import type {
+﻿import type {
 	ExpressiveCodeConfig,
 	GitHubEditConfig,
 	ImageFallbackConfig,
@@ -25,11 +25,11 @@ export const siteConfig: SiteConfig = {
 	},
 	banner: {
 		enable: false,
-		src: "/xinghui.avif", // 相对于“/src”目录。如果位于“/public”目录的起始位置，则相对于“/public”目录。
+		src: "https://pic.yumekai.top/pic?img=ua", // 相对于“/src”目录。如果位于“/public”目录的起始位置，则相对于“/public”目录。
 
 		position: "center", // 与对象位置设置相同，仅支持“顶部”、“居中”、“底部”选项。默认情况下为“居中”。
 		credit: {
-			enable: true, // 显示横幅图片的信用说明文字
+			enable: false, // 关闭版权声明
 			text: "Pixiv @chokei", // 需显示的版权声明
 
 			url: "https://www.pixiv.net/artworks/122782209", // （可选）指向原始作品或艺术家页面的网址链接
@@ -66,6 +66,27 @@ export const siteConfig: SiteConfig = {
 		{ url: "https://pic.yumekai.top", text: "随机图节点" }
 		// { url: "https://cfstatus.072199.xyz", text: "状态检测节点" }
 	],
+
+	// 站点公告栏配置
+	announcement: {
+		enable: true,
+		content: "欢迎光临放课后の技术部！",
+	},
+
+	// 音乐播放器配置
+	music: {
+		enable: true,
+		id: "914046086", // 默认网易云歌单 ID
+		server: "netease",
+		type: "playlist",
+		autoPlay: false,
+		volume: 0.7,
+	},
+
+	// 网页桌宠配置
+	pet: {
+		enable: true,
+	},
 
 	// 功能页面开关配置
 	featurePages: {

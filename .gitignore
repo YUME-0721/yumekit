@@ -60,3 +60,5 @@ out/
 # 内容图片库（不上传至 GitHub）
 src/content/.images/
 
+# 参考源码目录（不上传至 GitHub）
+fuwari-main/

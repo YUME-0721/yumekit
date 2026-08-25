@@ -15,6 +15,29 @@ export type AnimeConfig = {
 	mode?: "bangumi" | "local"; // 番剧页面模式
 };
 
+// 网页桌宠配置
+export type PetConfig = {
+	enable: boolean; // 是否启用网页桌宠组件
+};
+
+// 公告栏配置
+export type AnnouncementConfig = {
+	enable: boolean; // 是否启用公告栏
+	title?: string; // 公告栏标题
+	content: string; // 公告内容（支持 HTML/文本）
+};
+
+// 音乐播放器配置
+export type MusicConfig = {
+	enable: boolean; // 是否启用音乐播放器
+	title?: string; // 音乐卡片标题
+	server?: "netease" | "tencent" | "kugou" | "xiami" | "baidu"; // 音频平台服务商
+	type?: "playlist" | "song" | "album" | "artist"; // 类型：歌单/单曲/专辑/艺术家
+	id?: string; // 歌单/歌曲 ID
+	autoPlay?: boolean; // 是否自动播放
+	volume?: number; // 默认音量 (0~1)
+};
+
 export type SiteConfig = {
 	title: string;
 	subtitle: string;
@@ -67,6 +90,12 @@ export type SiteConfig = {
 	bangumi?: BangumiConfig;
 	// 番剧页面配置
 	anime?: AnimeConfig;
+	// 网页桌宠配置
+	pet?: PetConfig;
+	// 公告栏配置
+	announcement?: AnnouncementConfig;
+	// 音乐播放器配置
+	music?: MusicConfig;
 };
 
 export type Favicon = {

@@ -1,0 +1,30 @@
+---
+import { siteConfig } from "../../config";
+import { Icon } from "astro-icon/components";
+
+interface Props {
+	class?: string;
+	style?: string;
+}
+
+const className = Astro.props.class;
+const style = Astro.props.style;
+
+const announcement = siteConfig.announcement;
+if (!announcement || !announcement.enable) {
+	return null;
+}
+---
+
+<div id="announcement" class:list={["card-base p-4 w-full select-none relative transition-all duration-300", className]} style={style}>
+    <!-- 标题栏：简洁图标 + 标题文本，彻底移除伪类竖线 -->
+    <div class="flex items-center gap-1.5 font-bold text-[15px] text-neutral-900 dark:text-neutral-100 mb-2.5">
+        <Icon name="material-symbols:campaign-outline-rounded" class="text-lg text-[var(--primary)] shrink-0" />
+        <span>{announcement.title || "站点公告"}</span>
+    </div>
+
+    <!-- 公告内容 -->
+    <div class="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed bg-[var(--float-panel-bg-opaque)] rounded-xl p-3 border border-black/5 dark:border-white/10 flex flex-col gap-2">
+        <div class="prose prose-sm dark:prose-invert max-w-none break-words" set:html={announcement.content} />
+    </div>
+</div>
