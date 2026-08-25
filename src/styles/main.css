@@ -36,6 +36,15 @@
         overflow-y: auto !important;
     }
 
+    #toc-sidebar {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    #toc-sidebar::-webkit-scrollbar {
+        display: none;
+    }
+
     /* Reverse filter for images to keep original colors */
     html.is-rainbow-mode .card-base img,
     html.is-rainbow-mode .card-base video,
