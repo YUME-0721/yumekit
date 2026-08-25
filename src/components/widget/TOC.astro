@@ -104,27 +104,50 @@ class TableOfContents extends HTMLElement {
     };
 
     updateBranches = () => {
-        const tocItems = Array.from(this.querySelectorAll<HTMLElement>(".toc-item"));
+        // 找出当前视窗中处于活跃高亮状态的第一个链接
+        const activeLink = this.tocEntries.find(entry => entry.classList.contains(this.visibleClass));
+        
+        // 找到 activeLink 所属的顶层 (Level 0) .toc-item 节点
+        let activeRootLi: HTMLElement | null = null;
+        if (activeLink) {
+            let current: HTMLElement | null = activeLink.closest(".toc-item");
+            while (current) {
+                const parentItem: HTMLElement | null = current.parentElement?.closest(".toc-item") || null;
+                if (!parentItem) {
+                    activeRootLi = current;
+                    break;
+                }
+                current = parentItem;
+            }
+        }
 
-        tocItems.forEach((li) => {
+        const allItems = Array.from(this.querySelectorAll<HTMLElement>(".toc-item"));
+        allItems.forEach((li) => {
             const wrapper = li.querySelector<HTMLElement>(":scope > .toc-sublist-wrapper");
             const btn = li.querySelector<HTMLElement>(":scope > div > .toc-toggle-btn");
             if (!wrapper) return;
 
-            // 检查当前 li 或其任何子节点是否包含高亮活跃的链接
-            const hasVisibleLink = !!li.querySelector(`a.${this.visibleClass}`);
+            // 当阅读焦点移入新区域时，清理非当前阅读区上的临时手动折叠标记
+            if (activeRootLi && li !== activeRootLi && !activeRootLi.contains(li)) {
+                if (li.getAttribute("data-user-collapsed") === "true") {
+                    li.removeAttribute("data-user-collapsed");
+                }
+            }
+
+            const userCollapsed = li.getAttribute("data-user-collapsed") === "true";
             const userExpanded = li.getAttribute("data-user-expanded") === "true";
 
             let shouldExpand = false;
-            if (hasVisibleLink) {
-                // 如果当前正在阅读该分支下的目录，自动展开（清除手动收起状态）
-                shouldExpand = true;
-                li.removeAttribute("data-user-collapsed");
+            if (userCollapsed) {
+                // 用户显式手动收起了当前分支 -> 尊重操作，强制收起
+                shouldExpand = false;
             } else if (userExpanded) {
-                // 如果用户手动展开了该分支，保持展开
+                // 用户显式手动展开了当前分支 -> 保持展开
                 shouldExpand = true;
             } else {
-                shouldExpand = false;
+                // 自动手风琴模式：仅自动展开当前阅读节点及其所属顶层树，其余全收起（确保最多只自动展开 1 个顶层分支）
+                const isItemInActiveTree = activeRootLi ? (li === activeRootLi || activeRootLi.contains(li)) : false;
+                shouldExpand = isItemInActiveTree;
             }
 
             if (shouldExpand) {
@@ -211,34 +234,55 @@ class TableOfContents extends HTMLElement {
         });
     };
 
-    setupToggleButtons = () => {
+    toggleItem = (li: HTMLElement) => {
+        const wrapper = li.querySelector<HTMLElement>(":scope > .toc-sublist-wrapper");
+        const btn = li.querySelector<HTMLElement>(":scope > div > .toc-toggle-btn");
+        if (!wrapper) return;
+
+        const isExpanded = wrapper.classList.contains("is-expanded");
+        if (isExpanded) {
+            wrapper.classList.remove("is-expanded");
+            btn?.classList.remove("is-expanded");
+            li.setAttribute("data-user-collapsed", "true");
+            li.removeAttribute("data-user-expanded");
+        } else {
+            wrapper.classList.add("is-expanded");
+            btn?.classList.add("is-expanded");
+            li.setAttribute("data-user-expanded", "true");
+            li.removeAttribute("data-user-collapsed");
+        }
+
+        this.updateActiveIndicator();
+        setTimeout(() => {
+            this.updateActiveIndicator();
+        }, 320);
+    };
+
+    setupToggleHandlers = () => {
+        // 1. 右侧箭头按钮：只切换分支折叠/展开，不平滑滚动页面
         const toggleBtns = this.querySelectorAll<HTMLButtonElement>(".toc-toggle-btn");
         toggleBtns.forEach((btn) => {
             btn.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 const li = btn.closest(".toc-item");
-                if (!li) return;
-                const wrapper = li.querySelector<HTMLElement>(":scope > .toc-sublist-wrapper");
-                if (!wrapper) return;
-
-                const isExpanded = wrapper.classList.contains("is-expanded");
-                if (isExpanded) {
-                    wrapper.classList.remove("is-expanded");
-                    btn.classList.remove("is-expanded");
-                    li.setAttribute("data-user-collapsed", "true");
-                    li.removeAttribute("data-user-expanded");
-                } else {
-                    wrapper.classList.add("is-expanded");
-                    btn.classList.add("is-expanded");
-                    li.setAttribute("data-user-expanded", "true");
-                    li.removeAttribute("data-user-collapsed");
+                if (li instanceof HTMLElement) {
+                    this.toggleItem(li);
                 }
+            });
+        });
 
-                this.updateActiveIndicator();
-                setTimeout(() => {
-                    this.updateActiveIndicator();
-                }, 320);
+        // 2. 目录标题链接：如果该目录含有子分支，点击时既定位锚点，又切换该分支的展开/折叠状态
+        const itemLinks = this.querySelectorAll<HTMLAnchorElement>(".toc-item > div > a");
+        itemLinks.forEach((link) => {
+            link.addEventListener("click", () => {
+                const li = link.closest(".toc-item");
+                if (li instanceof HTMLElement) {
+                    const hasSublist = !!li.querySelector(":scope > .toc-sublist-wrapper");
+                    if (hasSublist) {
+                        this.toggleItem(li);
+                    }
+                }
             });
         });
     };
@@ -327,7 +371,7 @@ class TableOfContents extends HTMLElement {
         }
         this.active = new Array(this.tocEntries.length).fill(false);
 
-        this.setupToggleButtons();
+        this.setupToggleHandlers();
 
         this.sections.forEach((section) =>
             this.observer.observe(section)
