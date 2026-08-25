@@ -71,10 +71,10 @@ class TableOfContents extends HTMLElement {
     anchorNavTarget: HTMLElement | null = null;
     headingIdxMap = new Map<string, number>();
     headings: HTMLElement[] = [];
-    sections: HTMLElement[] = [];
     tocEntries: HTMLAnchorElement[] = [];
     active: boolean[] = [];
     activeIndicator: HTMLElement | null = null;
+    ticking = false;
 
     constructor() {
         super();
@@ -85,13 +85,15 @@ class TableOfContents extends HTMLElement {
 
     markVisibleSection = (entries: IntersectionObserverEntry[]) => {
         entries.forEach((entry) => {
-            const id = entry.target.children[0]?.getAttribute("id");
+            const id = entry.target.getAttribute("id");
             const idx = id ? this.headingIdxMap.get(id) : undefined;
-            if (idx != undefined)
+            if (idx !== undefined) {
                 this.active[idx] = entry.isIntersecting;
+            }
 
-            if (entry.isIntersecting && this.anchorNavTarget == entry.target.firstChild)
+            if (entry.isIntersecting && this.anchorNavTarget === entry.target) {
                 this.anchorNavTarget = null;
+            }
         });
 
         if (!this.active.includes(true)) {
@@ -130,9 +132,20 @@ class TableOfContents extends HTMLElement {
         const topmost = visibleActiveEntries[0];
         const bottommost = visibleActiveEntries[visibleActiveEntries.length - 1];
 
-        let top = topmost.offsetTop;
-        let bottom = bottommost.offsetTop + bottommost.offsetHeight;
-        this.activeIndicator?.setAttribute("style", `display: block; top: ${top}px; height: ${bottom - top}px`);
+        // 基于 getBoundingClientRect 精确计算相对于 table-of-contents 容器的绝对偏移，彻底杜绝任何父级 relative 引起的错位
+        const containerRect = this.getBoundingClientRect();
+        const topmostRect = topmost.getBoundingClientRect();
+        const bottommostRect = bottommost.getBoundingClientRect();
+
+        if (containerRect.height === 0 || topmostRect.height === 0) return;
+
+        const top = topmostRect.top - containerRect.top;
+        const height = bottommostRect.bottom - topmostRect.top;
+
+        this.activeIndicator?.setAttribute(
+            "style",
+            `display: block; top: ${top}px; height: ${height}px;`
+        );
     };
 
     toggleActiveHeading = () => {
@@ -213,7 +226,7 @@ class TableOfContents extends HTMLElement {
         let activeIdx = 0;
         for (let i = 0; i < this.headings.length; i++) {
             const top = this.headings[i].getBoundingClientRect().top;
-            if (top <= 120) {
+            if (top <= 140) {
                 activeIdx = i;
             } else {
                 break;
@@ -221,6 +234,34 @@ class TableOfContents extends HTMLElement {
         }
         this.active.fill(false);
         this.active[activeIdx] = true;
+    };
+
+    updateActiveHeadingByScroll = () => {
+        if (this.anchorNavTarget || this.headings.length === 0) return;
+
+        let activeIdx = 0;
+        for (let i = 0; i < this.headings.length; i++) {
+            const rect = this.headings[i].getBoundingClientRect();
+            if (rect.top <= 140) {
+                activeIdx = i;
+            } else {
+                break;
+            }
+        }
+
+        this.active.fill(false);
+        this.active[activeIdx] = true;
+        this.toggleActiveHeading();
+    };
+
+    onScroll = () => {
+        if (!this.ticking) {
+            requestAnimationFrame(() => {
+                this.updateActiveHeadingByScroll();
+                this.ticking = false;
+            });
+            this.ticking = true;
+        }
     };
 
     handleTocClick = (event: MouseEvent) => {
@@ -246,6 +287,9 @@ class TableOfContents extends HTMLElement {
             const idx = this.headingIdxMap.get(id);
             if (idx !== undefined) {
                 this.anchorNavTarget = this.headings[idx];
+                this.active.fill(false);
+                this.active[idx] = true;
+                this.toggleActiveHeading();
             } else {
                 this.anchorNavTarget = null;
             }
@@ -253,10 +297,10 @@ class TableOfContents extends HTMLElement {
     };
 
     connectedCallback() {
-        // 保证在组件挂载后无条件即刻初始化
         requestAnimationFrame(() => {
             this.init();
         });
+        window.addEventListener("scroll", this.onScroll, { passive: true });
     };
 
     init() {
@@ -264,7 +308,6 @@ class TableOfContents extends HTMLElement {
 
         if (!this.tocEl) return;
 
-        // 统一使用事件代理监听所有的目录点击（包含箭头与标题链接）
         this.tocEl.removeEventListener("click", this.handleTocClick as any);
         this.tocEl.addEventListener("click", this.handleTocClick as any);
 
@@ -276,35 +319,36 @@ class TableOfContents extends HTMLElement {
 
         if (this.tocEntries.length === 0) return;
 
-        this.sections = new Array(this.tocEntries.length);
-        this.headings = new Array(this.tocEntries.length);
+        this.headings = [];
+        this.headingIdxMap.clear();
+
         for (let i = 0; i < this.tocEntries.length; i++) {
             const id = decodeURIComponent(this.tocEntries[i].hash?.substring(1));
             const heading = document.getElementById(id);
-            const section = heading?.parentElement;
-            if (heading instanceof HTMLElement && section instanceof HTMLElement) {
-                this.headings[i] = heading;
-                this.sections[i] = section;
+            if (heading instanceof HTMLElement) {
+                this.headings.push(heading);
                 this.headingIdxMap.set(id, i);
             }
         }
+
         this.active = new Array(this.tocEntries.length).fill(false);
 
-        // 绑定 IntersectionObserver 监听正文标题
-        this.sections.forEach((section) => {
-            this.observer.unobserve(section);
-            this.observer.observe(section);
+        // 直接监听所有 heading 标题元素本身
+        this.headings.forEach((heading) => {
+            this.observer.unobserve(heading);
+            this.observer.observe(heading);
         });
 
-        this.fallback();
+        this.updateActiveHeadingByScroll();
         this.update();
     };
 
     disconnectedCallback() {
-        this.sections.forEach((section) =>
-            this.observer.unobserve(section)
+        this.headings.forEach((heading) =>
+            this.observer.unobserve(heading)
         );
         this.observer.disconnect();
+        window.removeEventListener("scroll", this.onScroll);
         if (this.tocEl) {
             this.tocEl.removeEventListener("click", this.handleTocClick as any);
         }
