@@ -95,10 +95,7 @@ class TableOfContents extends HTMLElement {
         });
 
         if (!this.active.includes(true)) {
-            // 当没有任何标题在视窗中时，隐藏 active-indicator
-            this.activeIndicator?.setAttribute("style", "display: none;");
             this.fallback();
-            return;
         }
         this.update();
     };
@@ -110,7 +107,7 @@ class TableOfContents extends HTMLElement {
             return;
         }
 
-        // 寻找在当前 DOM 布局中真正可视的代表性 entry (若子节点被折叠隐藏，则指示器优雅挂载在显示的父级标题上)
+        // 寻找在当前 DOM 布局中真正可视的代表性 entry (若子节点被折叠隐藏，则指示器挂载在显示的父级标题上)
         const visibleActiveEntries = activeEntries.map(entry => {
             let currentLink: HTMLAnchorElement = entry;
             let li = currentLink.closest(".toc-item");
@@ -210,46 +207,40 @@ class TableOfContents extends HTMLElement {
         }, 320);
     };
 
-    setupToggleHandlers = () => {
-        // 仅在手动点击右侧箭头按钮时展开/收缩分支目录
-        const toggleBtns = this.querySelectorAll<HTMLButtonElement>(".toc-toggle-btn");
-        toggleBtns.forEach((btn) => {
-            btn.addEventListener("click", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const li = btn.closest(".toc-item");
-                if (li instanceof HTMLElement) {
-                    this.toggleItem(li);
-                }
-            });
-        });
-    };
-
     fallback = () => {
-        if (!this.sections.length) return;
+        if (!this.headings.length) return;
 
-        for (let i = 0; i < this.sections.length; i++) {
-            let offsetTop = this.sections[i].getBoundingClientRect().top;
-            let offsetBottom = this.sections[i].getBoundingClientRect().bottom;
-
-            if (this.isInRange(offsetTop, 0, window.innerHeight)
-                || this.isInRange(offsetBottom, 0, window.innerHeight)
-                || (offsetTop < 0 && offsetBottom > window.innerHeight)) {                    
-                this.markActiveHeading(i);
+        let activeIdx = 0;
+        for (let i = 0; i < this.headings.length; i++) {
+            const top = this.headings[i].getBoundingClientRect().top;
+            if (top <= 120) {
+                activeIdx = i;
+            } else {
+                break;
             }
-            else if (offsetTop > window.innerHeight) break;
         }
+        this.active.fill(false);
+        this.active[activeIdx] = true;
     };
 
-    markActiveHeading = (idx: number)=> {
-        this.active[idx] = true;
-    };
+    handleTocClick = (event: MouseEvent) => {
+        const target = event.target as HTMLElement | null;
+        if (!target) return;
 
-    handleAnchorClick = (event: Event) => {
-        const anchor = event
-            .composedPath()
-            .find((element) => element instanceof HTMLAnchorElement);
+        // 点击右侧展开/收缩箭头按钮
+        const toggleBtn = target.closest<HTMLButtonElement>(".toc-toggle-btn");
+        if (toggleBtn) {
+            event.preventDefault();
+            event.stopPropagation();
+            const li = toggleBtn.closest<HTMLElement>(".toc-item");
+            if (li) {
+                this.toggleItem(li);
+            }
+            return;
+        }
 
+        // 点击锚点标题链接
+        const anchor = target.closest<HTMLAnchorElement>("a[href^='#']");
         if (anchor) {
             const id = decodeURIComponent(anchor.hash?.substring(1));
             const idx = this.headingIdxMap.get(id);
@@ -261,31 +252,21 @@ class TableOfContents extends HTMLElement {
         }
     };
 
-    isInRange(value: number, min: number, max: number) {
-        return min < value && value < max;
-    };
-
     connectedCallback() {
-        // wait for the onload animation to finish, which makes the `getBoundingClientRect` return correct values
-        const element = document.querySelector('.prose');
-        if (element) {
-            element.addEventListener('animationend', () => {
-                this.init();
-            }, { once: true });
-        } else {
-            console.debug('Animation element not found');
-        }
+        // 保证在组件挂载后无条件即刻初始化
+        requestAnimationFrame(() => {
+            this.init();
+        });
     };
 
     init() {
-        // 优先使用侧边栏的 TOC 容器，否则使用原来的
         this.tocEl = document.getElementById("toc-sidebar") || document.getElementById("toc-inner-wrapper");
 
         if (!this.tocEl) return;
 
-        this.tocEl.addEventListener("click", this.handleAnchorClick, {
-            capture: true,
-        });
+        // 统一使用事件代理监听所有的目录点击（包含箭头与标题链接）
+        this.tocEl.removeEventListener("click", this.handleTocClick as any);
+        this.tocEl.addEventListener("click", this.handleTocClick as any);
 
         this.activeIndicator = document.getElementById("active-indicator");
 
@@ -309,11 +290,11 @@ class TableOfContents extends HTMLElement {
         }
         this.active = new Array(this.tocEntries.length).fill(false);
 
-        this.setupToggleHandlers();
-
-        this.sections.forEach((section) =>
-            this.observer.observe(section)
-        );
+        // 绑定 IntersectionObserver 监听正文标题
+        this.sections.forEach((section) => {
+            this.observer.unobserve(section);
+            this.observer.observe(section);
+        });
 
         this.fallback();
         this.update();
@@ -324,7 +305,9 @@ class TableOfContents extends HTMLElement {
             this.observer.unobserve(section)
         );
         this.observer.disconnect();
-        this.tocEl?.removeEventListener("click", this.handleAnchorClick);
+        if (this.tocEl) {
+            this.tocEl.removeEventListener("click", this.handleTocClick as any);
+        }
     };
 }
 
