@@ -4,16 +4,16 @@
 
 /* Page transition animations with Swup（超丝滑硬件加速渐变与微模糊过渡） */
 html.is-changing [class*="transition-swup-"] {
-    transition: opacity 280ms cubic-bezier(0.4, 0, 0.2, 1),
-                transform 280ms cubic-bezier(0.4, 0, 0.2, 1),
-                filter 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                transform 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                filter 300ms cubic-bezier(0.4, 0, 0.2, 1);
     will-change: opacity, transform, filter;
 }
 
 html.is-animating [class*="transition-swup-"] {
     opacity: 0 !important;
-    transform: translateY(12px) scale(0.995);
-    filter: blur(2px);
+    transform: translateY(8px) scale(0.998);
+    filter: blur(1.5px);
 }
 
 /* 进场组件动效（顺滑回弹与自然浮现） */

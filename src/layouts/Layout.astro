@@ -322,7 +322,7 @@ const bannerOffset =
 		<!-- Umami 统计脚本（使用配置） -->
 		{umamiConfig.enabled && <Fragment set:html={umamiConfig.scripts} />}
 	</head>
-	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
+	<body class=" min-h-screen transition " class:list={[{"is-home": isHomePage, "lg:is-home": isHomePage, "enable-banner": enableBanner}]}
 		  data-overlayscrollbars-initialize
 	>
 		<div id="bg-box"></div>
@@ -478,27 +478,49 @@ const bannerOffset =
 		transform: translateY(30px) scale(0.75) !important;
 	}
 
+	.enable-banner #banner-wrapper,
+	.enable-banner #banner,
+	.enable-banner #main-grid,
+	.enable-banner #top-row,
+	.enable-banner #sidebar-sticky,
+	.enable-banner #right-sidebar-sticky {
+		transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+		            height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+		            top 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+		            opacity 0.35s ease;
+		will-change: transform, height, top;
+	}
+
 	.enable-banner.is-home #banner-wrapper {
 		@apply h-[var(--banner-height-home)] translate-y-[var(--banner-height-extend)]
 	}
-	.enable-banner #banner-wrapper {
-		@apply h-[var(--banner-height-home)]
+	.enable-banner:not(.is-home) #banner-wrapper {
+		@apply h-[var(--banner-height)] translate-y-0
 	}
 
 	.enable-banner.is-home #banner {
 		@apply h-[var(--banner-height-home)] translate-y-0
 	}
-	.enable-banner #banner {
-		@apply h-[var(--banner-height-home)] translate-y-[var(--bannerOffset)]
+	.enable-banner:not(.is-home) #banner {
+		@apply h-[var(--banner-height)] translate-y-[var(--bannerOffset)]
 	}
 	.enable-banner.is-home #main-grid {
 		@apply translate-y-[var(--banner-height-extend)];
 	}
-	.enable-banner #top-row {
-		@apply h-[calc(var(--banner-height-home)_-_4.5rem)] transition-all duration-300
+	.enable-banner:not(.is-home) #main-grid {
+		@apply translate-y-0;
+	}
+	.enable-banner.is-home #top-row {
+		@apply h-[calc(var(--banner-height-home)_-_4.5rem)];
+	}
+	.enable-banner:not(.is-home) #top-row {
+		@apply h-[calc(var(--banner-height)_-_4.5rem)];
 	}
 	.enable-banner.is-home #sidebar-sticky {
 		@apply top-[calc(1rem_-_var(--banner-height-extend))]
+	}
+	.enable-banner:not(.is-home) #sidebar-sticky {
+		@apply top-4
 	}
 	.navbar-hidden {
 		@apply opacity-0 -translate-y-16
@@ -716,9 +738,9 @@ const setup = () => {
 		// change banner height immediately when a link is clicked
 		const bodyElement = document.querySelector('body')
 		if (pathsEqual(visit.to.url, url('/'))) {
-			bodyElement!.classList.add('lg:is-home');
+			bodyElement!.classList.add('is-home', 'lg:is-home');
 		} else {
-			bodyElement!.classList.remove('lg:is-home');
+			bodyElement!.classList.remove('is-home', 'lg:is-home');
 		}
 
 		// increase the page height during page transition to prevent the scrolling animation from jumping
