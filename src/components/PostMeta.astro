@@ -63,6 +63,25 @@ const formattedTags = (tags || []).map((t: string) => t.trim()).filter(Boolean);
         </div>
     )}
 
+    <!-- tags list -->
+    {formattedTags.length > 0 && (
+        <div class="flex items-center gap-1">
+            <div class="w-6 h-6 rounded-md flex items-center justify-center bg-[var(--btn-regular-bg)] text-[var(--primary)] shrink-0">
+                <Icon name="material-symbols:tag-rounded" class="text-sm"></Icon>
+            </div>
+            <div class="flex flex-wrap items-center gap-1">
+                {formattedTags.map((tag, idx) => (
+                    <>
+                        <a href={getTagUrl(tag)} class="text-50 font-medium hover:text-[var(--primary)] hover:underline transition">
+                            {tag}
+                        </a>
+                        {idx < formattedTags.length - 1 && <span class="text-neutral-300 dark:text-neutral-600 font-normal">/</span>}
+                    </>
+                ))}
+            </div>
+        </div>
+    )}
+
     <!-- page views -->
     {slug && (
         <div class="flex items-center gap-1 shrink-0">
@@ -80,25 +99,6 @@ const formattedTags = (tags || []).map((t: string) => t.trim()).filter(Boolean);
                 <Icon name="material-symbols:person" class="text-sm"></Icon>
             </div>
             <span class="text-50 font-medium" id={`page-visitors-${slug}`}>0 人</span>
-        </div>
-    )}
-
-    <!-- tags list -->
-    {formattedTags.length > 0 && (
-        <div class="flex items-center gap-1">
-            <div class="w-6 h-6 rounded-md flex items-center justify-center bg-[var(--btn-regular-bg)] text-[var(--primary)] shrink-0">
-                <Icon name="material-symbols:tag-rounded" class="text-sm"></Icon>
-            </div>
-            <div class="flex flex-wrap items-center gap-1">
-                {formattedTags.map((tag, idx) => (
-                    <>
-                        <a href={getTagUrl(tag)} class="text-50 font-medium hover:text-[var(--primary)] hover:underline transition">
-                            {tag}
-                        </a>
-                        {idx < formattedTags.length - 1 && <span class="text-neutral-300 dark:text-neutral-600 font-normal">/</span>}
-                    </>
-                ))}
-            </div>
         </div>
     )}
 </div>

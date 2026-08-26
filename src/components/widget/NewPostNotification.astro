@@ -4,13 +4,29 @@ import { Icon } from "astro-icon/components";
 ---
 
 <style>
+    #new-post-notification {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        z-index: 50;
+        pointer-events: none;
+    }
+    @media (min-width: 1024px) {
+        #new-post-notification {
+            bottom: 5.5rem;
+            right: auto;
+            left: calc(50% + var(--page-width) / 2 + 1.25rem);
+        }
+    }
+
     #notification-panel {
         position: relative;
         width: 3.75rem;
         height: 3.75rem;
-        border-radius: 50%;
+        border-radius: 1rem;
         overflow: hidden;
         box-sizing: border-box;
+        transform-origin: bottom right;
         transition:
             width 360ms cubic-bezier(0.4, 0, 0.2, 1),
             height 360ms cubic-bezier(0.4, 0, 0.2, 1),
@@ -18,14 +34,31 @@ import { Icon } from "astro-icon/components";
             transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1),
             opacity 260ms ease;
     }
-    #notification-panel.is-open {
-        width: var(--np-open-width, min(20rem, calc(100vw - 2rem)));
-        height: var(--np-open-height, min(70vh, 34rem));
-        border-radius: 1rem;
+
+    @media (min-width: 1024px) {
+        #notification-panel {
+            transform-origin: bottom left;
+        }
     }
+
+    #notification-panel.is-open {
+        width: var(--np-open-width, min(22rem, calc(100vw - 2rem)));
+        height: var(--np-open-height, min(70vh, 34rem));
+        border-radius: 1.25rem;
+        box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.2);
+    }
+    @media (min-width: 1024px) {
+        #notification-panel.is-open {
+            transform: translateX(calc(-100% + 3.75rem));
+        }
+    }
+
     #notification-minimized {
         position: absolute;
         inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         transition: opacity 160ms ease, transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     #notification-content {
@@ -39,7 +72,7 @@ import { Icon } from "astro-icon/components";
     #notification-panel.is-open #notification-minimized {
         opacity: 0;
         pointer-events: none;
-        transform: none;
+        transform: scale(0.8);
     }
     #notification-panel.is-open-content #notification-content {
         opacity: 1;
@@ -48,34 +81,34 @@ import { Icon } from "astro-icon/components";
     }
 </style>
 
-<div id="new-post-notification" class="fixed bottom-4 right-4 z-50 pointer-events-none">
-    <div id="notification-panel" class="pointer-events-auto bg-[var(--card-bg)] border-2 border-[var(--primary)] text-[var(--primary)] shadow-lg transform translate-y-20 opacity-0">
-        <button id="notification-minimized" aria-label="New post notification" class="flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+<div id="new-post-notification" class="pointer-events-none">
+    <div id="notification-panel" class="pointer-events-auto btn-card text-[var(--primary)] transform translate-y-20 opacity-0 relative">
+        <button id="notification-minimized" aria-label="New post notification" class="w-full h-full flex items-center justify-center text-[var(--primary)] hover:scale-105 active:scale-95 transition-transform">
+            <Icon name="material-symbols:notifications-outline-rounded" class="text-2xl mx-auto"></Icon>
         </button>
 
-        <div id="notification-content" class="flex flex-col p-5">
-            <div class="flex items-center justify-between mb-3">
+        <div id="notification-content" class="flex flex-col p-5 bg-[var(--card-bg)] text-left">
+            <div class="flex items-center justify-between mb-3 shrink-0">
                 <div class="flex items-center gap-2 text-[var(--primary)]">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
-                    <h3 class="font-bold text-black dark:text-white">发现新文章</h3>
+                    <Icon name="material-symbols:notifications-rounded" class="text-xl shrink-0" />
+                    <h3 class="font-bold text-black dark:text-white text-base">发现新文章</h3>
                     <a href="/posts/post-diff-guide/#食用方法" class="ml-1 text-xs text-[var(--primary)] hover:underline opacity-80" title="查看食用方法">
-                        <Icon name="material-symbols:help-outline-rounded" size={16} />
+                        <Icon name="material-symbols:help-outline-rounded" class="text-base" />
                     </a>
                 </div>
                 <div class="flex items-center gap-1">
-                    <button id="clear-notification" class="text-black/50 dark:text-white/50 hover:text-red-500 transition-colors p-1 rounded-md hover:bg-red-500/10" title="清空通知">
-                        <Icon name="material-symbols:delete-rounded" size={18} class="mx-auto" />
+                    <button id="clear-notification" class="text-black/50 dark:text-white/50 hover:text-red-500 transition-colors p-1.5 rounded-lg hover:bg-red-500/10" title="清空通知">
+                        <Icon name="material-symbols:delete-rounded" class="text-lg mx-auto" />
                     </button>
-                    <button id="minimize-notification" class="text-black/50 dark:text-white/50 hover:text-[var(--primary)] transition-colors p-1 rounded-md hover:bg-[var(--primary)]/10" title="隐藏">
-                        <Icon name="material-symbols:close-rounded" size={18} class="mx-auto" />
+                    <button id="minimize-notification" class="text-black/50 dark:text-white/50 hover:text-[var(--primary)] transition-colors p-1.5 rounded-lg hover:bg-[var(--primary)]/10" title="隐藏">
+                        <Icon name="material-symbols:close-rounded" class="text-lg mx-auto" />
                     </button>
                 </div>
             </div>
-            <div id="new-post-list" class="text-sm text-black/80 dark:text-white/80 transition-colors space-y-3 flex-1 overflow-y-auto overflow-x-hidden"></div>
+            <div id="new-post-list" class="text-sm text-black/80 dark:text-white/80 transition-colors space-y-3 flex-1 overflow-y-auto overflow-x-hidden hide-scrollbar"></div>
         </div>
     </div>
-    <span id="notification-dot" class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[var(--card-bg)] animate-pulse pointer-events-none transform translate-y-20 opacity-0 scale-0 transition-all duration-260 ease-out"></span>
+    <span id="notification-dot" class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-[var(--card-bg)] animate-pulse pointer-events-none transform translate-y-20 opacity-0 scale-0 transition-all duration-260 ease-out"></span>
 </div>
 
 <script>

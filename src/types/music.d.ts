@@ -9,6 +9,7 @@ export interface Song {
 export interface ParsedLyric {
 	time: number;
 	text: string;
+	translation?: string;
 }
 
 export interface MusicManager {
@@ -24,6 +25,7 @@ export interface MusicManager {
 	showLyrics: boolean;
 	parsedLyrics: ParsedLyric[];
 	currentLyricText: string;
+	currentLyricIndex: number;
 	server: string;
 	type: string;
 	id: string;

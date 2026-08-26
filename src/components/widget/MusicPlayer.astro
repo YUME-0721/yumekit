@@ -16,9 +16,9 @@ if (!music || !music.enable) {
 }
 ---
 
-<div class={className} style={style}>
+<div class:list={[className, "w-full min-h-[178px]"]} style={style}>
     <MusicPlayerSvelte
-        client:only="svelte"
+        client:load
         title={music.title || "音乐"}
         server={music.server || "netease"}
         type={music.type || "playlist"}

@@ -10,13 +10,15 @@ interface Props {
 
 let { headings = [] } = Astro.props;
 
-const maxDepth = siteConfig.toc.depth || 3;
-headings = headings.filter(h => h.depth <= maxDepth);
-
 let minDepth = 10;
 for (const heading of headings) {
 	minDepth = Math.min(minDepth, heading.depth);
 }
+if (minDepth === 10) minDepth = 1;
+
+const configDepth = siteConfig.toc.depth || 3;
+const allowedMaxDepth = minDepth + configDepth - 1;
+headings = headings.filter(h => h.depth <= allowedMaxDepth);
 
 const className = Astro.props.class;
 
@@ -60,11 +62,30 @@ function buildToc(headings: MarkdownHeading[]): TocItem[] {
 const toc = buildToc(headings);
 ---
 {isPostsRoute &&
-<table-of-contents class:list={[className, "group block relative z-0 bg-[var(--float-panel-bg-opaque)] rounded-xl p-2"]}>
+<table-of-contents class:list={[className, "group block relative z-0 bg-[var(--float-panel-bg-opaque)] rounded-xl p-1"]}>
     <TOCList items={toc} />
-    <div id="active-indicator" class:list={[{'hidden': headings.length == 0}, "-z-10 absolute bg-[var(--toc-btn-hover)] left-2 right-2 rounded-xl transition-all " +
-        "group-hover:bg-transparent border-2 border-[var(--toc-btn-hover)] group-hover:border-[var(--toc-btn-active)] border-dashed"]}></div>
 </table-of-contents>}
+
+<style is:global>
+.toc-item a {
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+.toc-item a.visible {
+    color: var(--primary) !important;
+    font-weight: 600 !important;
+    background-color: color-mix(in srgb, var(--primary) 10%, transparent);
+}
+.toc-item a.visible .toc-badge {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+    box-shadow: 0 1px 4px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+.toc-item a.visible .toc-dot {
+    background-color: var(--primary) !important;
+    transform: scale(1.3);
+    box-shadow: 0 0 5px var(--primary);
+}
+</style>
 
 <script>
 class TableOfContents extends HTMLElement {
@@ -76,8 +97,9 @@ class TableOfContents extends HTMLElement {
     headings: HTMLElement[] = [];
     tocEntries: HTMLAnchorElement[] = [];
     active: boolean[] = [];
-    activeIndicator: HTMLElement | null = null;
     ticking = false;
+
+    isHoveringToc = false;
 
     constructor() {
         super();
@@ -86,120 +108,119 @@ class TableOfContents extends HTMLElement {
         );
     };
 
-    markVisibleSection = (entries: IntersectionObserverEntry[]) => {
-        entries.forEach((entry) => {
-            const id = entry.target.getAttribute("id");
-            const idx = id ? this.headingIdxMap.get(id) : undefined;
-            if (idx !== undefined) {
-                this.active[idx] = entry.isIntersecting;
-            }
-
-            if (entry.isIntersecting && this.anchorNavTarget === entry.target) {
-                this.anchorNavTarget = null;
-            }
-        });
-
-        if (!this.active.includes(true)) {
-            this.fallback();
+    handleTocWheel = (e: WheelEvent) => {
+        if (!this.tocEl) return;
+        const maxScroll = this.tocEl.scrollHeight - this.tocEl.clientHeight;
+        if (maxScroll > 0) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.tocEl.scrollTop += e.deltaY;
         }
+    };
+
+    handleTocMouseEnter = () => {
+        this.isHoveringToc = true;
+    };
+
+    handleTocMouseLeave = () => {
+        this.isHoveringToc = false;
+    };
+
+    markVisibleSection = (entries: IntersectionObserverEntry[]) => {
+        if (this.anchorNavTarget) {
+            for (const entry of entries) {
+                if (entry.isIntersecting && this.anchorNavTarget === entry.target) {
+                    this.anchorNavTarget = null;
+                    break;
+                }
+            }
+        }
+        this.fallback();
         this.update();
     };
 
-    updateActiveIndicator = () => {
-        const activeEntries = this.tocEntries.filter(entry => entry.classList.contains(this.visibleClass));
-        if (activeEntries.length === 0) {
-            this.activeIndicator?.setAttribute("style", "display: none;");
-            return;
-        }
-
-        // 寻找在当前 DOM 布局中真正可视的代表性 entry (若子节点被折叠隐藏，则指示器挂载在显示的父级标题上)
-        const visibleActiveEntries = activeEntries.map(entry => {
-            let currentLink: HTMLAnchorElement = entry;
-            let li = currentLink.closest(".toc-item");
-            while (li) {
-                const wrapper = li.querySelector<HTMLElement>(":scope > .toc-sublist-wrapper");
-                if (wrapper && !wrapper.classList.contains("is-expanded")) {
-                    const parentLink = li.querySelector<HTMLAnchorElement>(":scope > div > a");
-                    if (parentLink) {
-                        currentLink = parentLink;
-                    }
-                }
-                const parentLi: HTMLElement | null = li.parentElement?.closest(".toc-item") || null;
-                li = parentLi;
+    toggleActiveHeading = () => {
+        const activeIdx = this.active.indexOf(true);
+        for (let i = 0; i < this.tocEntries.length; i++) {
+            if (i === activeIdx) {
+                this.tocEntries[i].classList.add(this.visibleClass);
+            } else {
+                this.tocEntries[i].classList.remove(this.visibleClass);
             }
-            return currentLink;
-        });
-
-        if (visibleActiveEntries.length === 0) return;
-
-        const topmost = visibleActiveEntries[0];
-        const bottommost = visibleActiveEntries[visibleActiveEntries.length - 1];
-
-        // 基于 getBoundingClientRect 精确计算相对于 table-of-contents 容器的绝对偏移，彻底杜绝任何父级 relative 引起的错位
-        const containerRect = this.getBoundingClientRect();
-        const topmostRect = topmost.getBoundingClientRect();
-        const bottommostRect = bottommost.getBoundingClientRect();
-
-        if (containerRect.height === 0 || topmostRect.height === 0) return;
-
-        const top = topmostRect.top - containerRect.top;
-        const height = bottommostRect.bottom - topmostRect.top;
-
-        this.activeIndicator?.setAttribute(
-            "style",
-            `display: block; top: ${top}px; height: ${height}px;`
-        );
+        }
     };
 
-    toggleActiveHeading = () => {
-        let i = this.active.length - 1;
-        while (i >= 0 && !this.active[i]) {
-            this.tocEntries[i].classList.remove(this.visibleClass);
-            i--;
-        }
-        while (i >= 0 && this.active[i]) {
-            this.tocEntries[i].classList.add(this.visibleClass);
-            i--;
-        }
-        while (i >= 0) {
-            this.tocEntries[i].classList.remove(this.visibleClass);
-            i--;
+    syncAccordionWithActive = () => {
+        const activeIdx = this.active.indexOf(true);
+        if (activeIdx < 0) return;
+        const activeEntry = this.tocEntries[activeIdx];
+        if (!activeEntry) return;
+
+        // 收集当前活跃标题所在的所有祖先 toc-item 节点
+        const activeChainLis = new Set<HTMLElement>();
+        let currLi = activeEntry.closest<HTMLElement>(".toc-item");
+        while (currLi) {
+            activeChainLis.add(currLi);
+            currLi = currLi.parentElement?.closest<HTMLElement>(".toc-item") || null;
         }
 
-        this.updateActiveIndicator();
+        // 遍历所有包含子分支的目录项
+        const allLis = this.querySelectorAll<HTMLElement>(".toc-item");
+        allLis.forEach((li) => {
+            const wrapper = li.querySelector<HTMLElement>(":scope > .toc-sublist-wrapper");
+            const btn = li.querySelector<HTMLElement>(":scope > div > .toc-toggle-btn");
+            if (!wrapper) return;
+
+            const isManualExpanded = li.dataset.manualExpanded === "true";
+            const isManualCollapsed = li.dataset.manualCollapsed === "true";
+
+            if (activeChainLis.has(li)) {
+                // 当前正读到该分支：自动平滑展开
+                if (!isManualCollapsed) {
+                    wrapper.classList.add("is-expanded");
+                    btn?.classList.add("is-expanded");
+                }
+            } else {
+                // 其他非活跃分支：自动平滑收起（保留用户明确手动展开的项）
+                if (!isManualExpanded) {
+                    wrapper.classList.remove("is-expanded");
+                    btn?.classList.remove("is-expanded");
+                    delete li.dataset.manualCollapsed;
+                }
+            }
+        });
     };
 
     scrollToActiveHeading = () => {
-        if (this.anchorNavTarget || !this.tocEl) return;
-        const activeHeading =
-            document.querySelectorAll<HTMLDivElement>(`#toc-sidebar .${this.visibleClass}, #toc .${this.visibleClass}`);
-        if (!activeHeading.length) return;
+        if (this.anchorNavTarget || !this.tocEl || this.isHoveringToc) return;
+        const activeEntry = this.tocEntries.find(entry => entry.classList.contains(this.visibleClass));
+        if (!activeEntry) return;
 
-        const topmost = activeHeading[0];
-        const bottommost = activeHeading[activeHeading.length - 1];
-        const tocHeight = this.tocEl.clientHeight;
+        const containerRect = this.tocEl.getBoundingClientRect();
+        const targetRect = activeEntry.getBoundingClientRect();
 
-        let top;
-        if (bottommost.getBoundingClientRect().bottom -
-            topmost.getBoundingClientRect().top < 0.9 * tocHeight)
-            top = topmost.offsetTop - 32;
-        else
-            top = bottommost.offsetTop - tocHeight * 0.8;
+        if (containerRect.height === 0 || targetRect.height === 0) return;
 
-        this.tocEl.scrollTo({
-            top,
-            left: 0,
-            behavior: "smooth",
-        });
+        const currentScrollTop = this.tocEl.scrollTop;
+        const targetTopRelative = targetRect.top - containerRect.top;
+        const targetBottomRelative = targetRect.bottom - containerRect.top;
+        const containerHeight = this.tocEl.clientHeight;
+
+        // 如果高亮项超出舒适的可视区域，立即平滑居中滚动
+        if (targetTopRelative < 40 || targetBottomRelative > containerHeight - 40) {
+            const desiredScrollTop = currentScrollTop + targetTopRelative - (containerHeight / 2) + (targetRect.height / 2);
+            this.tocEl.scrollTo({
+                top: Math.max(0, desiredScrollTop),
+                behavior: "smooth",
+            });
+        }
     };
 
     update = () => {
         requestAnimationFrame(() => {
             this.toggleActiveHeading();
+            this.syncAccordionWithActive();
             this.scrollToActiveHeading();
-            setTimeout(() => {
-                this.updateActiveIndicator();
-            }, 320);
         });
     };
 
@@ -212,15 +233,18 @@ class TableOfContents extends HTMLElement {
         if (isExpanded) {
             wrapper.classList.remove("is-expanded");
             btn?.classList.remove("is-expanded");
+            li.dataset.manualCollapsed = "true";
+            delete li.dataset.manualExpanded;
         } else {
             wrapper.classList.add("is-expanded");
             btn?.classList.add("is-expanded");
+            li.dataset.manualExpanded = "true";
+            delete li.dataset.manualCollapsed;
         }
 
-        this.updateActiveIndicator();
         setTimeout(() => {
-            this.updateActiveIndicator();
-        }, 320);
+            this.scrollToActiveHeading();
+        }, 150);
     };
 
     fallback = () => {
@@ -229,7 +253,7 @@ class TableOfContents extends HTMLElement {
         let activeIdx = 0;
         for (let i = 0; i < this.headings.length; i++) {
             const top = this.headings[i].getBoundingClientRect().top;
-            if (top <= 140) {
+            if (top <= 160) {
                 activeIdx = i;
             } else {
                 break;
@@ -245,16 +269,21 @@ class TableOfContents extends HTMLElement {
         let activeIdx = 0;
         for (let i = 0; i < this.headings.length; i++) {
             const rect = this.headings[i].getBoundingClientRect();
-            if (rect.top <= 140) {
+            if (rect.top <= 160) {
                 activeIdx = i;
             } else {
                 break;
             }
         }
 
-        this.active.fill(false);
-        this.active[activeIdx] = true;
-        this.toggleActiveHeading();
+        const prevActive = this.active.indexOf(true);
+        if (prevActive !== activeIdx) {
+            this.active.fill(false);
+            this.active[activeIdx] = true;
+            this.toggleActiveHeading();
+            this.syncAccordionWithActive();
+            this.scrollToActiveHeading();
+        }
     };
 
     onScroll = () => {
@@ -265,6 +294,43 @@ class TableOfContents extends HTMLElement {
             });
             this.ticking = true;
         }
+    };
+
+    smoothScrollToTarget = (targetEl: HTMLElement) => {
+        const headerOffset = 80; // 顶部导航栏避让间距
+        const elementPosition = targetEl.getBoundingClientRect().top;
+        const offsetPosition = Math.max(0, elementPosition + window.scrollY - headerOffset);
+        const startY = window.scrollY || window.pageYOffset;
+        const diff = offsetPosition - startY;
+
+        if (Math.abs(diff) < 2) {
+            this.anchorNavTarget = null;
+            return;
+        }
+
+        // 根据滚动距离动态计算滑动时长（380ms ~ 700ms），模拟手机长页惯性滑动质感
+        const duration = Math.min(700, Math.max(380, Math.abs(diff) * 0.32));
+        const startTime = performance.now();
+
+        // 丝滑 EaseInOutCubic 阻尼缓动曲线：起步平顺、中间疾驰、结尾优雅减速
+        const easeInOutCubic = (t: number) =>
+            t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+        const animateScroll = (currentTime: number) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeProgress = easeInOutCubic(progress);
+
+            window.scrollTo(0, startY + diff * easeProgress);
+
+            if (progress < 1) {
+                requestAnimationFrame(animateScroll);
+            } else {
+                this.anchorNavTarget = null;
+            }
+        };
+
+        requestAnimationFrame(animateScroll);
     };
 
     handleTocClick = (event: MouseEvent) => {
@@ -283,18 +349,29 @@ class TableOfContents extends HTMLElement {
             return;
         }
 
-        // 点击锚点标题链接
+        // 点击锚点标题链接：阻止原生瞬间闪跳，开启手机般长条平滑滑动
         const anchor = target.closest<HTMLAnchorElement>("a[href^='#']");
         if (anchor) {
+            event.preventDefault();
+            event.stopPropagation();
+
             const id = decodeURIComponent(anchor.hash?.substring(1));
             const idx = this.headingIdxMap.get(id);
-            if (idx !== undefined) {
-                this.anchorNavTarget = this.headings[idx];
+            if (idx !== undefined && this.headings[idx]) {
+                const targetHeading = this.headings[idx];
+                this.anchorNavTarget = targetHeading;
+
+                if (window.location.hash !== anchor.hash) {
+                    history.pushState(null, "", anchor.hash);
+                }
+
                 this.active.fill(false);
                 this.active[idx] = true;
                 this.toggleActiveHeading();
-            } else {
-                this.anchorNavTarget = null;
+                this.syncAccordionWithActive();
+                this.scrollToActiveHeading();
+
+                this.smoothScrollToTarget(targetHeading);
             }
         }
     };
@@ -307,14 +384,19 @@ class TableOfContents extends HTMLElement {
     };
 
     init() {
-        this.tocEl = document.getElementById("toc-sidebar") || document.getElementById("toc-inner-wrapper");
+        this.tocEl = document.getElementById("toc-sidebar-scroll") || document.getElementById("toc-sidebar") || document.getElementById("toc-inner-wrapper");
 
         if (!this.tocEl) return;
 
+        this.tocEl.removeEventListener("wheel", this.handleTocWheel as any);
+        this.tocEl.addEventListener("wheel", this.handleTocWheel as any, { passive: false });
+        this.tocEl.removeEventListener("mouseenter", this.handleTocMouseEnter);
+        this.tocEl.addEventListener("mouseenter", this.handleTocMouseEnter);
+        this.tocEl.removeEventListener("mouseleave", this.handleTocMouseLeave);
+        this.tocEl.addEventListener("mouseleave", this.handleTocMouseLeave);
+
         this.tocEl.removeEventListener("click", this.handleTocClick as any);
         this.tocEl.addEventListener("click", this.handleTocClick as any);
-
-        this.activeIndicator = document.getElementById("active-indicator");
 
         this.tocEntries = Array.from(
             document.querySelectorAll<HTMLAnchorElement>("#toc-sidebar a[href^='#'], #toc a[href^='#']")
@@ -353,6 +435,9 @@ class TableOfContents extends HTMLElement {
         this.observer.disconnect();
         window.removeEventListener("scroll", this.onScroll);
         if (this.tocEl) {
+            this.tocEl.removeEventListener("wheel", this.handleTocWheel as any);
+            this.tocEl.removeEventListener("mouseenter", this.handleTocMouseEnter);
+            this.tocEl.removeEventListener("mouseleave", this.handleTocMouseLeave);
             this.tocEl.removeEventListener("click", this.handleTocClick as any);
         }
     };

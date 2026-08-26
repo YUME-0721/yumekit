@@ -14,8 +14,15 @@ const className = Astro.props.class;
 const { headings = [] } = Astro.props;
 
 const tocEnabled = siteConfig.toc.enable;
-const maxDepth = siteConfig.toc.depth || 3;
-const filteredHeadings = headings.filter((h) => h.depth <= maxDepth);
+let minDepth = 10;
+for (const h of headings) {
+	minDepth = Math.min(minDepth, h.depth);
+}
+if (minDepth === 10) minDepth = 1;
+
+const configDepth = siteConfig.toc.depth || 3;
+const allowedMaxDepth = minDepth + configDepth - 1;
+const filteredHeadings = headings.filter((h) => h.depth <= allowedMaxDepth);
 
 const hasTOC = tocEnabled && filteredHeadings.length > 0;
 const hasAnnouncement = siteConfig.announcement?.enable ?? false;
@@ -30,18 +37,22 @@ const hasMusic = siteConfig.music?.enable ?? false;
         </div>
     )}
 
-    <!-- 音乐播放器与文章目录：吸附在屏幕顶部 top-4 保持固定 -->
-    <div id="right-sidebar-sticky" class="transition-all duration-300 flex flex-col w-full gap-4 sticky top-4">
-        {hasMusic && <MusicPlayer class="onload-animation" style="animation-delay: 150ms" />}
+    <!-- 音乐播放器与文章目录：吸附在屏幕顶部 top-4 保持固定，限制一屏内最大高度并弹性分配空间 -->
+    <div id="right-sidebar-sticky" class="transition-all duration-300 flex flex-col w-full gap-4 sticky top-4 max-h-[calc(100vh-2rem)]">
+        {hasMusic && <MusicPlayer class="onload-animation shrink-0" style="animation-delay: 150ms" />}
 
-        <!-- 文章目录动态插槽（Swup 容器 #toc-container，置于播放器下方） -->
-        <div id="toc-container" class="transition-swup-fade w-full">
+        <!-- 文章目录动态插槽（Swup 容器 #toc-container，自适应占用播放器下方的剩余可用高度） -->
+        <div id="toc-container" class="transition-swup-fade w-full flex-1 min-h-0 flex flex-col">
             {hasTOC && (
-                <div id="toc-sidebar" class="card-base p-4 max-h-[calc(100vh-22rem)] overflow-y-auto hide-scrollbar onload-animation">
-                    <div class="text-sm font-medium text-black/60 dark:text-white/60 mb-2 flex items-center justify-between">
+                <div id="toc-sidebar" class="card-base p-4 w-full flex-1 min-h-0 onload-animation flex flex-col overflow-hidden">
+                    <!-- 目录固定头部：始终常驻置顶显示，绝不随列表滚动 -->
+                    <div class="text-sm font-medium text-black/60 dark:text-white/60 mb-2 flex items-center justify-between shrink-0 select-none">
                         <span>目录</span>
                     </div>
-                    <TOC headings={filteredHeadings}></TOC>
+                    <!-- 目录独立滚动容器 -->
+                    <div id="toc-sidebar-scroll" class="flex-1 min-h-0 overflow-y-auto hide-scrollbar scroll-smooth overscroll-contain">
+                        <TOC headings={filteredHeadings}></TOC>
+                    </div>
                 </div>
             )}
         </div>

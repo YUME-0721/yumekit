@@ -3,7 +3,7 @@ import Icon from "@iconify/svelte";
 import { onDestroy, onMount } from "svelte";
 import type { Song, ParsedLyric, MusicManager } from "../../types/music";
 
-export let title = "音乐盒";
+export let title = "音乐";
 export let server = "netease";
 export let type = "playlist";
 export let id = "914046086";
@@ -34,9 +34,22 @@ let showVolumeSlider = false;
 let loopMode: "order" | "random" | "single" = "order";
 let showPlaylist = false;
 let showLyrics = false;
+let parsedLyrics: ParsedLyric[] = [];
 let currentLyricText = "";
+let currentLyricIndex = -1;
 
-// 组件初始化瞬间立即同步全局单例已有状态，彻底消除组件挂载第一帧的状态闪烁
+// 歌词滚动与滚动条 DOM 引用及状态
+let lyricsScrollEl: HTMLElement | null = null;
+let trackEl: HTMLElement | null = null;
+let thumbTop = 0;
+let thumbHeight = 24;
+let isDraggingThumb = false;
+let startDragY = 0;
+let startDragScrollTop = 0;
+let isUserInteracting = false;
+let userScrollTimeout: any = null;
+
+// 组件初始化瞬间立即同步全局单例已有状态
 const initialGlobalMgr = getGlobalMusicManager();
 if (initialGlobalMgr) {
 	playlist = initialGlobalMgr.playlist;
@@ -47,8 +60,10 @@ if (initialGlobalMgr) {
 	volume = initialGlobalMgr.volume;
 	isMuted = initialGlobalMgr.isMuted;
 	loopMode = initialGlobalMgr.loopMode;
-	showLyrics = initialGlobalMgr.showLyrics;
-	currentLyricText = initialGlobalMgr.currentLyricText;
+	showLyrics = initialGlobalMgr.showLyrics ?? false;
+	parsedLyrics = initialGlobalMgr.parsedLyrics || [];
+	currentLyricText = initialGlobalMgr.currentLyricText || "";
+	currentLyricIndex = initialGlobalMgr.currentLyricIndex ?? -1;
 }
 
 const CACHE_KEY = `fuwari_music_cache_${server}_${type}_${id}`;
@@ -58,7 +73,6 @@ let lastSavedTime = 0;
 function savePlayerState(mgr: MusicManager) {
 	if (typeof window === "undefined" || !mgr) return;
 	const now = Date.now();
-	// 如果在播放中且当前时间变化小于 1.5 秒，则节流跳过存储
 	if (mgr.isPlaying && Math.abs(mgr.currentTime - lastSavedTime) < 1.5) {
 		return;
 	}
@@ -70,6 +84,7 @@ function savePlayerState(mgr: MusicManager) {
 			volume: mgr.volume,
 			isMuted: mgr.isMuted,
 			loopMode: mgr.loopMode,
+			showLyrics: mgr.showLyrics,
 			timestamp: now,
 		};
 		localStorage.setItem(STATE_CACHE_KEY, JSON.stringify(state));
@@ -115,25 +130,65 @@ function preloadImage(url: string) {
 	}
 }
 
+/**
+ * 增强型歌词解析：支持双语翻译合并与单行括号翻译解析
+ */
 function parseLrc(lrcText?: string): ParsedLyric[] {
 	if (!lrcText) return [];
 	const lines = lrcText.split("\n");
-	const result: ParsedLyric[] = [];
+	const rawItems: { time: number; text: string }[] = [];
 	const timeReg = /\[(\d{2}):(\d{2})(?:\.(\d{2,3}))?\]/g;
 
 	for (const line of lines) {
-		const matches = [...line.matchAll(timeReg)];
-		const text = line.replace(timeReg, "").trim();
+		const trimmedLine = line.trim();
+		if (!trimmedLine) continue;
+		// 过滤元数据标签
+		if (/^\[(ti|ar|al|by|offset|length):.*\]$/i.test(trimmedLine)) continue;
+
+		const matches = [...trimmedLine.matchAll(timeReg)];
+		const text = trimmedLine.replace(timeReg, "").trim();
 		if (!text) continue;
 
 		for (const m of matches) {
 			const min = parseInt(m[1], 10);
 			const sec = parseInt(m[2], 10);
 			const ms = m[3] ? parseInt(m[3], 10) / (m[3].length === 2 ? 100 : 1000) : 0;
-			result.push({ time: min * 60 + sec + ms, text });
+			rawItems.push({ time: min * 60 + sec + ms, text });
 		}
 	}
-	return result.sort((a, b) => a.time - b.time);
+
+	rawItems.sort((a, b) => a.time - b.time);
+
+	// 合并相同或极相近时间戳的双语翻译
+	const merged: ParsedLyric[] = [];
+	for (const item of rawItems) {
+		const last = merged[merged.length - 1];
+		if (last && Math.abs(last.time - item.time) < 0.25) {
+			if (!last.translation) {
+				last.translation = item.text.startsWith("(") || item.text.startsWith("（")
+					? item.text
+					: `(${item.text})`;
+			} else {
+				last.translation += ` ${item.text}`;
+			}
+		} else {
+			// 单行内若已有括号翻译（如: Half asleep (半睡半醒)），则优雅拆分为主句与翻译副句
+			const parenMatch = item.text.match(/^(.*?)[\s]*[(\（]([^\)\）]+)[)\）]$/);
+			if (parenMatch && parenMatch[1].trim() && parenMatch[2].trim()) {
+				merged.push({
+					time: item.time,
+					text: parenMatch[1].trim(),
+					translation: `(${parenMatch[2].trim()})`,
+				});
+			} else {
+				merged.push({
+					time: item.time,
+					text: item.text,
+				});
+			}
+		}
+	}
+	return merged;
 }
 
 function getOrCreateGlobalManager(): MusicManager {
@@ -168,9 +223,10 @@ function getOrCreateGlobalManager(): MusicManager {
 		volume: initVolume,
 		isMuted: initMuted,
 		loopMode: cachedState?.loopMode || "order",
-		showLyrics: false,
+		showLyrics: cachedState?.showLyrics ?? false,
 		parsedLyrics: [],
 		currentLyricText: "",
+		currentLyricIndex: -1,
 		server,
 		type,
 		id: String(id),
@@ -186,6 +242,7 @@ function getOrCreateGlobalManager(): MusicManager {
 			if (!lrcSource) {
 				this.parsedLyrics = [];
 				this.currentLyricText = "";
+				this.currentLyricIndex = -1;
 				this.notify();
 				return;
 			}
@@ -195,6 +252,7 @@ function getOrCreateGlobalManager(): MusicManager {
 					if (res.ok) {
 						const text = await res.text();
 						this.parsedLyrics = parseLrc(text);
+						this.currentLyricIndex = -1;
 						this.notify();
 						return;
 					}
@@ -203,6 +261,7 @@ function getOrCreateGlobalManager(): MusicManager {
 				}
 			}
 			this.parsedLyrics = parseLrc(lrcSource);
+			this.currentLyricIndex = -1;
 			this.notify();
 		},
 		loadSong(index: number, playNow = false, forceReload = false) {
@@ -217,7 +276,6 @@ function getOrCreateGlobalManager(): MusicManager {
 				: song.url;
 
 			const hasValidAudio = this.audio.src && this.audio.src !== "" && this.audio.src !== window.location.href;
-			// 只要非强制重载且当前歌曲索引相同且已有有效音频，则绝对不打断已有音频流！
 			if (!forceReload && hasValidAudio && this.currentIndex === targetIndex) {
 				if (playNow && this.audio.paused) {
 					this.audio.play().then(() => {
@@ -237,6 +295,7 @@ function getOrCreateGlobalManager(): MusicManager {
 			this.audio.load();
 			this.loadLyrics(song.lrc);
 			this.currentLyricText = "";
+			this.currentLyricIndex = -1;
 			this.currentTime = 0;
 			this.notify();
 
@@ -362,7 +421,6 @@ function getOrCreateGlobalManager(): MusicManager {
 
 			const restorePlayback = (dataLength: number) => {
 				const hasValidAudio = this.audio && this.audio.src && this.audio.src !== "" && this.audio.src !== window.location.href;
-				// 如果音频已在播放中，绝对不要打断！
 				if (hasValidAudio && !this.audio.paused) {
 					this.isPlaying = true;
 					this.notify();
@@ -420,17 +478,22 @@ function getOrCreateGlobalManager(): MusicManager {
 		},
 	};
 
-	// Bind persistent event listeners to global Audio
 	audio.addEventListener("timeupdate", () => {
 		manager.currentTime = audio.currentTime;
 		manager.duration = audio.duration || 0;
 
 		if (manager.parsedLyrics.length > 0) {
-			for (let i = manager.parsedLyrics.length - 1; i >= 0; i--) {
+			let activeIdx = -1;
+			for (let i = 0; i < manager.parsedLyrics.length; i++) {
 				if (manager.currentTime >= manager.parsedLyrics[i].time) {
-					manager.currentLyricText = manager.parsedLyrics[i].text;
+					activeIdx = i;
+				} else {
 					break;
 				}
+			}
+			if (activeIdx !== manager.currentLyricIndex) {
+				manager.currentLyricIndex = activeIdx;
+				manager.currentLyricText = activeIdx >= 0 ? manager.parsedLyrics[activeIdx].text : "";
 			}
 		}
 		manager.notify();
@@ -498,10 +561,124 @@ function getOrCreateGlobalManager(): MusicManager {
 
 let syncCallback: () => void;
 
+function markUserInteraction() {
+	isUserInteracting = true;
+	if (userScrollTimeout) clearTimeout(userScrollTimeout);
+	userScrollTimeout = setTimeout(() => {
+		isUserInteracting = false;
+		scrollToActiveLyric(true);
+	}, 2600);
+}
+
+function scrollToActiveLyric(smooth = true) {
+	if (!lyricsScrollEl || isUserInteracting || currentLyricIndex < 0) return;
+	const activeEl = lyricsScrollEl.querySelector(`[data-lyric-idx="${currentLyricIndex}"]`) as HTMLElement;
+	if (!activeEl) return;
+
+	const targetTop = activeEl.offsetTop - (lyricsScrollEl.clientHeight / 2) + (activeEl.clientHeight / 2);
+	lyricsScrollEl.scrollTo({
+		top: Math.max(0, targetTop),
+		behavior: smooth ? "smooth" : "auto",
+	});
+}
+
+function handleLyricsScroll() {
+	if (!lyricsScrollEl) return;
+	const { scrollTop, scrollHeight, clientHeight } = lyricsScrollEl;
+	const maxScroll = scrollHeight - clientHeight;
+	if (maxScroll <= 0) {
+		thumbTop = 0;
+		thumbHeight = 100;
+		return;
+	}
+	const heightPercent = Math.max(20, Math.min(65, (clientHeight / scrollHeight) * 100));
+	thumbHeight = heightPercent;
+	const scrollRatio = scrollTop / maxScroll;
+	thumbTop = scrollRatio * (100 - thumbHeight);
+}
+
+function handleScrollUp() {
+	markUserInteraction();
+	if (lyricsScrollEl) {
+		lyricsScrollEl.scrollBy({ top: -45, behavior: "smooth" });
+	}
+}
+
+function handleScrollDown() {
+	markUserInteraction();
+	if (lyricsScrollEl) {
+		lyricsScrollEl.scrollBy({ top: 45, behavior: "smooth" });
+	}
+}
+
+function handleTrackClick(e: MouseEvent) {
+	if (!trackEl || !lyricsScrollEl || isDraggingThumb) return;
+	const rect = trackEl.getBoundingClientRect();
+	const clickRatio = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+	const maxScroll = lyricsScrollEl.scrollHeight - lyricsScrollEl.clientHeight;
+	lyricsScrollEl.scrollTo({
+		top: clickRatio * maxScroll,
+		behavior: "smooth",
+	});
+	markUserInteraction();
+}
+
+function handleThumbMouseDown(e: MouseEvent) {
+	e.stopPropagation();
+	e.preventDefault();
+	isDraggingThumb = true;
+	startDragY = e.clientY;
+	if (lyricsScrollEl) {
+		startDragScrollTop = lyricsScrollEl.scrollTop;
+	}
+	markUserInteraction();
+
+	const onMouseMove = (moveEvent: MouseEvent) => {
+		if (!isDraggingThumb || !lyricsScrollEl || !trackEl) return;
+		const deltaY = moveEvent.clientY - startDragY;
+		const trackHeight = trackEl.clientHeight;
+		const maxScroll = lyricsScrollEl.scrollHeight - lyricsScrollEl.clientHeight;
+		if (trackHeight <= 0 || maxScroll <= 0) return;
+
+		const effectiveTrackHeight = trackHeight * (1 - thumbHeight / 100);
+		const scrollDelta = (deltaY / effectiveTrackHeight) * maxScroll;
+		lyricsScrollEl.scrollTop = Math.max(0, Math.min(maxScroll, startDragScrollTop + scrollDelta));
+		markUserInteraction();
+	};
+
+	const onMouseUp = () => {
+		isDraggingThumb = false;
+		window.removeEventListener("mousemove", onMouseMove);
+		window.removeEventListener("mouseup", onMouseUp);
+	};
+
+	window.addEventListener("mousemove", onMouseMove);
+	window.addEventListener("mouseup", onMouseUp);
+}
+
+function handleLyricClick(time: number) {
+	const mgr = getGlobalMusicManager();
+	if (mgr) {
+		mgr.seek(time);
+		if (!mgr.isPlaying) {
+			mgr.togglePlay();
+		}
+	}
+	isUserInteracting = false;
+	setTimeout(() => scrollToActiveLyric(true), 50);
+}
+
+$: if (currentLyricIndex !== undefined && showLyrics) {
+	// 在当前歌词索引变化时自动居中
+	setTimeout(() => {
+		scrollToActiveLyric(true);
+		handleLyricsScroll();
+	}, 20);
+}
+
 onMount(() => {
 	const mgr = getOrCreateGlobalManager();
 
-	// Sync current state to local component
 	const syncState = () => {
 		playlist = mgr.playlist;
 		currentIndex = mgr.currentIndex;
@@ -511,15 +688,16 @@ onMount(() => {
 		volume = mgr.volume;
 		isMuted = mgr.isMuted;
 		loopMode = mgr.loopMode;
-		showLyrics = mgr.showLyrics;
-		currentLyricText = mgr.currentLyricText;
+		showLyrics = mgr.showLyrics ?? false;
+		parsedLyrics = mgr.parsedLyrics || [];
+		currentLyricText = mgr.currentLyricText || "";
+		currentLyricIndex = mgr.currentLyricIndex ?? -1;
 	};
 
 	syncCallback = syncState;
 	mgr.listeners.add(syncCallback);
 	syncState();
 
-	// 只有当全局尚未加载过歌单时才拉取，切页过程绝不重复触发 fetchPlaylist！
 	const isPlaylistLoaded = Array.isArray(mgr.playlist) && mgr.playlist.length > 0;
 	if (!isPlaylistLoaded) {
 		mgr.server = server;
@@ -527,12 +705,20 @@ onMount(() => {
 		mgr.id = String(id);
 		mgr.fetchPlaylist(server, type, String(id), autoPlay, CACHE_KEY);
 	}
+
+	setTimeout(() => {
+		scrollToActiveLyric(false);
+		handleLyricsScroll();
+	}, 150);
 });
 
 onDestroy(() => {
 	const mgr = getGlobalMusicManager();
 	if (mgr && syncCallback) {
 		mgr.listeners.delete(syncCallback);
+	}
+	if (userScrollTimeout) {
+		clearTimeout(userScrollTimeout);
 	}
 });
 
@@ -554,6 +740,10 @@ function handleLoopToggle() {
 
 function handleLyricsToggle() {
 	getGlobalMusicManager()?.toggleLyrics();
+	setTimeout(() => {
+		scrollToActiveLyric(false);
+		handleLyricsScroll();
+	}, 60);
 }
 
 function handleSeek(e: MouseEvent) {
@@ -585,36 +775,36 @@ function handleSelectSong(idx: number) {
 }
 </script>
 
-<div class="card-base p-3.5 w-full select-none relative overflow-hidden transition-all duration-300">
-    <!-- Header Title & Quick Action Icons -->
-    <div class="flex items-center justify-between mb-2.5">
-        <div class="flex items-center gap-1.5 font-bold text-[15px] text-neutral-900 dark:text-neutral-100">
-            <Icon icon="material-symbols:music-note-rounded" class="text-base text-[var(--primary)] shrink-0" />
+<div class="card-base p-4 w-full select-none relative overflow-hidden transition-all duration-300">
+    <!-- Header Title & Quick Action Icons (对齐图2橙色竖条与加粗标题) -->
+    <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2 font-bold text-[16px] text-neutral-900 dark:text-neutral-100 tracking-wide">
+            <span class="w-1.5 h-4.5 rounded-full bg-[var(--primary)] shrink-0 inline-block shadow-sm"></span>
             <span>{title}</span>
         </div>
 
-        <div class="flex items-center gap-1.5 text-neutral-400 dark:text-neutral-500">
-            <!-- Lyrics Toggle -->
+        <div class="flex items-center gap-1 text-neutral-400 dark:text-neutral-500">
+            <!-- Lyrics Toggle Button -->
             <button
                 on:click={handleLyricsToggle}
-                class="p-1 rounded-md hover:text-[var(--primary)] hover:bg-black/5 dark:hover:bg-white/5 transition"
-                title={showLyrics ? "隐藏歌词" : "显示歌词"}
+                class="p-1.5 rounded-lg hover:text-[var(--primary)] hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center {showLyrics ? 'text-[var(--primary)]' : ''}"
+                title={showLyrics ? "折叠歌词" : "展开歌词"}
             >
-                <Icon icon={showLyrics ? "material-symbols:subtitles-rounded" : "material-symbols:subtitles-off-outline-rounded"} class="text-base {showLyrics ? 'text-[var(--primary)]' : ''}" />
+                <Icon icon="material-symbols:subtitles-rounded" class="text-lg" />
             </button>
 
-            <!-- Volume Icon & Expandable Slider Button -->
+            <!-- Volume Button with Flyout Slider -->
             <div class="relative flex items-center">
                 <button
                     on:click={() => (showVolumeSlider = !showVolumeSlider)}
-                    class="p-1 rounded-md hover:text-[var(--primary)] hover:bg-black/5 dark:hover:bg-white/5 transition"
+                    class="p-1.5 rounded-lg hover:text-[var(--primary)] hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center justify-center {showVolumeSlider ? 'text-[var(--primary)]' : ''}"
                     title="调节音量"
                 >
-                    <Icon icon={isMuted || volume === 0 ? "material-symbols:volume-off-rounded" : "material-symbols:volume-up-rounded"} class="text-base {showVolumeSlider ? 'text-[var(--primary)]' : ''}" />
+                    <Icon icon={isMuted || volume === 0 ? "material-symbols:volume-off-rounded" : "material-symbols:volume-up-rounded"} class="text-lg" />
                 </button>
 
                 {#if showVolumeSlider}
-                    <div class="absolute right-0 top-7 z-30 p-2 rounded-xl bg-[var(--float-panel-bg-opaque)] border border-black/10 dark:border-white/10 shadow-lg flex items-center gap-2 animate-fade-in backdrop-blur-md">
+                    <div class="absolute right-0 top-8 z-30 p-2.5 rounded-xl bg-[var(--float-panel-bg-opaque)] border border-black/10 dark:border-white/10 shadow-xl flex items-center gap-2 animate-fade-in backdrop-blur-md">
                         <button on:click={handleMuteToggle} class="text-neutral-400 hover:text-[var(--primary)] transition">
                             <Icon icon={isMuted ? "material-symbols:volume-off-rounded" : "material-symbols:volume-up-rounded"} class="text-sm" />
                         </button>
@@ -633,131 +823,218 @@ function handleSelectSong(idx: number) {
         </div>
     </div>
 
-    <!-- Song Information Row -->
-    <div class="flex items-center gap-3">
-        <!-- Rotating Album Disc (全局单例常驻，切页无缝旋转) -->
-        <div class="relative w-12 h-12 shrink-0 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden shadow-inner">
+    <!-- Song Information Row (对齐图2黑胶唱片、歌曲歌手及音量时间状态) -->
+    <div class="flex items-center gap-3.5 my-1">
+        <!-- Rotating Vinyl Disc Cover -->
+        <div class="relative w-13 h-13 shrink-0 bg-black/10 dark:bg-black/30 rounded-full overflow-hidden shadow-md ring-1 ring-black/10 dark:ring-white/15">
             <img
                 src={getOptimizedCover(currentSong.pic)}
                 alt={currentSong.title}
-                width="48"
-                height="48"
+                width="52"
+                height="52"
                 loading="eager"
                 decoding="async"
                 fetchpriority="high"
-                class="w-12 h-12 rounded-full object-cover shadow-sm border border-black/10 dark:border-white/15 {isPlaying ? 'animate-spin-slow' : ''}"
+                class="w-13 h-13 rounded-full object-cover shadow-sm {isPlaying ? 'animate-spin-slow' : ''}"
             />
-            <div class="absolute inset-0 m-auto w-2.5 h-2.5 rounded-full bg-neutral-900 border border-neutral-700 pointer-events-none"></div>
+            <!-- Center Vinyl Spindle Hole -->
+            <div class="absolute inset-0 m-auto w-3 h-3 rounded-full bg-neutral-900 border-2 border-neutral-700 pointer-events-none shadow-inner"></div>
         </div>
 
-        <!-- Song Title & Artist -->
-        <div class="flex-1 min-w-0 flex flex-col justify-center">
-            <div class="font-bold text-[14px] leading-tight text-neutral-800 dark:text-neutral-100 truncate" title={currentSong.title}>
-                {currentSong.title}
+        <!-- Song Title & Artist & Time/Volume Row -->
+        <div class="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
+            <div class="flex items-center justify-between gap-1">
+                <span class="font-bold text-[15px] leading-tight text-neutral-900 dark:text-neutral-100 truncate" title={currentSong.title}>
+                    {currentSong.title}
+                </span>
+                <button
+                    on:click={handleLyricsToggle}
+                    class="px-1.5 py-0.5 rounded text-[10px] font-mono border transition shrink-0 select-none {showLyrics ? 'text-white bg-[var(--primary)] border-[var(--primary)] shadow-sm' : 'text-[var(--primary)] border-[var(--primary)]/30 hover:bg-[var(--primary)]/10'}"
+                    title={showLyrics ? "折叠歌词" : "展开歌词"}
+                >
+                    LRC
+                </button>
             </div>
-            <div class="text-[11.5px] text-neutral-500 dark:text-neutral-400 truncate mt-0.5" title={currentSong.author}>
+            <div class="text-[12px] text-neutral-500 dark:text-neutral-400 truncate" title={currentSong.author}>
                 {currentSong.author}
             </div>
-        </div>
-
-        <!-- Time Badge -->
-        <div class="text-[11px] font-mono text-neutral-400 dark:text-neutral-500 tabular-nums shrink-0 text-right">
-            {formatTime(currentTime)} / {formatTime(duration)}
+            <div class="flex items-center justify-between text-[11px] font-mono text-neutral-400 dark:text-neutral-500 tabular-nums mt-0.5">
+                <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
+                <div class="flex items-center gap-1.5 text-neutral-400">
+                    <Icon icon="material-symbols:volume-up-rounded" class="text-xs" />
+                    <div class="w-10 h-1 bg-black/10 dark:bg-white/15 rounded-full overflow-hidden">
+                        <div class="h-full bg-[var(--primary)] rounded-full" style="width: {isMuted ? 0 : volume * 100}%"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
-    <!-- Scrolling Lyrics Popover -->
-    {#if showLyrics && currentLyricText}
-        <div class="mt-2 px-2.5 py-1 rounded-lg bg-[var(--float-panel-bg-opaque)] text-center text-xs font-medium text-[var(--primary)] border border-[var(--primary)]/20 truncate animate-fade-in">
-            {currentLyricText}
-        </div>
-    {/if}
 
     <!-- Interactive Progress Scrub Bar -->
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
-        class="w-full h-1.5 hover:h-2 bg-black/10 dark:bg-white/10 rounded-full cursor-pointer relative overflow-hidden transition-all my-2.5"
+        class="w-full h-1.5 hover:h-2.5 bg-black/10 dark:bg-white/10 rounded-full cursor-pointer relative overflow-hidden transition-all my-3"
         on:click={handleSeek}
         title="点击跳转播放进度"
     >
         <div
-            class="h-full bg-[var(--primary)] rounded-full transition-all duration-100"
+            class="h-full bg-[var(--primary)] rounded-full transition-all duration-100 relative"
             style="width: {progressPercent}%"
         ></div>
     </div>
 
-    <!-- Bottom Functional Control Bar -->
-    <div class="flex items-center justify-between px-1 text-neutral-600 dark:text-neutral-300">
+    <!-- Playback Control Bar (对齐图2中央饱满橙色大按键) -->
+    <div class="flex items-center justify-between px-2 text-neutral-600 dark:text-neutral-300">
         <!-- Loop Mode Button -->
         <button
             on:click={handleLoopToggle}
-            class="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 hover:text-[var(--primary)] transition"
+            class="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 hover:text-[var(--primary)] transition"
             title={loopMode === 'order' ? '列表循环' : loopMode === 'single' ? '单曲循环' : '随机播放'}
         >
             {#if loopMode === "order"}
-                <Icon icon="material-symbols:repeat-rounded" class="text-base" />
+                <Icon icon="material-symbols:repeat-rounded" class="text-xl" />
             {:else if loopMode === "single"}
-                <Icon icon="material-symbols:repeat-one-rounded" class="text-base text-[var(--primary)]" />
+                <Icon icon="material-symbols:repeat-one-rounded" class="text-xl text-[var(--primary)]" />
             {:else}
-                <Icon icon="material-symbols:shuffle-rounded" class="text-base text-[var(--primary)]" />
+                <Icon icon="material-symbols:shuffle-rounded" class="text-xl text-[var(--primary)]" />
             {/if}
         </button>
 
         <!-- Previous Song Button -->
         <button
             on:click={handlePrev}
-            class="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 hover:text-[var(--primary)] transition"
+            class="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 hover:text-[var(--primary)] transition"
             title="上一曲"
         >
-            <Icon icon="material-symbols:skip-previous-rounded" class="text-xl" />
+            <Icon icon="material-symbols:skip-previous-rounded" class="text-2xl" />
         </button>
 
-        <!-- Compact Circular Play/Pause Button -->
+        <!-- Master Play/Pause Large Circular Button (完全对标图2) -->
         <button
             on:click={handlePlayToggle}
-            class="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 active:scale-95 transition-all flex items-center justify-center text-[var(--primary)] shadow-sm"
+            class="w-12 h-12 rounded-full bg-[var(--primary)] hover:brightness-110 active:scale-95 transition-all flex items-center justify-center text-white shadow-md shadow-[var(--primary)]/25"
             title={isPlaying ? "暂停" : "播放"}
         >
-            <Icon icon={isPlaying ? "material-symbols:pause-rounded" : "material-symbols:play-arrow-rounded"} class="text-xl translate-x-[0.5px]" />
+            <Icon icon={isPlaying ? "material-symbols:pause-rounded" : "material-symbols:play-arrow-rounded"} class="text-2xl translate-x-[0.5px]" />
         </button>
 
         <!-- Next Song Button -->
         <button
             on:click={handleNext}
-            class="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 hover:text-[var(--primary)] transition"
+            class="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 hover:text-[var(--primary)] transition"
             title="下一曲"
         >
-            <Icon icon="material-symbols:skip-next-rounded" class="text-xl" />
+            <Icon icon="material-symbols:skip-next-rounded" class="text-2xl" />
         </button>
 
-        <!-- Playlist Drawer Toggle Button -->
+        <!-- Playlist Toggle Button -->
         <button
             on:click={() => (showPlaylist = !showPlaylist)}
-            class="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 {showPlaylist ? 'text-[var(--primary)] bg-black/5 dark:bg-white/10' : ''} transition"
+            class="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 {showPlaylist ? 'text-[var(--primary)] bg-black/5 dark:bg-white/10' : ''} transition"
             title="播放列表"
         >
-            <Icon icon="material-symbols:queue-music-rounded" class="text-base" />
+            <Icon icon="material-symbols:queue-music-rounded" class="text-xl" />
         </button>
     </div>
 
     <!-- Playlist Drawer (Accordion Dropdown) -->
     {#if showPlaylist}
-        <div class="music-playlist-scrollbar mt-2.5 pt-2.5 border-t border-black/10 dark:border-white/10 max-h-48 overflow-y-auto overflow-x-hidden space-y-0.5 text-xs animate-fade-in w-full">
+        <div class="music-playlist-scrollbar mt-3 pt-2.5 border-t border-black/10 dark:border-white/10 max-h-48 overflow-y-auto overflow-x-hidden space-y-0.5 text-xs animate-fade-in w-full">
             {#each playlist as song, idx}
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
                 <!-- svelte-ignore a11y_no_static_element_interactions -->
                 <div
                     on:click={() => handleSelectSong(idx)}
-                    class="flex items-center justify-between p-1.5 rounded-lg cursor-pointer transition w-full overflow-hidden {idx === currentIndex ? 'bg-[var(--primary)]/15 text-[var(--primary)] font-semibold' : 'hover:bg-black/5 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300'}"
+                    class="flex items-center justify-between p-2 rounded-lg cursor-pointer transition w-full overflow-hidden {idx === currentIndex ? 'bg-[var(--primary)]/15 text-[var(--primary)] font-semibold' : 'hover:bg-black/5 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300'}"
                 >
-                    <div class="flex items-center gap-1.5 min-w-0 flex-1 mr-2">
+                    <div class="flex items-center gap-2 min-w-0 flex-1 mr-2">
                         <span class="w-4 text-center text-[10px] text-neutral-400 shrink-0">{idx + 1}</span>
                         <span class="truncate block flex-1" title={song.title}>{song.title}</span>
                     </div>
-                    <span class="text-[10.5px] text-neutral-400 dark:text-neutral-500 shrink-0 truncate max-w-[38%] text-right" title={song.author}>{song.author}</span>
+                    <span class="text-[11px] text-neutral-400 dark:text-neutral-500 shrink-0 truncate max-w-[38%] text-right" title={song.author}>{song.author}</span>
                 </div>
             {/each}
+        </div>
+    {/if}
+
+    <!-- Scrolling Lyrics Window with Custom Scrollbar (完全对标图2精美滚动与滚动条) -->
+    {#if showLyrics}
+        <div class="lyrics-card-box relative w-full flex items-stretch mt-3 rounded-2xl overflow-hidden bg-black/[0.02] dark:bg-black/25 border border-black/5 dark:border-white/5 shadow-inner transition-all">
+            <!-- Lyrics Scrollable Area -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <div
+                bind:this={lyricsScrollEl}
+                on:scroll={handleLyricsScroll}
+                on:wheel={markUserInteraction}
+                on:touchstart={markUserInteraction}
+                class="lyrics-scroll-area flex-1 h-[175px] overflow-y-auto px-4 py-10 text-center relative scroll-smooth"
+            >
+                {#if parsedLyrics.length > 0}
+                    <div class="space-y-4">
+                        {#each parsedLyrics as lyric, idx}
+                            <!-- svelte-ignore a11y_click_events_have_key_events -->
+                            <div
+                                data-lyric-idx={idx}
+                                on:click={() => handleLyricClick(lyric.time)}
+                                class="lyric-item cursor-pointer transition-all duration-300 transform select-none {idx === currentLyricIndex ? 'lyric-item-active text-[var(--primary)] font-bold scale-[1.03] opacity-100 drop-shadow-sm' : 'text-neutral-500 dark:text-neutral-400 font-medium text-[13px] opacity-45 hover:opacity-85 scale-100'}"
+                            >
+                                <div class="leading-relaxed {idx === currentLyricIndex ? 'text-[14.5px] md:text-[15px] font-bold' : ''}">
+                                    {lyric.text}
+                                </div>
+                                {#if lyric.translation}
+                                    <div class="text-[12px] mt-0.5 tracking-wide {idx === currentLyricIndex ? 'text-[var(--primary)]/90 font-medium' : 'opacity-70 font-normal'}">
+                                        {lyric.translation}
+                                    </div>
+                                {/if}
+                            </div>
+                        {/each}
+                    </div>
+                {:else}
+                    <div class="h-full flex flex-col items-center justify-center text-xs text-neutral-400 dark:text-neutral-500 py-10 gap-1.5">
+                        <Icon icon="material-symbols:music-note-rounded" class="text-xl opacity-40 text-[var(--primary)]" />
+                        <span>{currentSong.url ? "暂无歌词或纯音乐，请欣赏" : "歌词加载中..."}</span>
+                    </div>
+                {/if}
+            </div>
+
+            <!-- Custom 精美滚动条 (对标图2：顶部▲箭头 + 药丸胶囊滑块 + 底部▼箭头) -->
+            {#if parsedLyrics.length > 0}
+                <div class="w-4.5 shrink-0 flex flex-col items-center justify-between py-1.5 select-none bg-black/[0.03] dark:bg-white/[0.02] border-l border-black/5 dark:border-white/5">
+                    <!-- Top Caret Button ▲ -->
+                    <button
+                        on:click={handleScrollUp}
+                        class="w-3.5 h-3.5 flex items-center justify-center text-neutral-400 hover:text-[var(--primary)] active:scale-90 transition rounded"
+                        title="向上翻阅歌词"
+                    >
+                        <Icon icon="material-symbols:arrow-drop-up-rounded" class="text-base -my-1" />
+                    </button>
+
+                    <!-- Scroll Track & Pill Thumb -->
+                    <!-- svelte-ignore a11y_click_events_have_key_events -->
+                    <!-- svelte-ignore a11y_no_static_element_interactions -->
+                    <div
+                        bind:this={trackEl}
+                        on:click={handleTrackClick}
+                        class="w-full flex-1 relative my-0.5 cursor-pointer flex justify-center"
+                    >
+                        <div
+                            on:mousedown={handleThumbMouseDown}
+                            class="absolute w-1.5 rounded-full bg-neutral-400/50 hover:bg-[var(--primary)] dark:bg-neutral-500/50 dark:hover:bg-[var(--primary)] transition-[background-color,transform] cursor-grab active:cursor-grabbing shadow-sm"
+                            style="top: {thumbTop}%; height: {thumbHeight}%;"
+                        ></div>
+                    </div>
+
+                    <!-- Bottom Caret Button ▼ -->
+                    <button
+                        on:click={handleScrollDown}
+                        class="w-3.5 h-3.5 flex items-center justify-center text-neutral-400 hover:text-[var(--primary)] active:scale-90 transition rounded"
+                        title="向下翻阅歌词"
+                    >
+                        <Icon icon="material-symbols:arrow-drop-down-rounded" class="text-base -my-1" />
+                    </button>
+                </div>
+            {/if}
         </div>
     {/if}
 </div>
@@ -770,6 +1047,38 @@ function handleSelectSong(idx: number) {
 .music-playlist-scrollbar::-webkit-scrollbar {
     display: none;
 }
+
+/* 歌词视窗上下柔和边缘淡出遮罩（Gradient Fade Mask） */
+.lyrics-scroll-area {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(0, 0, 0, 0.35) 8%,
+        black 22%,
+        black 78%,
+        rgba(0, 0, 0, 0.35) 92%,
+        transparent 100%
+    );
+    mask-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(0, 0, 0, 0.35) 8%,
+        black 22%,
+        black 78%,
+        rgba(0, 0, 0, 0.35) 92%,
+        transparent 100%
+    );
+}
+.lyrics-scroll-area::-webkit-scrollbar {
+    display: none;
+}
+
+.lyric-item {
+    will-change: transform, opacity, color;
+}
+
 @keyframes spin-slow {
     from {
         transform: rotate(0deg);
@@ -781,6 +1090,7 @@ function handleSelectSong(idx: number) {
 .animate-spin-slow {
     animation: spin-slow 14s linear infinite;
 }
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-3px); }
     to { opacity: 1; transform: translateY(0); }
@@ -789,3 +1099,4 @@ function handleSelectSong(idx: number) {
     animation: fadeIn 0.15s ease-out;
 }
 </style>
+
