@@ -20,7 +20,7 @@ pinned: false
 
 | 类别 | 核心命令 | 主要用途说明 |
 | :--- | :--- | :--- |
-| **文件管理** | `ls`, `cd`, `mkdir`, `rm`, `cp`, `mv`, `find` | 目录浏览、文件增删改查与高级条件搜索 |
+| **文件管理** | `ls`, `cd`, `mkdir`, `rm`, `cp`, `mv`, `find`, `tar` | 目录浏览、文件增删改查、高级条件搜索与打包压缩归档 |
 | **用户与权限** | `useradd`, `passwd`, `chmod`, `chown`, `sudo` | 用户账号管理、文件读写执行权限与 root 提权 |
 | **进程管理** | `ps`, `top`/`htop`, `kill`, `systemctl` | 查看与终止进程、Systemd 系统服务状态管控 |
 | **网络配置** | `ip`, `ping`, `ss`/`netstat`, `firewall-cmd` | 网络接口查询、连通性测试、端口监听与防火墙规则 |
@@ -109,6 +109,40 @@ pinned: false
   find /var/log -name "*.log"                 # 查找 /var/log 下所有 .log 文件
   find /data -type f -size +500M              # 查找 /data 下大于 500MB 的文件
   find /tmp -type f -mtime +7 -exec rm -f {} \; # 查找 /tmp 下 7 天前的文件并删除
+  ```
+
+### 1.8 `tar` - 打包与解压缩归档文件
+* **核心参数记忆口诀**：
+  * `-c`：创建新的归档文件 (**c**reate)
+  * `-x`：解压释放归档文件 (e**x**tract)
+  * `-z`：使用 `gzip` 格式压缩/解压（文件后缀通常为 `.tar.gz` 或 `.tgz`）
+  * `-j`：使用 `bzip2` 格式压缩/解压（文件后缀通常为 `.tar.bz2`）
+  * `-J`：使用 `xz` 高压缩比格式压缩/解压（文件后缀通常为 `.tar.xz`）
+  * `-v`：显示详细处理过程与文件列表 (**v**erbose)
+  * `-f`：指定归档文件名 (**f**ile，**必须作为最后一个选项且紧接文件名**)
+  * `-C`：指定解压缩的目标目录路径
+  * `-t`：查看归档包内的文件列表而不实际解压
+  * `--exclude`：打包时排除指定的文件或目录
+* **常用实战示例**：
+  ```bash
+  # 1. 压缩打包整个目录（gzip 格式）
+  tar -zcvf project_backup.tar.gz /app/project/
+
+  # 2. 解压 .tar.gz 到当前目录
+  tar -zxvf project_backup.tar.gz
+
+  # 3. 解压到指定的目录路径（-C）
+  tar -zxvf project_backup.tar.gz -C /opt/deployed/
+
+  # 4. 只查看压缩包内的文件列表，不进行解压
+  tar -ztvf project_backup.tar.gz
+
+  # 5. 打包时排除特定文件夹或临时文件
+  tar -zcvf backup.tar.gz --exclude="node_modules" --exclude="*.log" ./my_app/
+
+  # 6. 解压 .tar.bz2 或 .tar.xz 文件
+  tar -jxvf archive.tar.bz2
+  tar -Jxvf archive.tar.xz
   ```
 
 ---
