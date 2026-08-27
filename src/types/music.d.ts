@@ -23,6 +23,7 @@ export interface MusicManager {
 	isMuted: boolean;
 	loopMode: "order" | "random" | "single";
 	showLyrics: boolean;
+	showPlaylist: boolean;
 	parsedLyrics: ParsedLyric[];
 	currentLyricText: string;
 	currentLyricIndex: number;
@@ -31,18 +32,25 @@ export interface MusicManager {
 	id: string;
 	consecutiveErrors: number;
 	pendingSeekTime?: number;
+	isPlaylistLoaded: boolean;
+	hasInitialized: boolean;
 	listeners: Set<() => void>;
 	notify: () => void;
 	loadLyrics: (lrcSource?: string) => Promise<void>;
 	loadSong: (index: number, playNow?: boolean, forceReload?: boolean) => void;
 	togglePlay: () => void;
+	play: () => Promise<void>;
+	pause: () => void;
 	prevSong: () => void;
 	nextSong: () => void;
+	playPrev: () => void;
+	playNext: () => void;
 	seek: (time: number) => void;
 	setVolume: (vol: number) => void;
 	toggleMute: () => void;
 	toggleLoopMode: () => void;
 	toggleLyrics: () => void;
+	togglePlaylist: () => void;
 	fetchPlaylist: (
 		server: string,
 		type: string,

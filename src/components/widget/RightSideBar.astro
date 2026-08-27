@@ -39,7 +39,7 @@ const hasMusic = siteConfig.music?.enable ?? false;
 
     <!-- 音乐播放器与文章目录：吸附在屏幕顶部 top-4 保持固定，限制一屏内最大高度并弹性分配空间 -->
     <div id="right-sidebar-sticky" class="transition-all duration-300 flex flex-col w-full gap-4 sticky top-4 max-h-[calc(100vh-2rem)]">
-        {hasMusic && <MusicPlayer class="onload-animation shrink-0" style="animation-delay: 150ms" />}
+        {hasMusic && <MusicPlayer class="shrink-0" />}
 
         <!-- 文章目录动态插槽（Swup 容器 #toc-container，自适应占用播放器下方的剩余可用高度） -->
         <div id="toc-container" class="transition-swup-fade w-full flex-1 min-h-0 flex flex-col">

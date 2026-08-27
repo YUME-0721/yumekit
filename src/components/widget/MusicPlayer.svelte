@@ -23,20 +23,23 @@ function setGlobalMusicManager(mgr: MusicManager) {
 	}
 }
 
-let playlist: Song[] = [];
-let currentIndex = 0;
-let isPlaying = false;
-let currentTime = 0;
-let duration = 0;
-let volume = defaultVolume;
-let isMuted = false;
+// 组件初始化瞬间立即同步全局单例已有状态，杜绝任何中间状态闪烁
+const initialGlobalMgr = getGlobalMusicManager();
+
+let playlist: Song[] = initialGlobalMgr?.playlist || [];
+let currentIndex = initialGlobalMgr?.currentIndex || 0;
+let isPlaying = initialGlobalMgr?.isPlaying || false;
+let currentTime = initialGlobalMgr?.currentTime || 0;
+let duration = initialGlobalMgr?.duration || 0;
+let volume = initialGlobalMgr?.volume ?? defaultVolume;
+let isMuted = initialGlobalMgr?.isMuted || false;
 let showVolumeSlider = false;
-let loopMode: "order" | "random" | "single" = "order";
-let showPlaylist = false;
-let showLyrics = false;
-let parsedLyrics: ParsedLyric[] = [];
-let currentLyricText = "";
-let currentLyricIndex = -1;
+let loopMode: "order" | "random" | "single" = initialGlobalMgr?.loopMode || "order";
+let showPlaylist = initialGlobalMgr?.showPlaylist || false;
+let showLyrics = initialGlobalMgr?.showLyrics || false;
+let parsedLyrics: ParsedLyric[] = initialGlobalMgr?.parsedLyrics || [];
+let currentLyricText = initialGlobalMgr?.currentLyricText || "";
+let currentLyricIndex = initialGlobalMgr?.currentLyricIndex ?? -1;
 
 // 歌词滚动与滚动条 DOM 引用及状态
 let lyricsScrollEl: HTMLElement | null = null;
@@ -48,23 +51,6 @@ let startDragY = 0;
 let startDragScrollTop = 0;
 let isUserInteracting = false;
 let userScrollTimeout: any = null;
-
-// 组件初始化瞬间立即同步全局单例已有状态
-const initialGlobalMgr = getGlobalMusicManager();
-if (initialGlobalMgr) {
-	playlist = initialGlobalMgr.playlist;
-	currentIndex = initialGlobalMgr.currentIndex;
-	isPlaying = initialGlobalMgr.isPlaying;
-	currentTime = initialGlobalMgr.currentTime;
-	duration = initialGlobalMgr.duration;
-	volume = initialGlobalMgr.volume;
-	isMuted = initialGlobalMgr.isMuted;
-	loopMode = initialGlobalMgr.loopMode;
-	showLyrics = initialGlobalMgr.showLyrics ?? false;
-	parsedLyrics = initialGlobalMgr.parsedLyrics || [];
-	currentLyricText = initialGlobalMgr.currentLyricText || "";
-	currentLyricIndex = initialGlobalMgr.currentLyricIndex ?? -1;
-}
 
 const CACHE_KEY = `fuwari_music_cache_${server}_${type}_${id}`;
 const STATE_CACHE_KEY = "fuwari_music_player_state";
@@ -92,7 +78,7 @@ function savePlayerState(mgr: MusicManager) {
 	} catch (e) {}
 }
 
-$: currentSong = playlist[currentIndex] || {
+$: currentSong = (playlist && playlist[currentIndex]) || (initialGlobalMgr?.playlist && initialGlobalMgr.playlist[initialGlobalMgr.currentIndex]) || {
 	title: "加载中...",
 	author: "请稍候",
 	url: "",
@@ -207,7 +193,13 @@ function getOrCreateGlobalManager(): MusicManager {
 		} catch (e) {}
 	}
 
-	const audio = new Audio();
+	const audio = (typeof window !== "undefined" && (window as any).__FUWARI_AUDIO__)
+		? (window as any).__FUWARI_AUDIO__
+		: new Audio();
+	if (typeof window !== "undefined") {
+		(window as any).__FUWARI_AUDIO__ = audio;
+	}
+
 	const initVolume = cachedState?.volume ?? defaultVolume;
 	const initMuted = cachedState?.isMuted ?? false;
 	audio.volume = initVolume;
@@ -224,6 +216,7 @@ function getOrCreateGlobalManager(): MusicManager {
 		isMuted: initMuted,
 		loopMode: cachedState?.loopMode || "order",
 		showLyrics: cachedState?.showLyrics ?? false,
+		showPlaylist: false,
 		parsedLyrics: [],
 		currentLyricText: "",
 		currentLyricIndex: -1,
@@ -231,10 +224,14 @@ function getOrCreateGlobalManager(): MusicManager {
 		type,
 		id: String(id),
 		consecutiveErrors: 0,
+		isPlaylistLoaded: false,
+		hasInitialized: true,
 		listeners: new Set(),
 		notify() {
 			for (const listener of this.listeners) {
-				listener();
+				try {
+					listener();
+				} catch (e) {}
 			}
 			savePlayerState(this);
 		},
@@ -276,12 +273,10 @@ function getOrCreateGlobalManager(): MusicManager {
 				: song.url;
 
 			const hasValidAudio = this.audio.src && this.audio.src !== "" && this.audio.src !== window.location.href;
+			// 正在播放且同一首歌，且非强制切歌时，绝不重新 load 从而打断音频
 			if (!forceReload && hasValidAudio && this.currentIndex === targetIndex) {
 				if (playNow && this.audio.paused) {
-					this.audio.play().then(() => {
-						this.isPlaying = true;
-						this.notify();
-					}).catch(() => {});
+					this.play();
 				}
 				return;
 			}
@@ -300,86 +295,92 @@ function getOrCreateGlobalManager(): MusicManager {
 			this.notify();
 
 			if (playNow) {
-				this.audio.play().then(() => {
-					this.isPlaying = true;
-					this.consecutiveErrors = 0;
-					this.notify();
-				}).catch((err) => {
-					console.warn("Primary play error, fallback to raw url", err);
-					if (this.audio.src !== song.url) {
-						this.audio.src = song.url;
-						this.audio.load();
-						this.audio.play().then(() => {
-							this.isPlaying = true;
-							this.consecutiveErrors = 0;
-							this.notify();
-						}).catch((e) => {
-							console.error("Playback error:", e);
-							this.isPlaying = false;
-							this.notify();
-						});
-					} else {
-						this.isPlaying = false;
-						this.notify();
-					}
-				});
+				this.play();
 			}
 		},
-		togglePlay() {
+		async play() {
 			if (!this.audio) return;
-			if (this.isPlaying) {
+			const song = this.playlist[this.currentIndex];
+			if (!this.audio.src || this.audio.src === "" || this.audio.src === window.location.href) {
+				if (song) {
+					this.loadSong(this.currentIndex, true, true);
+					return;
+				}
+			}
+			try {
+				await this.audio.play();
+				this.isPlaying = true;
+				this.consecutiveErrors = 0;
+				this.notify();
+			} catch (err) {
+				console.warn("Primary play error, trying fallback stream...", err);
+				const songId = song ? extractSongId(song.url) : null;
+				if (songId && !this.audio.src.includes("music.163.com/song/media/outer")) {
+					this.audio.src = `https://music.163.com/song/media/outer/url?id=${songId}.mp3`;
+					this.audio.load();
+					this.audio.play().then(() => {
+						this.isPlaying = true;
+						this.consecutiveErrors = 0;
+						this.notify();
+					}).catch((e) => {
+						console.error("Playback error:", e);
+						this.isPlaying = false;
+						this.notify();
+					});
+				} else if (song && this.audio.src !== song.url) {
+					this.audio.src = song.url;
+					this.audio.load();
+					this.audio.play().then(() => {
+						this.isPlaying = true;
+						this.consecutiveErrors = 0;
+						this.notify();
+					}).catch(() => {
+						this.isPlaying = false;
+						this.notify();
+					});
+				} else {
+					this.isPlaying = false;
+					this.notify();
+				}
+			}
+		},
+		pause() {
+			if (this.audio) {
 				this.audio.pause();
 				this.isPlaying = false;
 				this.notify();
+			}
+		},
+		togglePlay() {
+			if (this.isPlaying) {
+				this.pause();
 			} else {
-				const song = this.playlist[this.currentIndex];
-				if (!this.audio.src || this.audio.src === "" || this.audio.src === window.location.href) {
-					if (song) {
-						this.loadSong(this.currentIndex, true, true);
-						return;
-					}
-				}
-				this.audio.play().then(() => {
-					this.isPlaying = true;
-					this.consecutiveErrors = 0;
-					this.notify();
-				}).catch((err) => {
-					console.warn("Play error, trying fallback stream...", err);
-					const songId = song ? extractSongId(song.url) : null;
-					if (songId) {
-						this.audio.src = `https://music.163.com/song/media/outer/url?id=${songId}.mp3`;
-						this.audio.load();
-						this.audio.play().then(() => {
-							this.isPlaying = true;
-							this.consecutiveErrors = 0;
-							this.notify();
-						}).catch((e) => {
-							console.error("Audio error:", e);
-							this.isPlaying = false;
-							this.notify();
-						});
-					} else {
-						this.isPlaying = false;
-						this.notify();
-					}
-				});
+				this.play();
 			}
 		},
 		prevSong() {
+			if (!this.playlist.length) return;
 			if (this.loopMode === "random") {
 				const nextIdx = Math.floor(Math.random() * this.playlist.length);
 				this.loadSong(nextIdx, true, true);
 			} else {
-				this.loadSong(this.currentIndex - 1, true, true);
+				this.loadSong((this.currentIndex - 1 + this.playlist.length) % this.playlist.length, true, true);
 			}
 		},
 		nextSong() {
+			if (!this.playlist.length) return;
 			if (this.loopMode === "random") {
 				const nextIdx = Math.floor(Math.random() * this.playlist.length);
 				this.loadSong(nextIdx, true, true);
 			} else {
-				this.loadSong(this.currentIndex + 1, true, true);
+				this.loadSong((this.currentIndex + 1) % this.playlist.length, true, true);
 			}
+		},
+		playPrev() {
+			this.prevSong();
+		},
+		playNext() {
+			this.nextSong();
 		},
 		seek(time: number) {
 			if (!this.audio || !this.duration) return;
@@ -412,7 +413,15 @@ function getOrCreateGlobalManager(): MusicManager {
 			this.showLyrics = !this.showLyrics;
 			this.notify();
 		},
+		togglePlaylist() {
+			this.showPlaylist = !this.showPlaylist;
+			this.notify();
+		},
 		async fetchPlaylist(srv, typ, playlistId, autoStart, cKey) {
+			if (this.isPlaylistLoaded && this.playlist.length > 0) {
+				return;
+			}
+
 			let latestCachedState: any = null;
 			try {
 				const s = localStorage.getItem(STATE_CACHE_KEY);
@@ -445,6 +454,7 @@ function getOrCreateGlobalManager(): MusicManager {
 					const data = JSON.parse(cached);
 					if (Array.isArray(data) && data.length > 0) {
 						this.playlist = data;
+						this.isPlaylistLoaded = true;
 						const hasValidAudio = this.audio && this.audio.src && this.audio.src !== "" && this.audio.src !== window.location.href;
 						if (!hasValidAudio) {
 							restorePlayback(data.length);
@@ -462,6 +472,7 @@ function getOrCreateGlobalManager(): MusicManager {
 					const data = await res.json();
 					if (Array.isArray(data) && data.length > 0) {
 						this.playlist = data;
+						this.isPlaylistLoaded = true;
 						try {
 							localStorage.setItem(cKey, JSON.stringify(data));
 						} catch (e) {}
@@ -689,6 +700,7 @@ onMount(() => {
 		isMuted = mgr.isMuted;
 		loopMode = mgr.loopMode;
 		showLyrics = mgr.showLyrics ?? false;
+		showPlaylist = mgr.showPlaylist ?? false;
 		parsedLyrics = mgr.parsedLyrics || [];
 		currentLyricText = mgr.currentLyricText || "";
 		currentLyricIndex = mgr.currentLyricIndex ?? -1;
@@ -699,7 +711,7 @@ onMount(() => {
 	syncState();
 
 	const isPlaylistLoaded = Array.isArray(mgr.playlist) && mgr.playlist.length > 0;
-	if (!isPlaylistLoaded) {
+	if (!isPlaylistLoaded || !mgr.isPlaylistLoaded) {
 		mgr.server = server;
 		mgr.type = type;
 		mgr.id = String(id);
@@ -709,7 +721,7 @@ onMount(() => {
 	setTimeout(() => {
 		scrollToActiveLyric(false);
 		handleLyricsScroll();
-	}, 150);
+	}, 60);
 });
 
 onDestroy(() => {
@@ -746,6 +758,10 @@ function handleLyricsToggle() {
 	}, 60);
 }
 
+function handlePlaylistToggle() {
+	getGlobalMusicManager()?.togglePlaylist();
+}
+
 function handleSeek(e: MouseEvent) {
 	const mgr = getGlobalMusicManager();
 	if (!mgr || !duration) return;
@@ -770,6 +786,7 @@ function handleSelectSong(idx: number) {
 	if (mgr) {
 		mgr.consecutiveErrors = 0;
 		mgr.loadSong(idx, true, true);
+		mgr.showPlaylist = false;
 		showPlaylist = false;
 	}
 }
@@ -930,7 +947,7 @@ function handleSelectSong(idx: number) {
 
         <!-- Playlist Toggle Button -->
         <button
-            on:click={() => (showPlaylist = !showPlaylist)}
+            on:click={handlePlaylistToggle}
             class="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 {showPlaylist ? 'text-[var(--primary)] bg-black/5 dark:bg-white/10' : ''} transition"
             title="播放列表"
         >
