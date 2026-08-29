@@ -139,14 +139,37 @@ const STUDIO_DICT: Record<string, string> = {
 
 // 智能提取番剧制作公司或核心类型标签
 function extractStudioOrGenre(tagsList: string[]): string {
-	// 1. 先尝试从词典中精准匹配制作公司标签
+	// 归一化工具：去除所有标点、空格、特殊符号并转小写
+	const clean = (s: string) => s.toLowerCase().replace(/['’`\s\-_·.・]/g, "");
+
+	// 0. 特别优先强化匹配常见易受标点影响的工作室
+	for (const tag of tagsList) {
+		const cTag = clean(tag);
+		if (cTag === "brainsbase" || cTag.includes("brainsbase") || cTag.includes("ブレインズベース")) {
+			return "Brain's Base";
+		}
+		if (cTag === "comixwave" || cTag === "comixwavefilms" || cTag.includes("コミックスウェーブ")) {
+			return "CoMix Wave";
+		}
+		if (cTag === "sevenarcs" || cTag.includes("セブンアークス")) {
+			return "Seven Arcs";
+		}
+		if (cTag.includes("ロックンロール") || cTag.includes("rocknroll")) {
+			return "Rock'n'Roll Mountain";
+		}
+		if (cTag.includes("ラパントラック") || cTag.includes("lapintrack")) {
+			return "Lapin Track";
+		}
+	}
+
+	// 1. 先尝试从词典中精准/归一化匹配制作公司标签
 	for (const tag of tagsList) {
 		if (STUDIO_DICT[tag]) {
 			return STUDIO_DICT[tag];
 		}
-		// 忽略大小写匹配
+		const cTag = clean(tag);
 		for (const [key, name] of Object.entries(STUDIO_DICT)) {
-			if (tag.toLowerCase() === key.toLowerCase()) {
+			if (cTag === clean(key)) {
 				return name;
 			}
 		}
@@ -156,8 +179,8 @@ function extractStudioOrGenre(tagsList: string[]): string {
 	for (const tag of tagsList) {
 		const isExcluded = /^[0-9]+年|^(日本|中国|欧美|漫改|轻改|原创|小说改|游戏改|日常|搞笑|恋爱|战斗|热血|治愈|奇幻|科幻|百合|催泪|校园|后宫|泡面番|肉番|剧场版|OVA|TV|WEB)$/i.test(tag);
 		if (!isExcluded) {
-			if (/^(Studio|Studio\s|动画制作|制作|Animation|Pictures|Works|Film)/i.test(tag) ||
-				/(Studio|Pictures|Works|Animation|Films|Production|制作|社|工房|动画)$/i.test(tag)) {
+			if (/^(Studio|Studio\s|动画制作|制作|Animation|Pictures|Works|Film|ブレインズ)/i.test(tag) ||
+				/(Studio|Pictures|Works|Animation|Films|Production|制作|社|工房|动画|ベース)$/i.test(tag)) {
 				return tag.length > 14 ? tag.slice(0, 14) + "…" : tag;
 			}
 		}
