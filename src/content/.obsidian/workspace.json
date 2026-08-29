@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "posts/2026/09-linux.md",
+                "file": "posts/2026/10-mysql.md",
                 "mode": "preview",
-                "source": true
+                "source": false
               },
               "icon": "lucide-file",
-              "title": "09-linux"
+              "title": "10-mysql"
             }
           }
         ]
@@ -210,15 +210,17 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "a36b15cef3e6e2a4",
+  "active": "5d056887d9cb8b28",
   "lastOpenFiles": [
+    "posts/2026/10-mysql.md",
+    "posts/2026/_10-mysql.md",
+    "posts/2026/09-linux.md",
+    "posts/2026/Untitled.md",
     "posts/2026/08-resource-station.md",
     "posts/2026/07-blog.md",
-    "posts/2026/09-linux.md",
     "posts/2026/black&white-film-developing.md",
     "posts/2026/D76.md",
     "posts/2026/_09-linux.md",
-    "posts/2026/Untitled.md",
     "posts/2026/Pixel-Google-AI-Pro.md",
     "posts/2026/YuNest.md",
     "posts/2026/PicAPI-Gallery.md",
@@ -236,8 +238,6 @@
     "_test01.md",
     "Untitled.md",
     "posts/single/_test-01.md",
-    "未命名 4.md",
-    "未命名 3.md",
     "posts/single",
     "posts/news",
     "post",
