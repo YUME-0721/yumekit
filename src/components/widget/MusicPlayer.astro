@@ -16,7 +16,7 @@ if (!music || !music.enable) {
 }
 ---
 
-<div id="fuwari-music-player-container" data-swup-persist="fuwari-music-player" class:list={[className, "w-full min-h-[178px]"]} style={style}>
+<div id="fuwari-music-player-container" data-swup-persist="fuwari-music-player" class:list={[className, "w-full select-none"]} style={style}>
     <MusicPlayerSvelte
         client:load
         title={music.title || "音乐"}

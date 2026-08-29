@@ -840,10 +840,10 @@ function handleSelectSong(idx: number) {
         </div>
     </div>
 
-    <!-- Song Information Row (对齐图2黑胶唱片、歌曲歌手及音量时间状态) -->
-    <div class="flex items-center gap-3.5 my-1">
-        <!-- Rotating Vinyl Disc Cover -->
-        <div class="relative w-13 h-13 shrink-0 bg-black/10 dark:bg-black/30 rounded-full overflow-hidden shadow-md ring-1 ring-black/10 dark:ring-white/15">
+    <!-- Song Information Row (严格锁定52px高度与正圆唱片尺寸，彻底消除形变) -->
+    <div class="flex items-center gap-3 my-1.5 h-[52px] w-full overflow-hidden">
+        <!-- Rotating Vinyl Disc Cover (严格锁定正方形圆形比例，防止任何形变) -->
+        <div class="relative w-[52px] h-[52px] min-w-[52px] min-h-[52px] max-w-[52px] max-h-[52px] aspect-square shrink-0 bg-neutral-900 rounded-full overflow-hidden shadow-md ring-1 ring-black/10 dark:ring-white/15 flex items-center justify-center">
             <img
                 src={getOptimizedCover(currentSong.pic)}
                 alt={currentSong.title}
@@ -852,16 +852,22 @@ function handleSelectSong(idx: number) {
                 loading="eager"
                 decoding="async"
                 fetchpriority="high"
-                class="w-13 h-13 rounded-full object-cover shadow-sm {isPlaying ? 'animate-spin-slow' : ''}"
+                class="w-full h-full object-cover rounded-full select-none pointer-events-none block {isPlaying ? 'animate-spin-slow' : ''}"
+                on:error={(e) => {
+                    const target = e.currentTarget;
+                    if (target && target.src !== '/favicon/favicon.svg') {
+                        target.src = '/favicon/favicon.svg';
+                    }
+                }}
             />
             <!-- Center Vinyl Spindle Hole -->
-            <div class="absolute inset-0 m-auto w-3 h-3 rounded-full bg-neutral-900 border-2 border-neutral-700 pointer-events-none shadow-inner"></div>
+            <div class="absolute inset-0 m-auto w-3 h-3 min-w-[12px] min-h-[12px] rounded-full bg-neutral-900 border-2 border-neutral-700 pointer-events-none shadow-inner z-10"></div>
         </div>
 
-        <!-- Song Title & Artist & Time/Volume Row -->
-        <div class="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
-            <div class="flex items-center justify-between gap-1">
-                <span class="font-bold text-[15px] leading-tight text-neutral-900 dark:text-neutral-100 truncate" title={currentSong.title}>
+        <!-- Song Title & Artist & Time/Volume Row (固定两端对齐与防折行) -->
+        <div class="flex-1 min-w-0 h-full flex flex-col justify-between overflow-hidden py-0.5">
+            <div class="flex items-center justify-between gap-1 w-full overflow-hidden leading-tight">
+                <span class="font-bold text-[14px] leading-tight text-neutral-900 dark:text-neutral-100 truncate block flex-1" title={currentSong.title}>
                     {currentSong.title}
                 </span>
                 <button
@@ -872,12 +878,12 @@ function handleSelectSong(idx: number) {
                     LRC
                 </button>
             </div>
-            <div class="text-[12px] text-neutral-500 dark:text-neutral-400 truncate" title={currentSong.author}>
+            <div class="text-[11.5px] text-neutral-500 dark:text-neutral-400 truncate block leading-tight" title={currentSong.author}>
                 {currentSong.author}
             </div>
-            <div class="flex items-center justify-between text-[11px] font-mono text-neutral-400 dark:text-neutral-500 tabular-nums mt-0.5">
+            <div class="flex items-center justify-between text-[10.5px] font-mono text-neutral-400 dark:text-neutral-500 tabular-nums leading-none">
                 <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
-                <div class="flex items-center gap-1.5 text-neutral-400">
+                <div class="flex items-center gap-1 text-neutral-400">
                     <Icon icon="material-symbols:volume-up-rounded" class="text-xs" />
                     <div class="w-10 h-1 bg-black/10 dark:bg-white/15 rounded-full overflow-hidden">
                         <div class="h-full bg-[var(--primary)] rounded-full" style="width: {isMuted ? 0 : volume * 100}%"></div>
@@ -891,7 +897,7 @@ function handleSelectSong(idx: number) {
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
-        class="w-full h-1.5 hover:h-2.5 bg-black/10 dark:bg-white/10 rounded-full cursor-pointer relative overflow-hidden transition-all my-3"
+        class="w-full h-1.5 hover:h-2.5 bg-black/10 dark:bg-white/10 rounded-full cursor-pointer relative overflow-hidden transition-all my-2.5"
         on:click={handleSeek}
         title="点击跳转播放进度"
     >
@@ -901,8 +907,8 @@ function handleSelectSong(idx: number) {
         ></div>
     </div>
 
-    <!-- Playback Control Bar (对齐图2中央饱满橙色大按键) -->
-    <div class="flex items-center justify-between px-2 text-neutral-600 dark:text-neutral-300">
+    <!-- Playback Control Bar (对齐中央饱满大按键) -->
+    <div class="flex items-center justify-between px-1 text-neutral-600 dark:text-neutral-300 h-11">
         <!-- Loop Mode Button -->
         <button
             on:click={handleLoopToggle}
