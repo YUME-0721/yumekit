@@ -14,19 +14,18 @@ interface Props {
 	url: string;
 	published: Date;
 	updated?: Date;
-	image: string;
-	description: string;
-	draft: boolean;
-	style: string;
+	image?: string;
+	description?: string;
+	draft?: boolean;
+	style?: string;
 }
-const { entry, title, url, published, updated, image, description, style } =
+const { entry, title, url, published, updated, image, description, style = "" } =
 	Astro.props;
 
 const isPinned = entry.data.pinned === true;
-const className = Astro.props.class;
+const className = Astro.props.class || "";
 
 const hasCover = image !== undefined && image !== null && image !== "";
-const coverWidth = "28%";
 
 const { remarkPluginFrontmatter } = await entry.render();
 
@@ -34,89 +33,153 @@ const category = entry.data.category ? entry.data.category.trim() : "";
 const tags = (entry.data.tags || []).map((t: string) => t.trim()).filter(Boolean);
 const formattedDate = formatDateToYYYYMMDD(published).replace(/-/g, "/");
 
-const displayTags = tags.slice(0, 4);
-const remainingTagsCount = tags.length - 4;
+const displayTags = tags.slice(0, 3);
+const remainingTagsCount = tags.length - 3;
 ---
-<div class:list={["card-base card-hover flex flex-col w-full relative [content-visibility:auto] [contain-intrinsic-size:280px] transform-gpu", className]} style={style}>
-    <div class:list={["pl-9 pr-4 pt-5 pb-5 relative flex flex-col justify-between min-h-[9.5rem]", {"w-[calc(100%_-_52px_-_12px)]": !hasCover, "w-[calc(100%_-_var(--coverWidth)_-_12px)]": hasCover}]}>
-        <div>
-            <!-- 文章标题 -->
-            <a href={url}
-               class="transition group w-full block font-bold mb-2 text-xl md:text-2xl text-black/90 dark:text-white/90 relative
-            hover:text-[var(--primary)] dark:hover:text-[var(--primary)]
-            active:text-[var(--title-active)] dark:active:text-[var(--title-active)]
-            before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)]
-            before:absolute before:top-1 md:before:top-1.5 before:-left-[1.125rem] before:block
-            ">
-                {title}
-            </a>
+<div class:list={["card-base card-hover flex flex-row items-center w-full relative h-[10.5rem] sm:h-[11.75rem] md:h-[12.75rem] rounded-2xl overflow-hidden [content-visibility:auto] [contain-intrinsic-size:200px] transform-gpu transition-all duration-300", className]} style={style}>
+    <!-- 左侧内容主体 -->
+    <div class="flex-1 h-full pl-5 sm:pl-7 md:pl-8 pr-3 sm:pr-4 py-3 sm:py-4 flex flex-col justify-between overflow-hidden z-10">
+        <!-- 上部：标题与元信息 -->
+        <div class="w-full overflow-hidden">
+            <!-- 文章标题（悬浮自动左右滑动） -->
+            <div class="post-title-wrapper relative w-full overflow-hidden mb-1 sm:mb-1.5 group/title" title={title}>
+                <a href={url}
+                   class="post-title-link block font-bold text-base sm:text-lg md:text-xl text-black/90 dark:text-white/90 transition-colors
+                   hover:text-[var(--primary)] dark:hover:text-[var(--primary)]
+                   active:text-[var(--title-active)] dark:active:text-[var(--title-active)]
+                   pl-3 sm:pl-3.5 relative
+                   before:w-1 before:h-4 sm:before:h-5 before:rounded-md before:bg-[var(--primary)]
+                   before:absolute before:top-1 sm:before:top-1 before:left-0 before:block">
+                    <span class="post-title-track inline-block whitespace-nowrap transition-transform ease-in-out">
+                        {title}
+                    </span>
+                </a>
+            </div>
 
-            <!-- 分类/系列与发布日期 -->
-            <div class="flex items-center flex-wrap gap-x-4 gap-y-1 text-xs md:text-sm font-medium mb-2.5 text-neutral-500 dark:text-neutral-400">
+            <!-- 分类与发布日期 -->
+            <div class="flex items-center flex-nowrap gap-x-3 text-xs md:text-sm font-medium mb-1.5 sm:mb-2 text-neutral-500 dark:text-neutral-400 overflow-hidden">
                 {category && (
-                    <a href={getCategoryUrl(category)} class="flex items-center gap-1.5 text-[var(--primary)] hover:underline font-bold transition">
-                        <Icon name="material-symbols:folder-outline-rounded" class="text-base md:text-lg"></Icon>
-                        <span>{category}</span>
+                    <a href={getCategoryUrl(category)} class="flex items-center gap-1 text-[var(--primary)] hover:underline font-bold transition shrink-0">
+                        <Icon name="material-symbols:folder-outline-rounded" class="text-sm md:text-base"></Icon>
+                        <span class="truncate max-w-[7rem] sm:max-w-[10rem]">{category}</span>
                     </a>
                 )}
-                <div class="flex items-center gap-1 text-neutral-400 dark:text-neutral-500">
-                    <Icon name="material-symbols:calendar-today-outline-rounded" class="text-sm md:text-base"></Icon>
+                <div class="flex items-center gap-1 text-neutral-400 dark:text-neutral-500 shrink-0">
+                    <Icon name="material-symbols:calendar-today-outline-rounded" class="text-xs sm:text-sm"></Icon>
                     <span>{formattedDate}</span>
                 </div>
             </div>
 
-            <!-- 文章简介 -->
-            <div class="transition text-black/70 dark:text-white/70 text-sm md:text-base leading-relaxed mb-3 pr-2 line-clamp-2">
-                { description || remarkPluginFrontmatter.excerpt }
+            <!-- 文章简介（固定两行截断） -->
+            <div class="text-black/70 dark:text-white/70 text-xs sm:text-sm leading-relaxed line-clamp-2 pr-1 select-none overflow-hidden">
+                { description || remarkPluginFrontmatter.excerpt || "暂无文章摘要..." }
             </div>
         </div>
 
         <!-- 底部标签区域 -->
-        {tags.length > 0 && (
-            <div class="flex flex-wrap items-center gap-1.5 mt-1 pt-1">
-                {displayTags.map((tag: string) => (
-                    <a href={getTagUrl(tag)} class="btn-regular h-6 md:h-7 px-2.5 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:text-[var(--primary)] dark:hover:text-[var(--primary)] transition flex items-center gap-0.5 active:scale-95">
-                        <span class="text-neutral-400 dark:text-neutral-500 font-semibold">#</span>
-                        <span>{tag}</span>
-                    </a>
-                ))}
-                {remainingTagsCount > 0 && (
-                    <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500">
-                        +{remainingTagsCount}
-                    </span>
-                )}
-            </div>
-        )}
+        <div class="flex items-center gap-1.5 pt-1 overflow-hidden h-7 shrink-0">
+            {tags.length > 0 ? (
+                <>
+                    {displayTags.map((tag: string) => (
+                        <a href={getTagUrl(tag)} class="btn-regular h-6 px-2 sm:px-2.5 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:text-[var(--primary)] dark:hover:text-[var(--primary)] transition flex items-center gap-0.5 active:scale-95 shrink-0">
+                            <span class="text-neutral-400 dark:text-neutral-500 font-semibold">#</span>
+                            <span class="max-w-[5rem] sm:max-w-[7rem] truncate">{tag}</span>
+                        </a>
+                    ))}
+                    {remainingTagsCount > 0 && (
+                        <span class="text-xs font-semibold px-1.5 py-0.5 rounded-md bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500 shrink-0">
+                            +{remainingTagsCount}
+                        </span>
+                    )}
+                </>
+            ) : (
+                <div class="text-[11px] text-neutral-400 dark:text-neutral-600 italic">No tags</div>
+            )}
+        </div>
     </div>
 
-    {hasCover && <a href={url} aria-label={title}
-                    class:list={["group",
-                        "max-h-none mx-0 mt-0",
-                        "w-[var(--coverWidth)] absolute top-3 bottom-3 right-3 rounded-xl overflow-hidden active:scale-95"
-                    ]} >
-        <div class="absolute pointer-events-none z-10 w-full h-full group-hover:bg-black/30 group-active:bg-black/50 transition"></div>
-        <!-- 封面图上的箭头 -->
-        <div class="absolute pointer-events-none z-20 w-full h-full flex items-center justify-center ">
-            <Icon name="material-symbols:chevron-right-rounded"
-                  class="transition opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-100 text-white text-5xl">
-            </Icon>
-        </div>
-        <ImageWrapper src={image} basePath={path.join("content/posts/", getDir(entry.id))} alt="Cover Image of the Post"
-                  class="w-full h-full">
-        </ImageWrapper>
-    </a>}
+    <!-- 右侧封面图（严格 4:3 比例固定） -->
+    {hasCover && (
+        <a href={url} aria-label={title}
+           class="group/cover shrink-0 aspect-[4/3] h-[calc(100%-1.25rem)] sm:h-[calc(100%-1.5rem)] my-auto mr-2.5 sm:mr-3 rounded-xl overflow-hidden relative shadow-sm border border-black/5 dark:border-white/5 active:scale-95 transition-transform duration-200">
+            <!-- 遮罩与悬浮交互 -->
+            <div class="absolute inset-0 z-10 bg-black/0 group-hover/cover:bg-black/25 group-active/cover:bg-black/40 transition-colors duration-300"></div>
+            <div class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+                <Icon name="material-symbols:chevron-right-rounded"
+                      class="transition-all duration-300 opacity-0 group-hover/cover:opacity-100 scale-50 group-hover/cover:scale-100 text-white text-3xl sm:text-4xl md:text-5xl drop-shadow-md">
+                </Icon>
+            </div>
+            <ImageWrapper src={image!} basePath={path.join("content/posts/", getDir(entry.id))} alt="Cover Image"
+                          class="w-full h-full object-cover">
+            </ImageWrapper>
+        </a>
+    )}
 
-    {!hasCover &&
-        <a href={url} aria-label={title} class="!flex btn-regular w-[3.25rem]
-         absolute right-3 top-3 bottom-3 rounded-xl bg-[var(--enter-btn-bg)]
-         hover:bg-[var(--enter-btn-bg-hover)] active:bg-[var(--enter-btn-bg-active)] active:scale-95
-        ">
+    <!-- 无封面时的右侧快速进入按钮 -->
+    {!hasCover && (
+        <a href={url} aria-label={title}
+           class="!flex btn-regular w-10 sm:w-12 h-[calc(100%-1.25rem)] sm:h-[calc(100%-1.5rem)] my-auto mr-2.5 sm:mr-3 rounded-xl bg-[var(--enter-btn-bg)] hover:bg-[var(--enter-btn-bg-hover)] active:bg-[var(--enter-btn-bg-active)] active:scale-95 shrink-0 items-center justify-center transition-all">
             <Icon name="material-symbols:chevron-right-rounded"
-                  class="transition text-[var(--primary)] text-4xl mx-auto">
+                  class="transition text-[var(--primary)] text-2xl sm:text-3xl">
             </Icon>
         </a>
-    }
+    )}
 </div>
 
-<style define:vars={{coverWidth}}>
+<style>
+    /* 标题悬浮平滑滑动（Marquee）效果 */
+    .post-title-wrapper {
+        mask-image: linear-gradient(to right, black calc(100% - 20px), transparent 100%);
+        -webkit-mask-image: linear-gradient(to right, black calc(100% - 20px), transparent 100%);
+    }
+
+    .post-title-wrapper.is-overflowing:hover .post-title-track {
+        animation: title-marquee var(--scroll-duration, 4s) cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+    }
+
+    @keyframes title-marquee {
+        0%, 15% {
+            transform: translateX(0);
+        }
+        85%, 100% {
+            transform: translateX(var(--scroll-distance, 0px));
+        }
+    }
 </style>
+
+<script>
+    function initPostTitleMarquee() {
+        const wrappers = document.querySelectorAll('.post-title-wrapper');
+        
+        wrappers.forEach(wrapper => {
+            const track = wrapper.querySelector('.post-title-track') as HTMLElement | null;
+            if (!track) return;
+
+            const checkOverflow = () => {
+                const scrollWidth = track.scrollWidth;
+                const clientWidth = wrapper.clientWidth;
+                const overflowDist = scrollWidth - clientWidth;
+
+                if (overflowDist > 4) {
+                    wrapper.classList.add('is-overflowing');
+                    // 额外预留 12px 确保最后一个字完全露出来
+                    const totalDist = -(overflowDist + 12);
+                    wrapper.style.setProperty('--scroll-distance', `${totalDist}px`);
+                    // 根据溢出长度自适应动画时间，每秒约滚动 40px，最少 3 秒
+                    const duration = Math.max(3, (overflowDist / 35)).toFixed(2);
+                    wrapper.style.setProperty('--scroll-duration', `${duration}s`);
+                } else {
+                    wrapper.classList.remove('is-overflowing');
+                }
+            };
+
+            wrapper.addEventListener('mouseenter', checkOverflow);
+            // 触摸屏设备也支持 touchstart 计算
+            wrapper.addEventListener('touchstart', checkOverflow, { passive: true });
+        });
+    }
+
+    // 初始化执行并支持 Swup 页面无刷新路由切换
+    initPostTitleMarquee();
+    document.addEventListener('swup:contentReplaced', initPostTitleMarquee);
+</script>
