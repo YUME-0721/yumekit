@@ -177,19 +177,54 @@ socket = /tmp/mysql.sock
 default-character-set = utf8mb4
 ```
 
-#### 5. 初始化数据库与启动
+#### 5. 初始化数据库并启动服务
 ```bash title="系统终端"
-# 初始化数据目录（注意保存输出末尾的临时密码）
+# 1. 初始化数据目录（⚠️ 注意终端输出末尾生成的临时密码，形如：[Server] root@localhost: xxxxxxxx）
 sudo /usr/local/mysql/bin/mysqld --initialize --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
 
-# 配置环境变量
-echo 'export PATH=$PATH:/usr/local/mysql/bin' | sudo tee -a /etc/profile
-source /etc/profile
-
-# 配置服务脚本并启动
+# 2. 配置 Systemd/SysVinit 服务脚本并启动
 sudo cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysql
+sudo chmod +x /etc/init.d/mysql
 sudo systemctl daemon-reload
-sudo service mysql start
+sudo systemctl start mysql
+sudo systemctl enable mysql
+```
+
+#### 6. 将 MySQL 命令加入 PATH 环境变量
+为方便直接在任意终端使用 `mysql`、`mysqldump` 等命令，将二进制路径写入全局环境变量：
+
+```bash title="系统终端"
+# 方案 A（推荐）：写入 /etc/profile.d 全局脚本
+echo 'export PATH=$PATH:/usr/local/mysql/bin' | sudo tee /etc/profile.d/mysql.sh
+source /etc/profile.d/mysql.sh
+
+# 方案 B（软链接方式）：直接链接到 /usr/local/bin
+sudo ln -sf /usr/local/mysql/bin/mysql /usr/local/bin/mysql
+sudo ln -sf /usr/local/mysql/bin/mysqldump /usr/local/bin/mysqldump
+sudo ln -sf /usr/local/mysql/bin/mysqladmin /usr/local/bin/mysqladmin
+```
+
+#### 7. 首次登录与修改 root 密码
+使用第 5 步中生成的临时初始密码登录并设定正式密码：
+
+```bash title="系统终端"
+# 输入初始化时生成的临时密码
+mysql -u root -p
+```
+
+进入 `mysql>` 提示符后，修改密码并开启远程连接权限（按需）：
+
+```sql title="MySQL 终端"
+-- 1. 修改 root 本地密码
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '你的强密码@123';
+
+-- 2. （可选）允许 root 远程连接，或创建专门的远程运维账户
+-- CREATE USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '你的强密码@123';
+-- GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+
+-- 3. 刷新权限生效
+FLUSH PRIVILEGES;
+EXIT;
 ```
 
 ---
