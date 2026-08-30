@@ -35,17 +35,21 @@ pinned: false
 
 #### 1. Ubuntu / Debian 系统
 
-##### 步骤 1：下载并配置官方 APT 源
+##### 步骤 1：下载配置官方 APT 源并导入最新 GPG 密钥
 ```bash title="Ubuntu / Debian 终端"
 # 1. 下载 MySQL APT 配置包（以官方发布工具为例）
 wget https://dev.mysql.com/get/mysql-apt-config_0.8.32-1_all.deb
 
 # 2. 安装配置工具
 sudo dpkg -i mysql-apt-config_0.8.32-1_all.deb
+
+# 3. 导入官方最新 2025+ GPG 密钥（解决 Ubuntu 24.04/22.04 下 EXPKEYSIG 密钥过期报错）
+wget -qO - https://repo.mysql.com/RPM-GPG-KEY-mysql-2025 | sudo gpg --dearmor --yes -o /usr/share/keyrings/mysql-apt-config.gpg
+sudo cp /usr/share/keyrings/mysql-apt-config.gpg /etc/apt/trusted.gpg.d/mysql.gpg
 ```
 
 > [!TIP]
-> 安装过程中会弹出终端交互界面，选择 **MySQL Server & Cluster**，按需挑选目标版本（如 `mysql-8.0` 或 `mysql-5.7`），最后选择 **Ok** 保存退出。
+> `dpkg -i` 安装过程中会弹出终端交互界面，选择 **MySQL Server & Cluster**，按需挑选目标版本（如 `mysql-8.0` 或 `mysql-5.7`），最后选择 **Ok** 保存退出。
 
 ##### 步骤 2：更新源并查询可用版本
 ```bash title="Ubuntu / Debian 终端"
@@ -65,6 +69,21 @@ sudo apt install -y mysql-server=8.0.35-1ubuntu22.04 mysql-client=8.0.35-1ubuntu
 ##### 步骤 4：锁定版本（防止后续 apt upgrade 自动升级）
 ```bash title="Ubuntu / Debian 终端"
 sudo apt-mark hold mysql-server mysql-client
+```
+
+##### 步骤 5：初始登录与设置 root 密码
+Ubuntu 下默认启用了 `auth_socket` 本地认证，无需密码直接通过 `sudo` 进入：
+```bash title="Ubuntu / Debian 终端"
+# 1. 直接免密进入 MySQL 命令行
+sudo mysql
+
+# 2. 在 MySQL 终端中修改 root 密码并刷新权限
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '你的强密码@123';
+FLUSH PRIVILEGES;
+EXIT;
+
+# 3. 运行安全加固向导（可选，按需禁用匿名用户、远程 root 等）
+sudo mysql_secure_installation
 ```
 
 ---
