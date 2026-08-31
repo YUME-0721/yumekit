@@ -483,14 +483,78 @@ server {
 
 ---
 
-## 🎯 总结速查
+## 🛡️ 六、防火墙端口开放与安全组配置
+
+Nginx 部署完成并启动后，若外部浏览器仍无法访问（报连接超时 `ERR_CONNECTION_TIMED_OUT`），通常是由于 Linux 宿主机防火墙或云厂商安全组未放行对应端口所致。
+
+### 1. `firewalld`（openEuler / CentOS / RHEL / Rocky Linux）
+
+```bash title="openEuler / RHEL 终端"
+# 1. 永久放行 HTTP (80) 与 HTTPS (443) 服务规则
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=https
+
+# 或直接按具体 TCP 端口放行（如自定义 8080 端口）
+sudo firewall-cmd --permanent --add-port=80/tcp
+sudo firewall-cmd --permanent --add-port=443/tcp
+sudo firewall-cmd --permanent --add-port=8080/tcp
+
+# 2. 重新加载防火墙规则使配置立即生效（必须执行）
+sudo firewall-cmd --reload
+
+# 3. 查看当前区域所有已放行的服务与端口列表
+sudo firewall-cmd --list-all
+```
+
+### 2. `ufw`（Ubuntu / Debian）
+
+```bash title="Ubuntu / Debian 终端"
+# 1. 直接放行 Nginx 预设规则（同时包含 80 与 443 端口）
+sudo ufw allow 'Nginx Full'
+
+# 或指定具体 TCP 端口放行
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw allow 8080/tcp
+
+# 2. 重载规则并查看当前防火墙状态
+sudo ufw reload
+sudo ufw status verbose
+```
+
+### 3. `iptables`（通用 / 精简 Linux 发行版）
+
+```bash title="系统终端"
+# 在 INPUT 链首部插入放行规则
+sudo iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+sudo iptables -I INPUT -p tcp --dport 443 -j ACCEPT
+
+# 查看规则链
+sudo iptables -L -n -v --line-numbers
+```
+
+### 4. 🌐 云服务器安全组配置（公网访问关键前提）
+
+> [!IMPORTANT]
+> **公网生产环境避坑**：
+> 如果服务器部署在**阿里云、腾讯云、华为云、AWS、Google Cloud** 等云平台上，除了操作系统内部的防火墙之外，**必须**登录云平台控制台：
+> 1. 进入对应云服务器实例的 **安全组（Security Group）** 页面；
+> 2. 在 **入方向规则（Inbound Rules）** 中新增放行规则：
+>    * **协议类型**：`TCP`
+>    * **端口范围**：`80`（HTTP）、`443`（HTTPS）以及自定义转发业务端口（如 `8080`）
+>    * **授权对象 / 源 IP**：`0.0.0.0/0`（全网公开访问）或指定办公网 IP。
+
+---
+
+## 🎯 七、总结速查
 
 1. **安装决策**：
-   - 生产首选 **官方 APT / YUM 源** 锁定小版本；若需特殊 C 模块则选择 **源码编译安装**。
+   - 生产首选 **官方 APT / YUM 源** 锁定小版本；若需特殊 C 模块则选择 **源码编译安装**；微服务与纯静态站点推荐 **Docker 容器化**。
 2. **生产上线避坑清单**：
    - [ ] 严格确认 `proxy_pass` 尾部是否包含 `/` 斜杠路径意图；
    - [ ] 静态目录权限设置为 `755`，检查 SELinux 上下文；
    - [ ] 全局按需放开 `client_max_body_size` 大小；
    - [ ] WebSocket 接口配置 `Upgrade` 与 `Connection` 请求头；
    - [ ] 开启 `server_tokens off` 隐藏服务器敏感版本信息；
-   - [ ] 每次变更配置前必执行 `nginx -t` 测试语法有效性。
+   - [ ] 每次变更配置前必执行 `nginx -t` 测试语法有效性；
+   - [ ] 检查并放行宿主机防火墙（firewalld / ufw）与云厂商安全组的 80 / 443 端口。
