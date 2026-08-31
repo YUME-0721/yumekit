@@ -19,7 +19,7 @@ export const siteConfig: SiteConfig = {
 	keywords: [],
 	lang: "zh_CN", // 'en', 'zh_CN', 'zh_TW', 'ja', 'ko', 'es', 'th'
 	themeColor: {
-		hue: 345, // 主题颜色的默认色调，范围在 0 到 360 度之间。例如：红色：0 度，青绿色：200 度，青色：250 度，粉色：345 度。
+		hue: 225, // 主题颜色的默认色调，范围在 0 到 360 度之间。例如：红色：0 度，青绿色：200 度，青色：250 度，粉色：345 度。
 		fixed: false, // 隐藏访客端的主题颜色选择器
 		forceDarkMode: false, // 强制启用暗黑模式并隐藏主题切换器
 	},
@@ -36,7 +36,7 @@ export const siteConfig: SiteConfig = {
 		},
 	},
 	background: {
-		enable: true, // 启用背景图片
+		enable: false, // 启用背景图片
 		src: "https://pic.yumekai.top/pic?img=ua", // 背景图片 URL（支持 HTTPS）
 		position: "center", // 背景位置：'top'（顶部）、'center'（居中）、'bottom'（底部）
 		size: "cover", // 背景尺寸：'cover'（覆盖）、'contain'（包含）、'auto'（自动）
