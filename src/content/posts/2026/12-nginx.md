@@ -18,7 +18,7 @@ pinned: false
 
 **Nginx**（发音为 "engine-x"）是一款由俄罗斯工程师 Igor Sysoev 开发的**高性能 HTTP 服务器、反向代理服务器及邮件/通用 TCP/UDP 代理服务器**。它采用异步非阻塞的**事件驱动架构（Event-driven）**与多进程 Master-Worker 模型。
 
-相比于传统的 Apache Prefork 模型，Nginx 在面对**高并发连接（C10K/C100K 问题）**时展现出极低的内存占用与卓越的吞吐性能，是现代 Web 架构中处理动静分离、API 网关、SSL 卸载以及微服务负载均衡的绝对标配。
+相比于传统的 Apache Prefork 模型，Nginx 在面对**高并发连接（C10K/C100K）问题**时展现出极低的内存占用与卓越的吞吐性能，是现代 Web 架构中处理动静分离、API 网关、SSL 卸载以及微服务负载均衡的绝对标配。
 
 ---
 
@@ -32,9 +32,9 @@ Nginx 官方维护两个分支：
 
 ---
 
-### 方法 1：使用 Nginx 官方仓库安装指定版本（推荐）
+### 方法 1：使用包管理器安装指定版本（推荐）
 
-Linux 系统自带的 apt/yum 源中的 Nginx 版本通常滞后较多，建议引入官方源。
+Debian / Ubuntu / CentOS 等传统发行版默认源中的 Nginx 版本可能相对滞后，通常推荐配置 Nginx 官方源；而 **openEuler**、**Anolis OS**、**Alibaba Cloud Linux** 等现代发行版官方软件源中通常已直接收录了 Nginx 软件包，无需额外配置第三方源即可直接安装指定版本。
 
 #### 1. Ubuntu / Debian 系统
 
@@ -95,6 +95,39 @@ sudo yum install -y nginx-1.24.0
 
 ##### 步骤 3：启动并设置开机自启
 ```bash title="系统终端"
+sudo systemctl start nginx
+sudo systemctl enable nginx
+sudo systemctl status nginx
+```
+
+---
+
+#### 3. openEuler / 国产及内置源 Linux 系统
+
+openEuler 等系统的官方镜像源（Base / Everything / Update 仓库）中已预先打包并维护了 Nginx，**无需单独配置 Nginx 官方 `.repo` 文件**，直接使用 `dnf` / `yum` 命令即可检索并安装。
+
+##### 步骤 1：查询系统源中可用的 Nginx 版本
+```bash title="openEuler 终端"
+# 查看系统源中收录的所有 Nginx 版本列表
+dnf list nginx --showduplicates
+# 或使用 yum
+yum list nginx --showduplicates | sort -r
+```
+
+##### 步骤 2：直接安装指定版本或最新版
+```bash title="openEuler 终端"
+# 安装系统源中的指定版本（带上版本号，如 1.21.5）
+sudo dnf install -y nginx-1.21.5
+
+# 或者使用 yum 安装指定版本
+sudo yum install -y nginx-1.21.5
+
+# 若直接安装源中最新可用版本
+sudo dnf install -y nginx
+```
+
+##### 步骤 3：启动并设置开机自启
+```bash title="openEuler 终端"
 sudo systemctl start nginx
 sudo systemctl enable nginx
 sudo systemctl status nginx
