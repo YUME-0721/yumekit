@@ -36,59 +36,133 @@ Tomcat 属于纯 Java 应用，其运行**严格依赖 JDK 环境**。在部署�
 
 ---
 
-### 方法 1：安装前置 JDK 环境
+### 步骤 1：安装前置 JDK 环境并配置 `JAVA_HOME`
 
-无论使用哪种 Tomcat 部署方式，宿主机均需安装对应版本的 JDK（以 OpenJDK 17 为例）：
+无论使用哪种 Tomcat 部署方式，宿主机均需安装对应版本的 JDK（以 **OpenJDK 17** 为例）：
 
-```bash title="Ubuntu / Debian 终端"
-# 安装 OpenJDK 17
+```bash title="Ubuntu / Debian 安装 OpenJDK 17"
+# 1. 更新包索引并安装
 sudo apt update
 sudo apt install -y openjdk-17-jdk
 
-# 验证安装
+# 2. 验证基础命令
 java -version
 ```
 
-```bash title="CentOS / RHEL 终端"
-# 安装 OpenJDK 17
+```bash title="CentOS / openEuler / RHEL 安装 OpenJDK 17"
+# 1. 安装 OpenJDK 17 开发套件（含 javac 工具）
 sudo yum install -y java-17-openjdk-devel
 
-# 验证安装
+# 2. 验证基础命令
 java -version
+```
+
+#### ❓ 疑问解答：通过 yum/apt 安装后需要配置环境变量吗？
+- **普通命令行**：包管理器会自动在 `/usr/bin/` 建立 `java` 软链接，因此直接执行 `java -version` 即可生效，不需要手动在 `PATH` 中追加。
+- **Tomcat 生产运行**：**强烈建议配置 `JAVA_HOME`**！Tomcat 的 `startup.sh` / `catalina.sh` 会优先查找 `$JAVA_HOME` 变量。如果不显式配置，在多版本 JDK 并存或 systemd 托管环境下极易报 `Neither the JAVA_HOME nor the JRE_HOME environment variable is defined` 错误。
+
+#### 🔍 如何准确找到 JDK 的真实安装路径？
+不同 Linux 发行版与架构下的 JDK 安装路径略有不同，可使用以下命令精准获取：
+
+```bash title="查询 JDK 真实路径"
+# 方法 A：通过 alternatives 追溯真实软链接目标
+ls -l $(which java)
+# 或执行：
+readlink -f $(which java)
+# openEuler/CentOS 通常输出：/usr/lib/jvm/java-17-openjdk-17.0.19.10-7.oe2403sp4.x86_64/bin/java
+# 则 JAVA_HOME 去掉最后的 /bin/java，即为：/usr/lib/jvm/java-17-openjdk（系统通常会提供一个不带具体补丁小版本的通用软链接目录）
+
+# 方法 B：查看系统所有注册的 Java 环境
+alternatives --display java
+```
+
+#### 写入全局环境变量（推荐）：
+```bash title="配置全局 JAVA_HOME"
+# 写入 profile.d 独立环境配置文件
+sudo tee /etc/profile.d/java.sh << 'EOF'
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+export PATH=$JAVA_HOME/bin:$PATH
+export CLASSPATH=.:$JAVA_HOME/lib
+EOF
+
+# 立即刷新环境变量
+source /etc/profile.d/java.sh
+
+# 验证 JAVA_HOME 是否正确输出
+echo $JAVA_HOME
 ```
 
 ---
 
-### 方法 2：通用二进制压缩包安装指定版本（推荐）
+### 步骤 2：下载并解压指定版本 Tomcat
 
-通过 Apache 官方归档源下载精确小版本（以 **Tomcat 9.0.86** 和 **Tomcat 10.1.19** 为例）。
+通过 Apache 官方归档源下载稳定版本（以 **Tomcat 9.0.86** 为例，如需 Tomcat 10 请替换对应版本号）：
 
-#### 1. 下载与解压
-```bash title="系统终端"
-# 创建安装目录
+```bash title="下载与目录初始化"
+# 1. 创建统一软件目录
 sudo mkdir -p /opt/tomcat
 
-# 下载指定版本的 Tomcat 二进制包（以 9.0.86 为例）
+# 2. 下载 Tomcat 9 二进制包
 wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.86/bin/apache-tomcat-9.0.86.tar.gz
 
-# 解压并重命名
+# 3. 解压并规范重命名
 sudo tar -zxvf apache-tomcat-9.0.86.tar.gz -C /opt/tomcat/
 sudo mv /opt/tomcat/apache-tomcat-9.0.86 /opt/tomcat/tomcat9
+
+# 4. 创建专用 pid 与临时目录
+sudo mkdir -p /opt/tomcat/tomcat9/temp
 ```
 
-#### 2. 创建专用运行用户与目录提权
-```bash title="系统终端"
-# 创建不可登录的 tomcat 系统用户与组
+---
+
+### 步骤 3：创建专用运行用户与目录提权
+
+生产环境中**严禁使用 root 用户直接运行 Web 容器**，以防被利用后沦陷整机：
+
+```bash title="权限与用户设置"
+# 1. 创建不可登录的 tomcat 系统用户与用户组
 sudo groupadd tomcat
 sudo useradd -s /bin/false -g tomcat -d /opt/tomcat/tomcat9 tomcat
 
-# 赋予目录归属与脚本执行权限
+# 2. 赋予目录归属与脚本执行权限
 sudo chown -R tomcat:tomcat /opt/tomcat/tomcat9
 sudo chmod +x /opt/tomcat/tomcat9/bin/*.sh
 ```
 
-#### 3. 配置 Systemd 系统守护进程服务
-创建系统服务文件 `/etc/systemd/system/tomcat.service`：
+---
+
+### 步骤 4：标准化配置 `bin/setenv.sh`（推荐实践）
+
+Tomcat 官方推荐将 JVM 参数、内存分配、字符编码独立维护在 `bin/setenv.sh` 中，无需侵入修改 `catalina.sh`：
+
+```bash title="创建并写入 /opt/tomcat/tomcat9/bin/setenv.sh"
+sudo tee /opt/tomcat/tomcat9/bin/setenv.sh << 'EOF'
+#!/bin/bash
+# JDK 环境变量绑定
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+export JRE_HOME=$JAVA_HOME
+
+# 进程 PID 记录文件（便于精准终止）
+export CATALINA_PID=/opt/tomcat/tomcat9/temp/tomcat.pid
+
+# JVM 内存与垃圾回收器调优（根据服务器配置调整，建议初始 512M 最大 1024M）
+export CATALINA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -server"
+
+# 解决中文乱码与防启动卡顿熵池配置
+export JAVA_OPTS="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom -Djava.awt.headless=true"
+EOF
+
+# 赋予执行权限与归属
+sudo chmod +x /opt/tomcat/tomcat9/bin/setenv.sh
+sudo chown tomcat:tomcat /opt/tomcat/tomcat9/bin/setenv.sh
+```
+
+---
+
+### 步骤 5：配置 Systemd 系统守护进程服务
+
+创建系统服务管理文件 `/etc/systemd/system/tomcat.service`：
+
 ```ini title="/etc/systemd/system/tomcat.service"
 [Unit]
 Description=Apache Tomcat Web Application Container
@@ -100,16 +174,13 @@ Type=forking
 User=tomcat
 Group=tomcat
 
-# 根据实际 JDK 路径配置（可用 update-alternatives --config java 查询）
-Environment="JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64"
+Environment="JAVA_HOME=/usr/lib/jvm/java-17-openjdk"
 Environment="CATALINA_PID=/opt/tomcat/tomcat9/temp/tomcat.pid"
 Environment="CATALINA_HOME=/opt/tomcat/tomcat9"
 Environment="CATALINA_BASE=/opt/tomcat/tomcat9"
-Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseG1GC"
-Environment="JAVA_OPTS=-Djava.awt.headless=true -Dfile.encoding=UTF-8"
 
 ExecStart=/opt/tomcat/tomcat9/bin/startup.sh
-ExecStop=/opt/tomcat/tomcat9/bin/shutdown.sh
+ExecStop=/opt/tomcat/tomcat9/bin/shutdown.sh 10 -force
 
 RestartSec=10
 Restart=always
@@ -118,22 +189,137 @@ Restart=always
 WantedBy=multi-user.target
 ```
 
-#### 4. 重新加载并管理服务
-```bash title="系统终端"
-# 重新加载 systemd 配置
+---
+
+### 步骤 6：配置 Linux 防火墙与云安全组（解决无法访问的关键）
+
+在外部浏览器访问 `http://服务器IP:8080` 前，必须确保本地防火墙和云厂商安全组均已放行 8080 端口：
+
+#### 1. Linux 本机防火墙放行
+
+```bash title="CentOS / openEuler / RHEL (firewalld)"
+# 1. 检查防火墙是否在运行
+sudo systemctl status firewalld
+
+# 2. 永久开放 TCP 8080 端口
+sudo firewall-cmd --zone=public --add-port=8080/tcp --permanent
+
+# 3. 重新加载规则使其立即生效
+sudo firewall-cmd --reload
+
+# 4. 验证端口是否已成功放行
+sudo firewall-cmd --query-port=8080/tcp
+# 输出 yes 即表示放行成功
+```
+
+```bash title="Ubuntu / Debian (UFW)"
+# 开放 8080 端口
+sudo ufw allow 8080/tcp
+sudo ufw reload
+```
+
+#### 2. 云服务器安全组配置（必查！）
+若服务器部署在阿里云、腾讯云、华为云、AWS、腾讯云轻量等云平台，系统内置防火墙放行后，**还必须在云控制台安全组入方向规则中添加一条放行规则**：
+- **协议类型**：`TCP`
+- **端口范围**：`8080`
+- **授权对象/源 IP**：`0.0.0.0/0`（全网开放）或指定你的客户端公网 IP。
+
+---
+
+### 步骤 7：启动服务与全链路验证
+
+```bash title="启动并验证"
+# 1. 重新加载 systemd 配置
 sudo systemctl daemon-reload
 
-# 启动 Tomcat 并设置开机自启
+# 2. 启动 Tomcat 服务
 sudo systemctl start tomcat
+
+# 3. 设置开机自启
 sudo systemctl enable tomcat
 
-# 查看服务运行状态
+# 4. 检查服务运行状态（Active: active (running) 说明成功）
 sudo systemctl status tomcat
+
+# 5. 本地终端测试 HTTP 连通性
+curl -I http://127.0.0.1:8080
+# 正常应返回 HTTP/1.1 200 或 302
 ```
 
 ---
 
-## 🐳 二、Linux 下使用 Docker 快速部署 Tomcat
+## 📋 二、Tomcat 日志体系与日常查看排查
+
+Tomcat 的全部运行与访问日志存放在 `$CATALINA_HOME/logs/` 目录下（本文路径为 `/opt/tomcat/tomcat9/logs/`）：
+
+| 日志文件名 | 记录内容与定位场景 |
+| :--- | :--- |
+| **`catalina.out`** | **核心控制台标准输出**：包含 JVM 启动日志、未捕获异常堆栈、应用中 `System.out.println` 输出等，**排错首选**。 |
+| **`catalina.YYYY-MM-DD.log`** | Tomcat 容器自身引擎与组件生命周期日志。 |
+| **`localhost.YYYY-MM-DD.log`** | Web 应用程序 Context 初始化、Filter 加载及 Servlet 运行异常。 |
+| **`localhost_access_log.YYYY-MM-DD.txt`** | **HTTP 访问请求日志**：记录客户端来源 IP、访问时间、请求路径、HTTP 状态码及耗时。 |
+
+### 常用日志排查命令：
+```bash title="常用日志跟踪命令"
+cd /opt/tomcat/tomcat9/logs
+
+# 1. 实时跟踪控制台最新日志输出（启动/报错联调最常用）
+tail -f catalina.out
+
+# 2. 查看最近 200 行日志并支持滚动翻页
+tail -n 200 catalina.out | less
+
+# 3. 在日志中检索致命错误或异常堆栈（忽略大小写）
+grep -in -C 5 "exception\|error" catalina.out
+
+# 4. 查看今天的 HTTP 请求访问记录
+tail -f localhost_access_log.$(date +%F).txt
+```
+
+---
+
+## 🔍 三、服务无法访问？5 步漏斗排查指南
+
+如果在浏览器输入 `http://<服务器IP>:8080` 出现无法连接、超时或报错，请按照以下标准顺序逐步排查：
+
+```mermaid
+flowchart TD
+    A[外部浏览器无法访问 8080] --> B[第 1 步：检查 Tomcat 进程状态]
+    B -- 进程不存在/挂掉 --> B1[查看 logs/catalina.out 启动报错]
+    B -- 正常 active running --> C[第 2 步：检查 8080 端口监听]
+    C -- 8080 未监听 --> C1[检查 conf/server.xml 配置与端口冲突]
+    C -- 8080 正在监听 --> D[第 3 步：本地回环测试 curl]
+    D -- 报 404/500 --> D1[检查 webapps 部署目录及 ROOT 项目]
+    D -- 正常响应 200 --> E[第 4 步：检查 Linux 系统防火墙]
+    E -- 端口未放行 --> E1[执行 firewall-cmd 放行 8080]
+    E -- 本机防火墙已放行 --> F[第 5 步：检查云厂商安全组/公网路由]
+```
+
+```bash title="排错命令工具箱"
+# 第 1 步：检查进程与服务状态
+sudo systemctl status tomcat
+# 或直接看 Java 进程
+ps -ef | grep tomcat
+
+# 第 2 步：查看 8080 端口是否正处于 LISTEN 监听状态
+sudo ss -tulpn | grep 8080
+# 正常应显示类似：LISTEN  0  100  *:8080  *:*  users:(("java",pid=...,fd=...))
+
+# 第 3 步：在服务器内部测试本机能否连通
+curl -I http://127.0.0.1:8080
+
+# 第 4 步：检查防火墙规则是否真正生效
+sudo firewall-cmd --list-ports
+
+# 第 5 步：如果开启了 SELinux，可临时排查是否被策略拦截
+getenforce
+# 若为 Enforcing 且怀疑被拦截，可临时测试：
+sudo setenforce 0
+```
+
+---
+
+## 🐳 四、Linux 下使用 Docker 快速部署 Tomcat
 
 使用 Docker 可以在同一台机器上秒级运行任意特定版本（如 Tomcat 8.5、9.0、10.1），彻底免去宿主机配置多版本 JDK 的繁琐流程。
 
@@ -183,7 +369,7 @@ docker compose logs -f
 
 ---
 
-## ⚖️ 三、Docker 部署 vs 传统宿主机部署优劣对比
+## ⚖️ 五、Docker 部署 vs 传统宿主机部署优劣对比
 
 | 评估维度 | Docker 容器化部署 | 传统宿主机/裸机部署 (Systemd 托管) |
 | :--- | :--- | :--- |
@@ -200,7 +386,7 @@ docker compose logs -f
 
 ---
 
-## ⚠️ 四、新手最容易犯错的关键坑点与解决方案
+## ⚠️ 六、新手最容易犯错的关键坑点与解决方案
 
 ---
 
@@ -301,7 +487,7 @@ JAVA_OPTS="$JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
 
 ---
 
-## 📋 五、生产环境通用优化配置模板（`server.xml`）
+## ⚙️ 七、生产环境通用优化配置模板（`server.xml`）
 
 一份优化过连接器并发、禁用 AJP 漏洞端口并隐藏敏感版本的生产配置：
 
@@ -348,7 +534,7 @@ JAVA_OPTS="$JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
 
 ---
 
-## 🎯 总结速查
+## 🎯 八、总结速查
 
 1. **版本匹配**：
    - 传统 Java EE 8 / `javax.*` 项目首选 **Tomcat 9.0.x**。
