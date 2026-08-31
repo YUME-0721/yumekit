@@ -14,7 +14,7 @@ export const siteConfig: SiteConfig = {
 	title: "放课后の技术部",
 	subtitle: "",
 	description:
-		"分享网络技术、服务器部署、内网穿透、静态网站搭建、CDN优化、容器化部署等技术教程与实践经验的个人技术博客，专注于云原生、无服务器架构和前后端开发，作者为YUME",
+		"分享网络技术、服务器部署、内网穿透、Linux运维、容器化部署、静态网站搭建、CDN优化等技术教程与实践经验的个人技术博客，专注于云原生、无服务器架构和前后端开发，作者为YUME",
 
 	keywords: [],
 	lang: "zh_CN", // 'en', 'zh_CN', 'zh_TW', 'ja', 'ko', 'es', 'th'

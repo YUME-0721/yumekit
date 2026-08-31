@@ -1,12 +1,11 @@
 ---
 import { Icon } from "astro-icon/components";
-import { navBarConfig, siteConfig } from "../config";
+import { navBarConfig } from "../config";
 import { LinkPresets } from "../constants/link-presets";
 import { LinkPreset, type NavBarLink } from "../types/config";
 import { url } from "../utils/url-utils";
 
 import Search from "./Search.svelte";
-import DisplaySettings from "./widget/DisplaySettings.svelte";
 import NavMenuPanel from "./widget/NavMenuPanel.astro";
 interface Props {
 	class?: string;
@@ -108,18 +107,12 @@ function isCurrentLink(targetUrl: string): boolean {
         </div>
         <div class="flex items-center gap-1">
             <Search isHeroHome={true} client:only="svelte"></Search>
-            {!siteConfig.themeColor.fixed && (
-                    <button aria-label="Display Settings" class="btn-plain scale-animation active:scale-90 flex items-center justify-center h-10 w-10 rounded-full" id="display-settings-switch">
-                        <Icon name="material-symbols:palette-outline" class="text-[1.25rem]"></Icon>
-                    </button>
-            )}
 
             <button aria-label="Menu" name="Nav Menu" class="btn-plain scale-animation active:scale-90 md:!hidden flex items-center justify-center h-10 w-10 rounded-full" id="nav-menu-switch">
                 <Icon name="material-symbols:menu-rounded" class="text-[1.25rem]"></Icon>
             </button>
         </div>
         <NavMenuPanel links={links}></NavMenuPanel>
-        <DisplaySettings client:only="svelte"></DisplaySettings>
     </div>
 </div>
 
@@ -148,16 +141,6 @@ function isCurrentLink(targetUrl: string): boolean {
 
 <script>
 function loadButtonScript() {
-    let settingBtn = document.getElementById("display-settings-switch");
-    if (settingBtn) {
-        settingBtn.onclick = function () {
-            let settingPanel = document.getElementById("display-setting");
-            if (settingPanel) {
-                settingPanel.classList.toggle("float-panel-closed");
-            }
-        };
-    }
-
     let menuBtn = document.getElementById("nav-menu-switch");
     if (menuBtn) {
         menuBtn.onclick = function () {

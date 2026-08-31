@@ -805,22 +805,24 @@ let toc = document.getElementById('toc-wrapper');
 let navbar = document.getElementById('navbar-wrapper');
 function scrollFunction() {
 	let bannerHeight = window.innerHeight * (BANNER_HEIGHT / 100);
+	let bttBtn = document.getElementById('back-to-top-btn') || backToTopBtn;
+	let gtcBtn = document.getElementById('go-to-comments-btn') || goToCommentsBtn;
 
-	if (backToTopBtn) {
+	if (bttBtn) {
 		if (document.body.scrollTop > bannerHeight || document.documentElement.scrollTop > bannerHeight) {
-			backToTopBtn.classList.remove('hide');
+			bttBtn.classList.remove('hide');
 		} else {
-			backToTopBtn.classList.add('hide');
+			bttBtn.classList.add('hide');
 		}
 	}
 
-    if (goToCommentsBtn) {
+    if (gtcBtn) {
         // Only show if comments exist and scrolled down
         const commentsExist = !!document.getElementById('giscus-container');
         if (commentsExist && (document.body.scrollTop > bannerHeight || document.documentElement.scrollTop > bannerHeight)) {
-            goToCommentsBtn.classList.remove('hide');
+            gtcBtn.classList.remove('hide');
         } else {
-            goToCommentsBtn.classList.add('hide');
+            gtcBtn.classList.add('hide');
         }
     }
 

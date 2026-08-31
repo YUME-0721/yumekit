@@ -1,53 +1,95 @@
 ---
 import { Icon } from "astro-icon/components";
+import { siteConfig } from "@/config";
+import DisplaySettings from "../widget/DisplaySettings.svelte";
 ---
 
-<!-- There can't be a filter on parent element, or it will break `fixed` -->
-<div class="back-to-top-wrapper hidden lg:block">
-    <div id="go-to-comments-btn" class="back-to-top-btn hide flex items-center rounded-2xl overflow-hidden transition" onclick="goToComments()">
-        <button aria-label="Go to Comments" class="btn-card h-[3.75rem] w-[3.75rem]">
-            <Icon name="material-symbols:comment-rounded" class="mx-auto"></Icon>
+<!-- 统一右侧浮动控制按钮组（评论区 -> 回到顶部 -> 调节按钮 -> 通知） -->
+<div class="floating-controls-wrapper">
+    <!-- 1. 评论区跳转按钮（页面有评论且滚动时显示） -->
+    <div id="go-to-comments-btn" class="floating-control-btn hide flex items-center rounded-2xl overflow-hidden transition-all duration-300" onclick="goToComments()">
+        <button aria-label="Go to Comments" class="btn-card h-[3.75rem] w-[3.75rem] rounded-2xl text-[var(--primary)] hover:scale-105 active:scale-95 transition-transform">
+            <Icon name="material-symbols:comment-rounded" class="text-2xl mx-auto"></Icon>
         </button>
     </div>
-    <div id="back-to-top-btn" class="back-to-top-btn hide flex items-center rounded-2xl overflow-hidden transition" onclick="backToTop()">
-        <button aria-label="Back to Top" class="btn-card h-[3.75rem] w-[3.75rem]">
-            <Icon name="material-symbols:keyboard-arrow-up-rounded" class="mx-auto"></Icon>
+
+    <!-- 2. 回到顶部按钮（滚动一段距离后显示） -->
+    <div id="back-to-top-btn" class="floating-control-btn hide flex items-center rounded-2xl overflow-hidden transition-all duration-300" onclick="backToTop()">
+        <button aria-label="Back to Top" class="btn-card h-[3.75rem] w-[3.75rem] rounded-2xl text-[var(--primary)] hover:scale-105 active:scale-95 transition-transform">
+            <Icon name="material-symbols:keyboard-arrow-up-rounded" class="text-2xl mx-auto"></Icon>
         </button>
     </div>
+
+    <!-- 3. 背景色/主题/彩虹模式/模糊调节按钮 -->
+    {!siteConfig.themeColor.fixed && (
+        <div id="display-settings-btn" class="floating-control-btn flex items-center rounded-2xl overflow-hidden transition-all duration-300">
+            <button id="display-settings-switch" aria-label="Display Settings" class="btn-card h-[3.75rem] w-[3.75rem] rounded-2xl text-[var(--primary)] hover:scale-105 active:scale-95 transition-transform" onclick="toggleDisplaySettings()">
+                <Icon name="material-symbols:palette-outline" class="text-2xl mx-auto"></Icon>
+            </button>
+        </div>
+    )}
+
+    <!-- 调节设置弹出面板 -->
+    <DisplaySettings client:only="svelte" />
 </div>
 
-<style lang="stylus">
-.back-to-top-wrapper
-    width: 3.75rem
-    height: 3.75rem
-    position: absolute
-    right: 0
-    top: 0
-    pointer-events: none
+<style>
+.floating-controls-wrapper {
+    position: relative;
+    pointer-events: none;
+    z-index: 50;
+}
 
-.back-to-top-btn
-    color: var(--primary)
-    font-size: 2.25rem
-    font-weight: bold
-    border: none
-    position: fixed
-    bottom: 10rem
-    opacity: 1
-    cursor: pointer
-    transform: translateX(5rem)
-    pointer-events: auto
-    z-index: 50
-    i
-        font-size: 1.75rem
-    &.hide
-        transform: translateX(5rem) scale(0.9)
-        opacity: 0
-        pointer-events: none
-    &:active
-      transform: translateX(5rem) scale(0.9)
+.floating-control-btn {
+    position: fixed;
+    right: 1rem;
+    z-index: 50;
+    pointer-events: auto;
+    cursor: pointer;
+    transform: scale(1);
+    opacity: 1;
+}
 
-#go-to-comments-btn
-    bottom: 14.5rem
+@media (min-width: 1024px) {
+    .floating-control-btn {
+        right: auto;
+        left: calc(50% + var(--page-width) / 2 + 1.25rem);
+    }
+}
+
+/* 从上到下垂直排列高度计算 */
+#go-to-comments-btn {
+    bottom: 13.75rem;
+}
+@media (min-width: 1024px) {
+    #go-to-comments-btn {
+        bottom: 19rem;
+    }
+}
+
+#back-to-top-btn {
+    bottom: 9.5rem;
+}
+@media (min-width: 1024px) {
+    #back-to-top-btn {
+        bottom: 14.5rem;
+    }
+}
+
+#display-settings-btn {
+    bottom: 5.25rem;
+}
+@media (min-width: 1024px) {
+    #display-settings-btn {
+        bottom: 10rem;
+    }
+}
+
+.floating-control-btn.hide {
+    transform: scale(0.85);
+    opacity: 0;
+    pointer-events: none;
+}
 </style>
 
 <script is:raw is:inline>
@@ -59,6 +101,13 @@ function goToComments() {
     const comments = document.getElementById('giscus-container');
     if (comments) {
         comments.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function toggleDisplaySettings() {
+    const settingPanel = document.getElementById("display-setting");
+    if (settingPanel) {
+        settingPanel.classList.toggle("float-panel-closed");
     }
 }
 </script>
