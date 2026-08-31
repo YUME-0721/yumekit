@@ -1,6 +1,7 @@
 ---
 // @ts-nocheck
 import { Icon } from "astro-icon/components";
+import { url } from "@utils/url-utils";
 ---
 
 <style>
@@ -92,7 +93,7 @@ import { Icon } from "astro-icon/components";
                 <div class="flex items-center gap-2 text-[var(--primary)]">
                     <Icon name="material-symbols:notifications-rounded" class="text-xl shrink-0" />
                     <h3 class="font-bold text-black dark:text-white text-base">发现新文章</h3>
-                    <a href="/posts/post-diff-guide/#食用方法" class="ml-1 text-xs text-[var(--primary)] hover:underline opacity-80" title="查看食用方法">
+                    <a href={url("/posts/post-diff-guide/#食用方法")} class="ml-1 text-xs text-[var(--primary)] hover:underline opacity-80" title="查看食用方法">
                         <Icon name="material-symbols:help-outline-rounded" class="text-base" />
                     </a>
                 </div>
@@ -391,9 +392,9 @@ import { Icon } from "astro-icon/components";
         
         // Show timestamp header
         let html = `
-            <div class="text-xs text-gray-500 dark:text-gray-400 mb-2 px-1 flex flex-col gap-0.5">
-                <div class="font-medium">发现更新</div>
-                <div class="opacity-70 text-[10px]">${initTimeStr} - ${checkTimeStr}</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mb-2 px-1 flex items-center justify-between gap-1.5">
+                <span class="font-medium shrink-0">发现更新</span>
+                <span class="opacity-70 text-[10px]">${initTimeStr} - ${checkTimeStr}</span>
             </div>`;
         
         newPosts.forEach(post => {
@@ -569,6 +570,26 @@ import { Icon } from "astro-icon/components";
                     updatePanelTargetSize()
                 })
                 panel.setAttribute('data-resize-listening', 'true')
+            }
+
+            if (!panel.hasAttribute('data-click-outside-listening')) {
+                document.addEventListener('click', (e) => {
+                    if (!panel.classList.contains('is-open')) return;
+                    const target = e.target;
+                    if (!(target instanceof Node)) return;
+                    if (panel.contains(target)) return;
+                    closePanel();
+                });
+                panel.setAttribute('data-click-outside-listening', 'true');
+            }
+
+            if (!panel.hasAttribute('data-escape-listening')) {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && panel.classList.contains('is-open')) {
+                        closePanel();
+                    }
+                });
+                panel.setAttribute('data-escape-listening', 'true');
             }
         }
         

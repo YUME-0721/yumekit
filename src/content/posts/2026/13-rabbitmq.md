@@ -36,7 +36,7 @@ RabbitMQ 的底层强依赖于 **Erlang/OTP** 运行环境。在安装前必须�
 
 ---
 
-### 方法 1：使用 Cloudsmith 官方仓库安装指定版本（推荐）
+### 步骤 1：使用官方仓库安装 Erlang 与 RabbitMQ 指定版本
 
 #### 1. Ubuntu / Debian 系统
 
@@ -63,30 +63,162 @@ sudo apt install -y rabbitmq-server=3.13.0-1
 
 ---
 
-#### 2. CentOS / RHEL / Rocky Linux 系统
+#### 2. CentOS / RHEL / Rocky Linux / openEuler 系统
 
-```bash title="CentOS / RHEL 终端"
-# 1. 配置 Erlang 官方仓库
+```bash title="CentOS / RHEL / openEuler 终端"
+# 1. 配置 Erlang 官方仓库脚本
 curl -s https://packagecloud.io/install/repositories/rabbitmq/erlang/script.rpm.sh | sudo bash
 
-# 2. 配置 RabbitMQ 官方仓库
+# 2. 配置 RabbitMQ 官方仓库脚本
 curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
 
-# 3. 查看可用版本并安装指定小版本
+# 3. 查看可用版本并安装指定版本
 sudo yum list rabbitmq-server --showduplicates | sort -r
 sudo yum install -y erlang
 sudo yum install -y rabbitmq-server-3.13.0-1.el8
 ```
 
-##### 步骤 3：启动服务与启用 Web 管理插件
+---
+
+### 步骤 2：验证 Erlang 与 RabbitMQ 安装版本
+
+在启动服务前，先验证底层 Erlang 运行时和 RabbitMQ 二进制是否正确就绪：
+
 ```bash title="系统终端"
-# 启动 RabbitMQ
+# 1. 验证 Erlang/OTP 大版本（例如输出 "26"）
+erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell
+
+# 2. 验证 RabbitMQ 软件包版本
+# CentOS / RHEL / openEuler:
+rpm -qa | grep rabbitmq-server
+
+# Ubuntu / Debian:
+dpkg -l | grep rabbitmq-server
+```
+
+---
+
+### 步骤 3：启动服务、设置开机自启与状态检查
+
+RabbitMQ 安装后默认注册为 Systemd 服务 `rabbitmq-server`：
+
+```bash title="系统终端"
+# 1. 重新加载 systemd 配置
+sudo systemctl daemon-reload
+
+# 2. 启动 RabbitMQ 服务并设置开机自启
 sudo systemctl start rabbitmq-server
 sudo systemctl enable rabbitmq-server
 
-# 启用网页管理后台插件（端口 15672）
-sudo rabbitmq-plugins enable rabbitmq_management
+# 3. 检查服务运行状态（Active: active (running) 说明成功）
+sudo systemctl status rabbitmq-server
+
+# 4. 使用 CLI 管理工具查看节点健康状态
+sudo rabbitmqctl status
 ```
+
+---
+
+### 步骤 4：配置 Linux 防火墙与云安全组（放行关键端口）
+
+RabbitMQ 涉及客户端通信、管理后台以及集群同步等多个端口，需按需放行：
+
+| 端口号 | 协议 | 作用说明 | 必开场景 |
+| :--- | :--- | :--- | :--- |
+| **`5672`** | TCP | **AMQP 0-9-1 / 1.0 协议端口** | 客户端生产与消费消息（Java / Python / Go 连接与业务数据交互） |
+| **`15672`** | TCP | **HTTP API 与 Web 管理控制台** | 浏览器登录管理 UI、运维监控看板与 Prometheus 指标拉取 |
+| **`25672`** | TCP | **Erlang 分布式节点通信端口** | 构建 RabbitMQ 分布式高可用集群及 CLI 工具交互通信 |
+| **`4369`** | TCP | **EPMD（Erlang 端口映射守护进程）** | Erlang 节点发现与集群内部通信 |
+
+#### 1. firewalld（openEuler / CentOS / RHEL / Rocky Linux）
+```bash title="openEuler / RHEL (firewalld)"
+# 1. 检查防火墙状态
+sudo systemctl status firewalld
+
+# 2. 放行 AMQP (5672)、Web 控制台 (15672) 及节点集群 (25672, 4369) 端口
+sudo firewall-cmd --permanent --add-port=5672/tcp
+sudo firewall-cmd --permanent --add-port=15672/tcp
+sudo firewall-cmd --permanent --add-port=25672/tcp
+sudo firewall-cmd --permanent --add-port=4369/tcp
+
+# 3. 重新加载规则使其生效（必须执行）
+sudo firewall-cmd --reload
+
+# 4. 验证已放行端口列表
+sudo firewall-cmd --list-ports
+```
+
+#### 2. ufw（Ubuntu / Debian）
+```bash title="Ubuntu / Debian (UFW)"
+# 开放 RabbitMQ 核心端口
+sudo ufw allow 5672/tcp
+sudo ufw allow 15672/tcp
+sudo ufw allow 25672/tcp
+sudo ufw allow 4369/tcp
+
+# 重载规则并查看状态
+sudo ufw reload
+sudo ufw status verbose
+```
+
+#### 3. iptables（通用 Linux）
+```bash title="系统终端"
+sudo iptables -I INPUT -p tcp --dport 5672 -j ACCEPT
+sudo iptables -I INPUT -p tcp --dport 15672 -j ACCEPT
+sudo iptables -I INPUT -p tcp --dport 25672 -j ACCEPT
+sudo iptables -I INPUT -p tcp --dport 4369 -j ACCEPT
+```
+
+#### 4. 🌐 云服务器安全组配置（公网/跨机访问关键前提）
+> [!IMPORTANT]
+> **公网生产环境必查**：
+> 若服务器部署在**阿里云、腾讯云、华为云、AWS** 等云平台：
+> 1. 进入云控制台对应实例的 **安全组（Security Group）** $\rightarrow$ **入方向规则**；
+> 2. 添加 `5672`（业务消息）、`15672`（Web 管理台）以及 `25672`（如需多节点组网）的 `TCP` 放行规则；
+> 3. 出于安全考量，**生产环境的 `15672` Web 管理台建议仅对公司办公网固定 IP 开放**。
+
+---
+
+### 步骤 5：启用 Web 管理控制台插件与创建管理员账号
+
+包管理器安装的 RabbitMQ 默认**未开启 Web 后台插件**，且默认内置的 `guest` 用户出于安全策略**仅允许 `localhost` 访问**。因此必须启用插件并新建远程管理员用户：
+
+```bash title="系统终端"
+# 1. 启用网页管理后台插件（免重启即时生效）
+sudo rabbitmq-plugins enable rabbitmq_management
+
+# 2. 查看当前已启用的插件列表
+sudo rabbitmq-plugins list -e
+
+# 3. 创建专属管理员账号（将 admin 和密码替换为您自定义的强密码）
+sudo rabbitmqctl add_user admin Admin_Password123!
+
+# 4. 为该账号分配 administrator 角色标签
+sudo rabbitmqctl set_user_tags admin administrator
+
+# 5. 为管理员赋予默认 Virtual Host (/) 的所有读、写、配置权限
+sudo rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
+
+# 6. 查看用户列表与角色确认
+sudo rabbitmqctl list_users
+```
+
+---
+
+### 步骤 6：浏览器访问与登录 Web 控制台
+
+```bash title="全链路验证"
+# 1. 本地终端测试 15672 管理端口连通性
+curl -I http://127.0.0.1:15672
+# 正常应返回 HTTP/1.1 200 OK
+```
+
+2. **浏览器登录管理后台**：
+   - 打开浏览器，访问：`http://服务器公网IP:15672`
+   - 输入刚才创建的管理员账号与密码：
+     - **Username**：`admin`
+     - **Password**：`Admin_Password123!`
+   - 点击 **Login** 登录，进入 RabbitMQ Management 控制台首页，即可实时查看集群 Overview、节点 CPU/内存/磁盘水位、Connections、Channels、Exchanges、Queues 等运行指标与消息吞吐速率！
 
 ---
 
@@ -267,7 +399,7 @@ default_pass = YourStrongPassword123!
    - 优先选用 **Docker (`rabbitmq:3.13-management`)**，彻底规避 Erlang 依赖地狱。
 2. **生产上线避坑清单**：
    - [ ] 禁止使用默认 `guest` 账号，创建独立管理员用户；
-   - [ ] 确保防火墙放行 `5672`（AMQP）与 `15672`（Web UI）端口；
+   - [ ] 确保防火墙放行 `5672`（AMQP）、`15672`（Web UI）与 `25672`（节点通信）端口；
    - [ ] 预先规划磁盘容量，配置 `disk_free_limit` 避免突发填满阻塞；
    - [ ] 集群部署务必核对所有节点的 `.erlang.cookie` 散列值与 `400` 权限；
    - [ ] 业务端启用 Publisher Confirm（确认）与 Consumer Manual Ack（手动确认）防止丢消息。

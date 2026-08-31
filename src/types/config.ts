@@ -72,7 +72,7 @@ export type SiteConfig = {
 	};
 	toc: {
 		enable: boolean;
-		depth: 1 | 2 | 3;
+		depth: 1 | 2 | 3 | 4 | 5 | 6;
 	};
 
 	showCoverInContent: false; // 是否在文章正文中显示封面图片（true: 显示，false: 不显示）

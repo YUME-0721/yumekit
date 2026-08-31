@@ -93,13 +93,6 @@ yum list nginx --showduplicates | sort -r
 sudo yum install -y nginx-1.24.0
 ```
 
-##### 步骤 3：启动并设置开机自启
-```bash title="系统终端"
-sudo systemctl start nginx
-sudo systemctl enable nginx
-sudo systemctl status nginx
-```
-
 ---
 
 #### 3. openEuler / 国产及内置源 Linux 系统
@@ -124,13 +117,6 @@ sudo yum install -y nginx-1.21.5
 
 # 若直接安装源中最新可用版本
 sudo dnf install -y nginx
-```
-
-##### 步骤 3：启动并设置开机自启
-```bash title="openEuler 终端"
-sudo systemctl start nginx
-sudo systemctl enable nginx
-sudo systemctl status nginx
 ```
 
 ---
@@ -180,6 +166,12 @@ sudo make install
 ```
 
 #### 4. 创建全局软链与 Systemd 服务
+```bash title="创建软链接"
+# 建立全局命令软链
+sudo ln -sf /usr/local/nginx/sbin/nginx /usr/local/bin/nginx
+```
+
+创建系统服务管理文件 `/etc/systemd/system/nginx.service`：
 ```ini title="/etc/systemd/system/nginx.service"
 [Unit]
 Description=The NGINX HTTP and reverse proxy server
@@ -197,10 +189,91 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target
 ```
+
+---
+
+### 步骤 3：配置 Linux 防火墙与云安全组（解决外部无法访问的关键）
+
+无论采用包管理器还是源码编译安装，在外部浏览器访问 `http://服务器IP` 前，必须确保本地防火墙和云厂商安全组均已放行 80 / 443 端口：
+
+#### 1. firewalld（openEuler / CentOS / RHEL / Rocky Linux）
+```bash title="openEuler / RHEL (firewalld)"
+# 1. 检查防火墙运行状态
+sudo systemctl status firewalld
+
+# 2. 永久放行 HTTP (80) 与 HTTPS (443) 服务规则
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=https
+
+# 或直接按具体 TCP 端口放行（如自定义 8080/8888 端口）
+sudo firewall-cmd --permanent --add-port=80/tcp
+sudo firewall-cmd --permanent --add-port=443/tcp
+sudo firewall-cmd --permanent --add-port=8080/tcp
+
+# 3. 重新加载防火墙规则使配置立即生效（必须执行）
+sudo firewall-cmd --reload
+
+# 4. 验证已放行的服务与端口
+sudo firewall-cmd --list-all
+```
+
+#### 2. ufw（Ubuntu / Debian）
+```bash title="Ubuntu / Debian (UFW)"
+# 1. 直接放行 Nginx 预设规则（同时包含 80 与 443 端口）
+sudo ufw allow 'Nginx Full'
+
+# 或指定具体 TCP 端口放行
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw allow 8080/tcp
+
+# 2. 重载规则并查看当前防火墙状态
+sudo ufw reload
+sudo ufw status verbose
+```
+
+#### 3. iptables（通用 / 精简 Linux 发行版）
 ```bash title="系统终端"
+# 在 INPUT 链首部插入放行规则
+sudo iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+sudo iptables -I INPUT -p tcp --dport 443 -j ACCEPT
+
+# 查看规则链
+sudo iptables -L -n -v --line-numbers
+```
+
+#### 4. 🌐 云服务器安全组配置（公网访问关键前提）
+> [!IMPORTANT]
+> **公网生产环境必查**：
+> 如果服务器部署在**阿里云、腾讯云、华为云、AWS、Google Cloud** 等云平台上，系统内置防火墙放行后，**还必须登录云平台控制台**：
+> 1. 进入对应云服务器实例的 **安全组（Security Group）** 页面；
+> 2. 在 **入方向规则（Inbound Rules）** 中新增放行规则：
+>    * **协议类型**：`TCP`
+>    * **端口范围**：`80`（HTTP）、`443`（HTTPS）以及自定义业务端口（如 `8080`）
+>    * **授权对象 / 源 IP**：`0.0.0.0/0`（全网公开访问）或指定办公网 IP。
+
+---
+
+### 步骤 4：启动服务与全链路连通性验证
+
+```bash title="启动并验证"
+# 1. 重新加载 systemd 配置
 sudo systemctl daemon-reload
+
+# 2. 启动 Nginx 服务并设置开机自启
 sudo systemctl start nginx
 sudo systemctl enable nginx
+
+# 3. 检查服务运行状态（Active: active (running) 说明成功）
+sudo systemctl status nginx
+
+# 4. 本地终端测试 HTTP 连通性
+curl -I http://127.0.0.1
+# 正常应返回 HTTP/1.1 200 OK
+
+# 5. 外部浏览器访问验证
+# 打开浏览器输入：http://服务器公网IP
+# 页面显示 "Welcome to nginx!" 欢迎页即代表整套部署与网络放行圆满成功！
 ```
 
 ---
@@ -483,70 +556,7 @@ server {
 
 ---
 
-## 🛡️ 六、防火墙端口开放与安全组配置
-
-Nginx 部署完成并启动后，若外部浏览器仍无法访问（报连接超时 `ERR_CONNECTION_TIMED_OUT`），通常是由于 Linux 宿主机防火墙或云厂商安全组未放行对应端口所致。
-
-### 1. `firewalld`（openEuler / CentOS / RHEL / Rocky Linux）
-
-```bash title="openEuler / RHEL 终端"
-# 1. 永久放行 HTTP (80) 与 HTTPS (443) 服务规则
-sudo firewall-cmd --permanent --add-service=http
-sudo firewall-cmd --permanent --add-service=https
-
-# 或直接按具体 TCP 端口放行（如自定义 8080 端口）
-sudo firewall-cmd --permanent --add-port=80/tcp
-sudo firewall-cmd --permanent --add-port=443/tcp
-sudo firewall-cmd --permanent --add-port=8080/tcp
-
-# 2. 重新加载防火墙规则使配置立即生效（必须执行）
-sudo firewall-cmd --reload
-
-# 3. 查看当前区域所有已放行的服务与端口列表
-sudo firewall-cmd --list-all
-```
-
-### 2. `ufw`（Ubuntu / Debian）
-
-```bash title="Ubuntu / Debian 终端"
-# 1. 直接放行 Nginx 预设规则（同时包含 80 与 443 端口）
-sudo ufw allow 'Nginx Full'
-
-# 或指定具体 TCP 端口放行
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw allow 8080/tcp
-
-# 2. 重载规则并查看当前防火墙状态
-sudo ufw reload
-sudo ufw status verbose
-```
-
-### 3. `iptables`（通用 / 精简 Linux 发行版）
-
-```bash title="系统终端"
-# 在 INPUT 链首部插入放行规则
-sudo iptables -I INPUT -p tcp --dport 80 -j ACCEPT
-sudo iptables -I INPUT -p tcp --dport 443 -j ACCEPT
-
-# 查看规则链
-sudo iptables -L -n -v --line-numbers
-```
-
-### 4. 🌐 云服务器安全组配置（公网访问关键前提）
-
-> [!IMPORTANT]
-> **公网生产环境避坑**：
-> 如果服务器部署在**阿里云、腾讯云、华为云、AWS、Google Cloud** 等云平台上，除了操作系统内部的防火墙之外，**必须**登录云平台控制台：
-> 1. 进入对应云服务器实例的 **安全组（Security Group）** 页面；
-> 2. 在 **入方向规则（Inbound Rules）** 中新增放行规则：
->    * **协议类型**：`TCP`
->    * **端口范围**：`80`（HTTP）、`443`（HTTPS）以及自定义转发业务端口（如 `8080`）
->    * **授权对象 / 源 IP**：`0.0.0.0/0`（全网公开访问）或指定办公网 IP。
-
----
-
-## 🎯 七、总结速查
+## 🎯 六、总结速查
 
 1. **安装决策**：
    - 生产首选 **官方 APT / YUM 源** 锁定小版本；若需特殊 C 模块则选择 **源码编译安装**；微服务与纯静态站点推荐 **Docker 容器化**。

@@ -1,4 +1,4 @@
-﻿import type {
+import type {
 	ExpressiveCodeConfig,
 	GitHubEditConfig,
 	ImageFallbackConfig,
@@ -46,7 +46,7 @@ export const siteConfig: SiteConfig = {
 	},
 	toc: {
 		enable: true, // 在文章右侧显示目录
-		depth: 2, // 显示目录的最大标题深度，从 1 到 3
+		depth: 3, // 显示目录的最大标题深度（设为 3 可完整显示三级标题 h2、h3、h4）
 	},
 	showCoverInContent: false, // 是否在文章正文中显示封面图片（true: 显示，false: 不显示）
 	favicon: [
