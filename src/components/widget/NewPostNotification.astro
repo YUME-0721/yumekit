@@ -28,12 +28,15 @@ import { url } from "@utils/url-utils";
         overflow: hidden;
         box-sizing: border-box;
         transform-origin: bottom right;
+        border: 1px solid transparent;
         transition:
             width 360ms cubic-bezier(0.4, 0, 0.2, 1),
             height 360ms cubic-bezier(0.4, 0, 0.2, 1),
             border-radius 360ms cubic-bezier(0.4, 0, 0.2, 1),
             transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1),
-            opacity 260ms ease;
+            opacity 260ms ease,
+            border-color 260ms ease,
+            box-shadow 360ms ease;
     }
 
     @media (min-width: 1024px) {
@@ -46,7 +49,11 @@ import { url } from "@utils/url-utils";
         width: var(--np-open-width, min(22rem, calc(100vw - 2rem)));
         height: var(--np-open-height, min(70vh, 34rem));
         border-radius: 1.25rem;
+        border-color: rgba(0, 0, 0, 0.15);
         box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.2);
+    }
+    :global(.dark) #notification-panel.is-open {
+        border-color: rgba(255, 255, 255, 0.2);
     }
     @media (min-width: 1024px) {
         #notification-panel.is-open {
