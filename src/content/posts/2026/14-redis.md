@@ -30,9 +30,11 @@ Redis 演进迅速：
 
 ---
 
-### 方法 1：使用 Redis 官方仓库安装指定版本（推荐）
+### 步骤 1：安装 Redis 指定版本
 
-#### 1. Ubuntu / Debian 系统
+#### 方法 1：使用 Redis 官方仓库安装（推荐）
+
+##### 1. Ubuntu / Debian 系统
 
 ```bash title="Ubuntu / Debian 终端"
 # 1. 导入官方 GPG 密钥
@@ -53,7 +55,7 @@ sudo apt-mark hold redis-server
 
 ---
 
-#### 2. CentOS / RHEL / Rocky Linux 系统
+##### 2. CentOS / RHEL / Rocky Linux 系统
 
 ```bash title="CentOS / RHEL 终端"
 # 安装 EPEL 与 Remi 源（提供最新全量 Redis 版本）
@@ -70,7 +72,7 @@ sudo yum install -y redis
 
 ---
 
-### 方法 2：源码编译安装（任意指定精确版本）
+#### 方法 2：源码编译安装（任意指定精确版本）
 
 Redis 由纯 C 语言编写且无复杂的第三方外部依赖，源码编译速度极快（通常 1 分钟内完成）。
 
@@ -93,25 +95,198 @@ sudo mkdir -p /usr/local/redis/conf /usr/local/redis/data
 sudo cp redis.conf /usr/local/redis/conf/
 ```
 
-配置 Systemd 服务 `/etc/systemd/system/redis.service`：
+> 若采用源码编译安装，可创建 Systemd 单元文件 `/etc/systemd/system/redis.service`：
 ```ini title="/etc/systemd/system/redis.service"
 [Unit]
 Description=Redis In-Memory Data Store
 After=network.target
 
 [Service]
-User=root
+Type=forking
 ExecStart=/usr/local/redis/bin/redis-server /usr/local/redis/conf/redis.conf
-ExecStop=/usr/local/redis/bin/redis-cli -p 6379 -a 'YourStrongPassword123!' shutdown
+ExecStop=/usr/local/redis/bin/redis-cli -p 6379 shutdown
 Restart=always
 
 [Install]
 WantedBy=multi-user.target
 ```
-```bash title="系统终端"
+
+---
+
+### 步骤 2：修改核心配置文件（`redis.conf`）
+
+配置文件默认路径：
+* **Ubuntu / Debian**：`/etc/redis/redis.conf`
+* **CentOS / RHEL**：`/etc/redis/redis.conf` 或 `/etc/redis.conf`
+* **源码编译安装**：`/usr/local/redis/conf/redis.conf`
+
+编辑配置文件，修改关键生产参数：
+
+```conf title="redis.conf 核心配置项"
+# ======================== 网络与绑定 ========================
+# 默认仅监听 127.0.0.1，允许远程或局域网访问需修改为 0.0.0.0 或指定内网 IP
+bind 0.0.0.0
+
+# 默认监听端口（6379）
+port 6379
+
+# 保护模式：若未设置密码且 bind 0.0.0.0，建议开启 protected-mode 防止公网未授权访问
+protected-mode yes
+
+# ======================== 运行模式与进程 ========================
+# 是否以守护进程（后台）方式运行（源码编译或独立启动时建议设为 yes；部分 systemd 配置若为 notify 则遵循系统）
+daemonize yes
+
+# ======================== 安全认证 ========================
+# 强烈建议设置强密码（必须包含大小写字母、数字及特殊符号）
+requirepass YourStrongPassword123!
+
+# ======================== 内存与持久化路径 ========================
+# 最大内存限制（根据服务器规格配置，如 2GB）
+maxmemory 2gb
+
+# 内存淘汰策略（超出限制后优先淘汰过期键）
+maxmemory-policy volatile-lru
+
+# 持久化数据文件与工作目录
+dir /var/lib/redis
+```
+
+---
+
+### 步骤 3：通过 systemctl 管理 Redis 服务
+
+> [!NOTE]
+> * **Ubuntu / Debian 官方包** 服务名称为 `redis-server`
+> * **CentOS / RHEL / 源码编译安装** 服务名称为 `redis`
+
+```bash title="systemctl 服务管理命令"
+# 1. 重新加载 systemd 配置文件
 sudo systemctl daemon-reload
-sudo systemctl start redis
-sudo systemctl enable redis
+
+# 2. 设置开机自启动
+sudo systemctl enable redis-server   # Ubuntu / Debian
+# sudo systemctl enable redis        # CentOS / RHEL / 自建服务
+
+# 3. 启动 Redis 服务
+sudo systemctl start redis-server    # Ubuntu / Debian
+# sudo systemctl start redis         # CentOS / RHEL
+
+# 4. 检查服务运行状态（确认 active (running) 状态）
+sudo systemctl status redis-server   # Ubuntu / Debian
+# sudo systemctl status redis        # CentOS / RHEL
+
+# 5. 常用维护命令：停止与重启
+sudo systemctl stop redis-server     # 停止服务
+sudo systemctl restart redis-server  # 重启服务
+```
+
+---
+
+### 步骤 4：配置防火墙放行 6379 端口
+
+若需要远程连接 Redis 实例，需在系统防火墙中放行 `6379` 端口：
+
+#### 1. Ubuntu / Debian 系统（UFW 防火墙）
+
+```bash title="UFW 防火墙操作"
+# 放行 6379 端口（TCP）
+sudo ufw allow 6379/tcp
+
+# 重新加载防火墙规则
+sudo ufw reload
+
+# 查看放行状态
+sudo ufw status
+```
+
+#### 2. CentOS / RHEL / Rocky Linux 系统（Firewalld 防火墙）
+
+```bash title="Firewalld 防火墙操作"
+# 永久放行 6379 端口
+sudo firewall-cmd --zone=public --add-port=6379/tcp --permanent
+
+# 重新加载生效
+sudo firewall-cmd --reload
+
+# 查看已放行的端口列表
+sudo firewall-cmd --list-ports
+```
+
+---
+
+### 步骤 5：验证 Redis 版本、运行状态与连接测试
+
+#### 1. 命令行查看 Redis 安装版本
+
+```bash title="查看 Redis 版本命令"
+# 方式 A：通过 redis-server 查询服务端版本
+redis-server -v
+# 输出示例：Redis server v=7.2.4 sha=00000000:0 malloc=jemalloc-5.3.0 bits=64 build=5f60d3d5f13702da
+
+# 方式 B：通过 redis-cli 查询客户端版本
+redis-cli -v
+# 输出示例：redis-cli 7.2.4
+
+# 方式 C：通过包管理器查询
+dpkg -l | grep redis          # Ubuntu / Debian
+rpm -qa | grep redis          # CentOS / RHEL
+```
+
+---
+
+#### 2. 检查端口监听与服务进程
+
+```bash title="检查监听端口与进程"
+# 查看 6379 端口监听状态
+sudo ss -tulpn | grep 6379
+# 或使用 netstat
+sudo netstat -tulpn | grep 6379
+
+# 查看 Redis 进程
+ps aux | grep redis-server
+```
+
+---
+
+#### 3. 连接 Redis 并进行读写测试
+
+使用官方自带的交互式客户端工具 `redis-cli` 建立连接并验证：
+
+```bash title="redis-cli 交互连接与功能测试"
+# 1. 命令行直连（-h 主机IP, -p 端口, -a 密码）
+redis-cli -h 127.0.0.1 -p 6379 -a 'YourStrongPassword123!'
+
+# 或先无密码进入，再通过 AUTH 命令认证：
+# redis-cli
+# 127.0.0.1:6379> AUTH YourStrongPassword123!
+```
+
+在交互式命令行中执行简单的连通性与读写测试命令：
+
+```text title="Redis 交互命令行"
+127.0.0.1:6379> PING
+PONG
+
+127.0.0.1:6379> SET test_key "Hello Redis"
+OK
+
+127.0.0.1:6379> GET test_key
+"Hello Redis"
+
+127.0.0.1:6379> DBSIZE
+(integer) 1
+
+127.0.0.1:6379> INFO server
+# Server
+redis_version:7.2.4
+os:Linux 5.15.0-generic x86_64
+arch_bits:64
+process_id:1234
+tcp_port:6379
+uptime_in_seconds:3600
+
+127.0.0.1:6379> EXIT
 ```
 
 ---

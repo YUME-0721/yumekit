@@ -29,9 +29,11 @@ pinned: false
 
 ---
 
-### 方法 1：使用 Elastic 官方仓库安装指定版本（推荐）
+### 步骤 1：安装 Elasticsearch 指定版本
 
-#### 1. Ubuntu / Debian 系统
+#### 方法 1：使用 Elastic 官方仓库安装（推荐）
+
+##### 1. Ubuntu / Debian 系统
 
 ```bash title="Ubuntu / Debian 终端"
 # 1. 导入 Elastic GPG 公钥
@@ -52,7 +54,7 @@ sudo apt-mark hold elasticsearch
 
 ---
 
-#### 2. CentOS / RHEL / Rocky Linux 系统
+##### 2. CentOS / RHEL / Rocky Linux 系统
 
 ```bash title="CentOS / RHEL 终端"
 # 1. 导入公钥
@@ -77,7 +79,7 @@ sudo yum install -y elasticsearch-8.12.2
 
 ---
 
-### 方法 2：通用归档包免安装解压部署（Generic Tarball）
+#### 方法 2：通用归档包免安装解压部署（Generic Tarball）
 
 ```bash title="系统终端"
 # 1. 下载指定版本（自带 Bundled JDK）
@@ -92,6 +94,230 @@ sudo chown -R esuser:esgroup /opt/elasticsearch
 
 # 3. 切换为 esuser 启动
 sudo -u esuser /opt/elasticsearch/bin/elasticsearch -d
+```
+
+---
+
+### 步骤 2：修改核心配置文件（`elasticsearch.yml`）
+
+Elasticsearch 的主配置文件路径：
+* **包管理器安装（DEB / RPM）**：`/etc/elasticsearch/elasticsearch.yml`
+* **归档包解压安装（Tarball）**：`/opt/elasticsearch/config/elasticsearch.yml`
+
+使用文本编辑器（如 `sudo nano` 或 `sudo vim`）编辑该文件，配置核心参数：
+
+```yaml title="/etc/elasticsearch/elasticsearch.yml"
+# ======================== 集群与节点设置 ========================
+# 集群名称（同集群内所有节点名称必须相同，默认 elasticsearch）
+cluster.name: my-application
+
+# 当前节点名称（节点间不可重复，便于日志与集群监控定位）
+node.name: node-1
+
+# ======================== 路径设置 ========================
+# 数据持久化存储路径
+path.data: /var/lib/elasticsearch
+
+# 日志存储路径
+path.logs: /var/log/elasticsearch
+
+# ======================== 网络与端口设置 ========================
+# 监听网络地址：0.0.0.0 允许所有网络/远程客户端访问（默认仅监听 127.0.0.1）
+network.host: 0.0.0.0
+
+# HTTP RESTful API 监听端口（默认 9200）
+http.port: 9200
+
+# 集群内部节点间 TCP 通信端口（默认 9300）
+transport.port: 9300
+
+# ======================== 集群发现与初始主节点 ========================
+# 初始化主节点选举列表（首次启动集群时必配，填写参与选举的 node.name）
+cluster.initial_master_nodes: ["node-1"]
+
+# 集群节点发现种子主机列表（单机部署可保留本节点或注释）
+# discovery.seed_hosts: ["127.0.0.1", "[::1]"]
+
+# ======================== 安全机制（ES 8.x 默认开启） ========================
+# 是否开启 X-Pack 身份认证与访问控制（生产环境强烈建议开启）
+xpack.security.enabled: true
+
+# 是否开启 HTTP 传输层 SSL/TLS 加密通信（开启后需使用 https:// 访问）
+xpack.security.http.ssl:
+  enabled: true
+```
+
+> [!TIP]
+> * 修改 `network.host` 为非本地回环地址（如 `0.0.0.0`）后，Elasticsearch 会自动由“开发模式”切换为**“生产模式”**，启动时会执行严格的系统自检（如 `vm.max_map_count`、文件描述符等）。
+> * 如果是学习测试环境且不想配置 SSL 证书，可临时将 `xpack.security.http.ssl.enabled` 设为 `false`（支持直接用 `http://` 访问）。
+
+---
+
+### 步骤 3：通过 systemctl 管理 Elasticsearch 服务
+
+包管理器（APT/YUM）安装完成后，Elasticsearch 会自动注册为 systemd 系统服务：
+
+```bash title="systemctl 服务管理命令"
+# 1. 重新加载 systemd 守护进程配置文件
+sudo systemctl daemon-reload
+
+# 2. 设置开机自启动
+sudo systemctl enable elasticsearch
+
+# 3. 启动 Elasticsearch 服务
+sudo systemctl start elasticsearch
+
+# 4. 检查服务运行状态（确认 active (running) 状态）
+sudo systemctl status elasticsearch
+
+# 5. 常用维护命令：停止与重启
+sudo systemctl stop elasticsearch     # 停止服务
+sudo systemctl restart elasticsearch  # 重启服务
+```
+
+---
+
+### 步骤 4：配置防火墙放行 9200 端口
+
+为了让局域网或外部客户端能够访问 Elasticsearch 的 HTTP 接口，需要放行 `9200` 端口（若有集群节点通信需求，还需放行 `9300` 端口）：
+
+#### 1. Ubuntu / Debian 系统（UFW 防火墙）
+
+```bash title="UFW 防火墙操作"
+# 放行 9200 端口（TCP）
+sudo ufw allow 9200/tcp
+
+# 重新加载防火墙规则
+sudo ufw reload
+
+# 查看当前放行规则状态
+sudo ufw status
+```
+
+#### 2. CentOS / RHEL / Rocky Linux 系统（Firewalld 防火墙）
+
+```bash title="Firewalld 防火墙操作"
+# 永久放行 9200 端口
+sudo firewall-cmd --zone=public --add-port=9200/tcp --permanent
+
+# 重新加载生效
+sudo firewall-cmd --reload
+
+# 查看已放行的端口列表
+sudo firewall-cmd --list-ports
+```
+
+---
+
+### 步骤 5：验证 Elasticsearch 版本、运行状态与网页访问
+
+#### 1. 命令行查看 Elasticsearch 安装版本
+
+通过 CLI 命令或系统包管理器可直接查询当前安装的精准版本及编译信息：
+
+```bash title="查看 ES 版本命令"
+# 方式 A：直接运行 ES 可执行文件查询版本与内置 JVM
+/usr/share/elasticsearch/bin/elasticsearch --version
+# 输出示例：Version: 8.12.2, Build: deb/48a64abb7d686e820c4733fbe177bd70f1a0058c/2024-02-19T10:04:32.774273129Z, JVM: 21.0.2
+
+# 方式 B：通过系统包管理器检索已安装包版本
+# Ubuntu / Debian
+dpkg -l | grep elasticsearch
+
+# CentOS / RHEL / Rocky Linux
+rpm -qa | grep elasticsearch
+```
+
+---
+
+#### 2. 检查服务与端口监听状态
+
+```bash title="服务与端口状态排查"
+# 1. 查看 systemd 服务运行状态
+sudo systemctl status elasticsearch
+
+# 2. 检查 9200 (HTTP) 与 9300 (TCP 集群通信) 端口监听情况
+sudo ss -tulpn | grep -E '9200|9300'
+# 或使用 netstat
+sudo netstat -tulpn | grep -E '9200|9300'
+```
+
+---
+
+#### 3. 设置 / 重置超级管理员 `elastic` 密码
+
+* 在 **ES 8.x** 首次安装启动时，系统会在控制台自动输出默认超级用户 `elastic` 的临时初始密码。
+* 若未记录或需要自定义密码，可使用官方提供的重置密码工具：
+
+```bash title="密码重置命令"
+# 方式 A：交互式自定义输入新密码（推荐）
+sudo /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic -i
+
+# 方式 B：自动生成并打印随机强密码
+sudo /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic
+```
+
+---
+
+#### 4. 通过 REST API 验证版本信息与集群健康状态
+
+##### (1) 查看基础版本信息（根路径 API）
+
+```bash title="终端 curl 验证基础版本信息"
+# ES 8.x 启用了 HTTPS 时访问（使用 -k 忽略自签名证书告警）
+curl -k -u elastic:你的密码 https://localhost:9200
+
+# 若关闭了 SSL 或为 ES 7.x 纯 HTTP 访问
+curl -u elastic:你的密码 http://localhost:9200
+```
+
+##### (2) 查看集群健康状态（Cluster Health）
+
+```bash title="查询集群健康状态"
+curl -k -u elastic:你的密码 https://localhost:9200/_cluster/health?pretty
+```
+
+> **健康状态（status）说明**：
+> * 🟢 **green（绿色）**：所有主分片（Primary）和副本分片（Replica）均正常分配运行，集群处于最理想状态。
+> * 🟡 **yellow（黄色）**：所有主分片正常运行，但部分副本分片尚未分配（单节点单机部署未配置从节点时为正常现象）。
+> * 🔴 **red（红色）**：存在部分主分片未分配，数据存在丢失或无法写入风险，需紧急排查节点或磁盘。
+
+##### (3) 查看集群节点列表与资源信息（`_cat/nodes`）
+
+```bash title="查看节点运行指标"
+curl -k -u elastic:你的密码 "https://localhost:9200/_cat/nodes?v&h=ip,port,heap.percent,ram.percent,cpu,load_1m,node.role,master,name"
+```
+
+---
+
+#### 5. 浏览器网页访问验证
+
+1. 打开电脑浏览器，在地址栏输入访问地址：  
+   `https://<你的服务器IP地址>:9200`  
+   *(若关闭了 SSL 则输入 `http://<你的服务器IP地址>:9200`)*
+2. 浏览器会弹出 HTTP 基础身份认证（Basic Auth）登录弹窗，输入：
+   * **用户名**：`elastic`
+   * **密码**：前面重置或设置的密码
+3. 点击登录后，页面成功输出以下格式的 JSON 数据，并看到经典的 `"tagline": "You Know, for Search"`，即代表 Elasticsearch 已成功部署并正常对外提供服务：
+
+```json title="浏览器响应输出"
+{
+  "name" : "node-1",
+  "cluster_name" : "my-application",
+  "cluster_uuid" : "abc123XYZ456-example",
+  "version" : {
+    "number" : "8.12.2",
+    "build_flavor" : "default",
+    "build_type" : "deb",
+    "build_hash" : "48a64abb7d686e820c4733fbe177bd70f1a0058c",
+    "build_date" : "2024-02-19T10:04:32.774273129Z",
+    "build_snapshot" : false,
+    "lucene_version" : "9.9.2",
+    "minimum_wire_compatibility_version" : "7.17.0",
+    "minimum_index_compatibility_version" : "7.0.0"
+  },
+  "tagline" : "You Know, for Search"
+}
 ```
 
 ---
