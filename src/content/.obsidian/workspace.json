@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "posts/2026/15-elasticsearch.md",
+                "file": "posts/2026/_16-shell.md",
                 "mode": "preview",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "15-elasticsearch"
+              "title": "_16-shell"
             }
           }
         ]
@@ -213,6 +213,7 @@
   "active": "a36b15cef3e6e2a4",
   "lastOpenFiles": [
     "posts/2026/15-elasticsearch.md",
+    "posts/2026/_16-shell.md",
     "posts/2026/14-redis.md",
     "posts/2026/13-rabbitmq.md",
     "posts/2026/12-nginx.md",
@@ -221,7 +222,6 @@
     "posts/2026/09-linux.md",
     "posts/2026/black&white-film-developing.md",
     "posts/2026/_10-mysql.md",
-    "posts/2026/Untitled.md",
     "posts/2026/08-resource-station.md",
     "posts/2026/07-blog.md",
     "posts/2026/D76.md",
